@@ -14,6 +14,18 @@ describe('HomePageComponent', () => {
     expect(image.alt).toContain('Felipe');
     expect(fixture.nativeElement.querySelector('.mf-hero__media')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('.mf-hero__actions')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('#problem-title')?.textContent).toContain(
+      'não deveria ser uma aposta',
+    );
+    expect(fixture.nativeElement.querySelectorAll('app-mf-accordion-item')).toHaveLength(7);
+
+    const firstRisk = fixture.nativeElement.querySelector(
+      'app-mf-accordion-item button',
+    ) as HTMLButtonElement;
+    firstRisk.dispatchEvent(new KeyboardEvent('keydown', { cancelable: true, key: 'Enter' }));
+    fixture.detectChanges();
+
+    expect(firstRisk.getAttribute('aria-expanded')).toBe('true');
     expect(actions[0].getAttribute('href')).toBe('/encontrar-meu-carro');
     expect(actions[1].getAttribute('href')).toBe('/showroom');
   });
