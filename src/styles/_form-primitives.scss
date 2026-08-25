@@ -1,0 +1,105 @@
+.mf-field {
+  display: grid;
+  gap: var(--space-2);
+  font-family: var(--font-ui);
+}
+
+.mf-field__label {
+  color: var(--mf-ink);
+  font-size: var(--type-label);
+  font-weight: 600;
+  letter-spacing: var(--tracking-label);
+  line-height: var(--leading-ui);
+  text-transform: uppercase;
+}
+
+.mf-field__label span {
+  color: var(--mf-oxide);
+}
+
+.mf-field__control {
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-block-size: 3rem;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--mf-graphite);
+  border-radius: 0;
+  color: var(--mf-ink);
+  background: var(--mf-paper);
+  font-family: var(--font-body);
+  font-size: var(--type-body-md);
+  line-height: var(--leading-body);
+  transition:
+    border-color var(--motion-micro) var(--ease-standard),
+    box-shadow var(--motion-micro) var(--ease-standard);
+}
+
+.mf-field__control::placeholder {
+  color: var(--mf-graphite);
+  opacity: 0.72;
+}
+
+.mf-field__control:hover:not(:disabled) {
+  border-color: var(--mf-ink);
+}
+
+.mf-field__control:focus-visible {
+  border-color: var(--mf-oxide);
+  outline: 2px solid var(--mf-oxide);
+  outline-offset: 2px;
+}
+
+.mf-field--error .mf-field__control {
+  border-color: var(--mf-oxide);
+}
+
+.mf-field__control:disabled {
+  cursor: not-allowed;
+  border-color: var(--mf-silver);
+  color: var(--mf-graphite);
+  background: var(--mf-porcelain);
+  opacity: 0.72;
+}
+
+.mf-field__control--select {
+  appearance: none;
+  padding-inline-end: var(--space-6);
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentcolor 50%),
+    linear-gradient(135deg, currentcolor 50%, transparent 50%);
+  background-position:
+    calc(100% - 1.125rem) 52%,
+    calc(100% - 0.875rem) 52%;
+  background-repeat: no-repeat;
+  background-size: 0.25rem 0.25rem;
+}
+
+.mf-field__control--textarea {
+  min-block-size: 8rem;
+  resize: vertical;
+}
+
+.mf-field__control:-webkit-autofill,
+.mf-field__control:-webkit-autofill:hover,
+.mf-field__control:-webkit-autofill:focus {
+  box-shadow: 0 0 0 62.5rem var(--mf-paper) inset;
+  -webkit-text-fill-color: var(--mf-ink);
+}
+
+.mf-field__message {
+  margin: 0;
+  color: var(--mf-graphite);
+  font-family: var(--font-ui);
+  font-size: var(--type-label);
+  line-height: var(--leading-ui);
+}
+
+.mf-field__message--error {
+  color: var(--mf-oxide);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mf-field__control {
+    transition: none;
+  }
+}
