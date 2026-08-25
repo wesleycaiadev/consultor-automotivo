@@ -1,0 +1,63 @@
+:host {
+  display: inline-block;
+}
+
+.mf-button {
+  display: inline-flex;
+  min-block-size: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding-inline: var(--space-5);
+  border: 1px solid var(--mf-ink);
+  background: var(--mf-ink);
+  color: var(--mf-paper);
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: var(--type-label);
+  font-weight: 600;
+  letter-spacing: var(--tracking-label);
+  line-height: var(--leading-ui);
+  text-transform: uppercase;
+  transition:
+    background-color var(--motion-micro) var(--ease-standard),
+    border-color var(--motion-micro) var(--ease-standard),
+    color var(--motion-micro) var(--ease-standard),
+    transform var(--motion-micro) var(--ease-standard);
+}
+
+.mf-button:hover:not(:disabled) {
+  background: var(--mf-graphite);
+  border-color: var(--mf-graphite);
+}
+
+.mf-button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.mf-button:focus-visible {
+  outline: 2px solid var(--mf-oxide);
+  outline-offset: 4px;
+}
+
+.mf-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.mf-button--secondary {
+  border-color: var(--mf-silver);
+  background: transparent;
+  color: var(--mf-ink);
+}
+
+.mf-button--secondary:hover:not(:disabled) {
+  border-color: var(--mf-graphite);
+  background: var(--mf-porcelain);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mf-button {
+    transition: none;
+  }
+}
