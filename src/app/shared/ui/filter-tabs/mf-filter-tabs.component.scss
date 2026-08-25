@@ -1,0 +1,33 @@
+.mf-filter-tabs {
+  display: flex;
+  gap: var(--space-4);
+  overflow-x: auto;
+  border-block-end: 1px solid var(--mf-silver);
+  scrollbar-width: thin;
+}
+
+.mf-filter-tabs__button {
+  min-block-size: 2.75rem;
+  flex: 0 0 auto;
+  padding: 0;
+  border: 0;
+  border-block-end: 2px solid transparent;
+  background: transparent;
+  color: var(--mf-graphite);
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: var(--type-label);
+  font-weight: 600;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+.mf-filter-tabs__button--selected {
+  border-block-end-color: var(--mf-oxide);
+  color: var(--mf-ink);
+}
+
+.mf-filter-tabs__button:focus-visible {
+  outline: 2px solid var(--mf-oxide);
+  outline-offset: -2px;
+}
