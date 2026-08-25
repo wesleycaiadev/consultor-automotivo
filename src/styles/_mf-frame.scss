@@ -1,0 +1,26 @@
+/*
+ * MF Frame API
+ *
+ * Apply `.mf-frame` to a button, image, or image container for the standard
+ * 16px cut. Add `.mf-frame--large` when a 24px cut is appropriate.
+ * Browsers without clip-path support receive a safe rectangular fallback.
+ */
+.mf-frame {
+  --mf-frame-size: var(--mf-frame-cut);
+}
+
+.mf-frame--large {
+  --mf-frame-size: var(--mf-frame-cut-large);
+}
+
+@supports (clip-path: polygon(0 0)) {
+  .mf-frame {
+    clip-path: polygon(
+      0 0,
+      calc(100% - var(--mf-frame-size)) 0,
+      100% var(--mf-frame-size),
+      100% 100%,
+      0 100%
+    );
+  }
+}
