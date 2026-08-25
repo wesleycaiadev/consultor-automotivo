@@ -1,0 +1,92 @@
+.mf-accordion-item {
+  border-block-end: 1px solid var(--mf-silver);
+}
+
+.mf-accordion-item__heading {
+  margin: 0;
+}
+
+.mf-accordion-item__trigger {
+  display: flex;
+  inline-size: 100%;
+  min-block-size: 3.5rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-5);
+  padding: var(--space-4) 0;
+  border: 0;
+  color: var(--mf-ink);
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: var(--type-display-sm);
+  font-weight: 400;
+  line-height: 1;
+  text-align: start;
+}
+
+.mf-accordion-item__trigger:focus-visible {
+  outline: 2px solid var(--mf-oxide);
+  outline-offset: 0.25rem;
+}
+
+.mf-accordion-item__indicator {
+  position: relative;
+  flex: 0 0 1rem;
+  block-size: 1rem;
+}
+
+.mf-accordion-item__indicator::before,
+.mf-accordion-item__indicator::after {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  inline-size: 0.625rem;
+  block-size: 1px;
+  background: currentcolor;
+  content: '';
+  transform: translate(-50%, -50%);
+  transition: transform var(--motion-micro) var(--ease-standard);
+}
+
+.mf-accordion-item__indicator::after {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+.mf-accordion-item--open .mf-accordion-item__indicator::after {
+  transform: translate(-50%, -50%) rotate(0deg);
+}
+
+.mf-accordion-item__panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows var(--motion-ui) var(--ease-standard),
+    opacity var(--motion-micro) var(--ease-standard);
+}
+
+.mf-accordion-item--open .mf-accordion-item__panel {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.mf-accordion-item__content {
+  min-block-size: 0;
+  overflow: hidden;
+  padding-inline-end: var(--space-10);
+  color: var(--mf-graphite);
+  font-size: var(--type-body-sm);
+  line-height: var(--leading-body);
+}
+
+.mf-accordion-item--open .mf-accordion-item__content {
+  padding-block: 0 var(--space-5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mf-accordion-item__indicator::before,
+  .mf-accordion-item__indicator::after,
+  .mf-accordion-item__panel {
+    transition-duration: 0ms;
+  }
+}
