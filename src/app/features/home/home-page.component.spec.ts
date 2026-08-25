@@ -26,6 +26,16 @@ describe('HomePageComponent', () => {
     expect(
       fixture.nativeElement.querySelector('.mf-finder-cta__action')?.getAttribute('href'),
     ).toBe('/encontrar-meu-carro');
+    expect(fixture.nativeElement.querySelectorAll('.mf-delivery-preview')).toHaveLength(2);
+    expect(fixture.nativeElement.querySelector('#deliveries-preview-title')?.textContent).toContain(
+      'continua na estrada',
+    );
+    expect(
+      fixture.nativeElement.querySelector('.mf-delivery-preview blockquote')?.textContent,
+    ).toContain('decisão ficou clara');
+    expect(
+      fixture.nativeElement.querySelectorAll('.mf-delivery-preview [aria-label*="star"]'),
+    ).toHaveLength(0);
 
     const firstRisk = fixture.nativeElement.querySelector(
       'app-mf-accordion-item button',

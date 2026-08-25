@@ -130,9 +130,66 @@ import { MfSectionMarkerComponent } from '../../shared/ui/section-marker/mf-sect
         </a>
       </div>
     </section>
+
+    <section class="mf-deliveries-preview mf-section" aria-labelledby="deliveries-preview-title">
+      <div class="mf-container">
+        <div class="mf-deliveries-preview__header">
+          <div>
+            <app-mf-section-marker label="Entregas" />
+            <h2 id="deliveries-preview-title">A escolha certa continua na estrada.</h2>
+          </div>
+          <a class="mf-editorial-link" href="/entregas">Ver todas as entregas</a>
+        </div>
+
+        <div class="mf-deliveries-preview__list">
+          @for (delivery of deliveries; track delivery.customer) {
+            <article class="mf-delivery-preview">
+              <img
+                [src]="delivery.image"
+                [alt]="delivery.alt"
+                width="1200"
+                height="900"
+                loading="lazy"
+              />
+              <div class="mf-delivery-preview__content">
+                <p class="mf-delivery-preview__location">{{ delivery.city }}</p>
+                <blockquote>{{ delivery.testimonial }}</blockquote>
+                <footer>
+                  <strong>{{ delivery.customer }}</strong>
+                  <span>{{ delivery.vehicle }}</span>
+                </footer>
+              </div>
+            </article>
+          }
+        </div>
+      </div>
+    </section>
   `,
 })
 export class HomePageComponent {
+  readonly deliveries = [
+    {
+      customer: 'Eduardo',
+      vehicle: 'Porsche Macan GTS',
+      city: 'Aracaju — SE',
+      testimonial:
+        '“A decisão ficou clara quando cada detalhe do carro e da compra passou a fazer sentido.”',
+      alt: 'Cliente ao lado de um Porsche durante a entrega do veículo',
+      image:
+        'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1400&q=85',
+    },
+    {
+      customer: 'Marina',
+      vehicle: 'Range Rover Velar',
+      city: 'Maceió — AL',
+      testimonial:
+        '“Encontramos um carro que conversa com a minha rotina, sem abrir mão da tranquilidade.”',
+      alt: 'Range Rover estacionado em frente a uma residência',
+      image:
+        'https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=1400&q=85',
+    },
+  ] as const;
+
   readonly vehicles = [
     {
       model: 'Porsche 911 Carrera',
