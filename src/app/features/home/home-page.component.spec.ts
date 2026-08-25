@@ -36,6 +36,18 @@ describe('HomePageComponent', () => {
     expect(
       fixture.nativeElement.querySelectorAll('.mf-delivery-preview [aria-label*="star"]'),
     ).toHaveLength(0);
+    expect(fixture.nativeElement.querySelector('#about-preview-title')?.textContent).toContain(
+      'não está à primeira vista',
+    );
+    expect(
+      fixture.nativeElement
+        .querySelector('#fale-com-felipe .mf-final-cta__action')
+        ?.getAttribute('href'),
+    ).toBe('https://wa.me/');
+    expect(fixture.nativeElement.querySelector('.mf-footer')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.mf-footer__admin')?.getAttribute('href')).toBe(
+      '/admin',
+    );
 
     const firstRisk = fixture.nativeElement.querySelector(
       'app-mf-accordion-item button',

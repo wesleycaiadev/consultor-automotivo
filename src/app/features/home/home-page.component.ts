@@ -164,6 +164,70 @@ import { MfSectionMarkerComponent } from '../../shared/ui/section-marker/mf-sect
         </div>
       </div>
     </section>
+
+    <section id="sobre" class="mf-about-preview mf-section" aria-labelledby="about-preview-title">
+      <div class="mf-container mf-about-preview__inner">
+        <figure class="mf-about-preview__media">
+          <img
+            class="mf-frame"
+            src="/images/felipe-hero.jpeg"
+            alt="Felipe, consultor da Marques Felipe Curadoria Automotiva"
+            width="853"
+            height="1280"
+            loading="lazy"
+          />
+        </figure>
+
+        <div class="mf-about-preview__content">
+          <app-mf-section-marker label="Sobre Felipe" />
+          <h2 id="about-preview-title">Escolher bem é enxergar o que não está à primeira vista.</h2>
+          <p>
+            Felipe conduz cada busca com atenção ao contexto de quem vai dirigir, à história do
+            veículo e ao que precisa fazer sentido depois da entrega.
+          </p>
+          <a class="mf-editorial-link" href="/sobre">Conhecer a forma de trabalhar</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="fale-com-felipe" class="mf-final-cta mf-section" aria-labelledby="final-cta-title">
+      <div class="mf-container mf-final-cta__inner">
+        <p class="mf-final-cta__eyebrow">Próxima escolha</p>
+        <h2 id="final-cta-title">Uma boa conversa pode ser o começo do carro certo.</h2>
+        <a class="mf-final-cta__action mf-frame" href="https://wa.me/">Falar com Felipe</a>
+      </div>
+    </section>
+
+    <footer class="mf-footer">
+      <div class="mf-container mf-footer__inner">
+        <div class="mf-footer__brand">
+          <p>Marques Felipe</p>
+          <span>Escolher bem começa antes da chave.</span>
+        </div>
+
+        <nav class="mf-footer__links" aria-label="Navegação do rodapé">
+          <a href="/">Início</a>
+          <a href="/#curadoria">Curadoria</a>
+          <a href="/showroom">Showroom</a>
+          <a href="/entregas">Entregas</a>
+          <a href="/sobre">Sobre</a>
+        </nav>
+
+        <address class="mf-footer__contact">
+          <a href="https://wa.me/">WhatsApp</a>
+          <a href="https://www.instagram.com/">Instagram</a>
+          <span>Aracaju — SE</span>
+        </address>
+
+        <div class="mf-footer__bottom">
+          <small>© 2026 Marques Felipe</small>
+          <a class="mf-footer__admin" href="/admin" aria-label="Acessar área administrativa">
+            <span class="mf-footer__admin-lock" aria-hidden="true"></span>
+            Admin
+          </a>
+        </div>
+      </div>
+    </footer>
   `,
 })
 export class HomePageComponent {
