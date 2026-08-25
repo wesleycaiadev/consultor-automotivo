@@ -135,8 +135,8 @@ app-mf-navbar {
   color: var(--mf-oxide);
 }
 
-.mf-mobile-menu__cta {
-  display: inline-flex;
+.mf-mobile-menu__cta,
+.mf-navbar__cta {
   min-block-size: 2.75rem;
   align-items: center;
   justify-content: center;
@@ -149,6 +149,10 @@ app-mf-navbar {
   letter-spacing: var(--tracking-label);
   text-decoration: none;
   text-transform: uppercase;
+}
+
+.mf-mobile-menu__cta {
+  display: inline-flex;
 }
 
 .mf-mobile-menu__cta:focus-visible,

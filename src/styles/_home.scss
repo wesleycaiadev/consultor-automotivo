@@ -229,3 +229,73 @@
     grid-column: 8 / span 4;
   }
 }
+
+@media (prefers-reduced-motion: no-preference) {
+  .mf-hero__media {
+    animation: mf-hero-media-reveal var(--motion-cinematic) var(--ease-editorial) both;
+  }
+
+  .mf-hero__photo {
+    animation: mf-hero-photo-settle var(--motion-cinematic) var(--ease-editorial) both;
+  }
+
+  .mf-hero__eyebrow {
+    animation: mf-hero-copy-enter var(--motion-editorial) var(--ease-editorial) 340ms both;
+  }
+
+  .mf-hero__title {
+    animation: mf-hero-title-reveal var(--motion-editorial) var(--ease-editorial) 440ms both;
+  }
+
+  .mf-hero__description {
+    animation: mf-hero-copy-enter var(--motion-ui) var(--ease-standard) 760ms both;
+  }
+
+  .mf-hero__actions {
+    animation: mf-hero-copy-enter var(--motion-ui) var(--ease-standard) 920ms both;
+  }
+}
+
+@keyframes mf-hero-media-reveal {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes mf-hero-photo-settle {
+  from {
+    transform: scale(1.08);
+  }
+
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes mf-hero-title-reveal {
+  from {
+    clip-path: inset(0 0 100% 0);
+    transform: translate3d(0, 1.25rem, 0);
+  }
+
+  to {
+    clip-path: inset(0 0 0 0);
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes mf-hero-copy-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 0.75rem, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}

@@ -12,6 +12,8 @@ describe('HomePageComponent', () => {
     expect(fixture.nativeElement.querySelector('h1')?.textContent).toContain('O carro certo');
     expect(image.src).toContain('/images/felipe-hero.jpeg');
     expect(image.alt).toContain('Felipe');
+    expect(fixture.nativeElement.querySelector('.mf-hero__media')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.mf-hero__actions')).toBeTruthy();
     expect(actions[0].getAttribute('href')).toBe('/encontrar-meu-carro');
     expect(actions[1].getAttribute('href')).toBe('/showroom');
   });
