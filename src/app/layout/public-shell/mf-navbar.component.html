@@ -1,18 +1,32 @@
 <header class="mf-navbar" [class.mf-navbar--scrolled]="scrolled()">
-  <a class="mf-navbar__brand" href="/" aria-label="Marques Felipe — Início">
+  <a class="mf-navbar__brand" routerLink="/" aria-label="Marques Felipe — Início">
     <span class="mf-navbar__brand-monogram" aria-hidden="true">MF</span>
     <span class="mf-navbar__brand-wordmark">MARQUES FELIPE</span>
   </a>
 
   <nav class="mf-navbar__desktop-nav" aria-label="Navegação principal">
-    <a class="is-active" href="/" aria-current="page">Início</a>
+    <a
+      routerLink="/"
+      routerLinkActive="is-active"
+      [routerLinkActiveOptions]="{ exact: true }"
+      #desktopHome="routerLinkActive"
+      [attr.aria-current]="desktopHome.isActive ? 'page' : null"
+      >Início</a
+    >
     <a href="/#curadoria">Curadoria</a>
-    <a href="/showroom">Showroom</a>
-    <a href="/entregas">Entregas</a>
-    <a href="/sobre">Sobre</a>
+    <a
+      routerLink="/showroom"
+      routerLinkActive="is-active"
+      [routerLinkActiveOptions]="{ exact: true }"
+      #desktopShowroom="routerLinkActive"
+      [attr.aria-current]="desktopShowroom.isActive ? 'page' : null"
+      >Showroom</a
+    >
+    <a href="/#entregas">Entregas</a>
+    <a href="/#sobre">Sobre</a>
   </nav>
 
-  <a class="mf-navbar__cta mf-frame" href="#fale-com-felipe">Fale com Felipe</a>
+  <a class="mf-navbar__cta mf-frame" href="https://wa.me/557998709362">Fale com Felipe</a>
 
   <button
     #menuTrigger
@@ -37,7 +51,7 @@
     aria-label="Menu principal"
   >
     <div class="mf-mobile-menu__header">
-      <a href="/" class="mf-mobile-menu__brand" (click)="closeMenu()">MARQUES FELIPE</a>
+      <a routerLink="/" class="mf-mobile-menu__brand" (click)="closeMenu()">MARQUES FELIPE</a>
       <button
         class="mf-mobile-menu__close"
         type="button"
@@ -49,14 +63,31 @@
     </div>
 
     <nav class="mf-mobile-menu__nav" aria-label="Navegação principal">
-      <a #firstMobileLink href="/" aria-current="page" (click)="closeMenu()">Início</a>
+      <a
+        #firstMobileLink
+        routerLink="/"
+        routerLinkActive
+        [routerLinkActiveOptions]="{ exact: true }"
+        #mobileHome="routerLinkActive"
+        [attr.aria-current]="mobileHome.isActive ? 'page' : null"
+        (click)="closeMenu()"
+        >Início</a
+      >
       <a href="/#curadoria" (click)="closeMenu()">Curadoria</a>
-      <a href="/showroom" (click)="closeMenu()">Showroom</a>
-      <a href="/entregas" (click)="closeMenu()">Entregas</a>
-      <a href="/sobre" (click)="closeMenu()">Sobre</a>
+      <a
+        routerLink="/showroom"
+        routerLinkActive
+        [routerLinkActiveOptions]="{ exact: true }"
+        #mobileShowroom="routerLinkActive"
+        [attr.aria-current]="mobileShowroom.isActive ? 'page' : null"
+        (click)="closeMenu()"
+        >Showroom</a
+      >
+      <a href="/#entregas" (click)="closeMenu()">Entregas</a>
+      <a href="/#sobre" (click)="closeMenu()">Sobre</a>
     </nav>
 
-    <a class="mf-mobile-menu__cta mf-frame" href="#fale-com-felipe" (click)="closeMenu()"
+    <a class="mf-mobile-menu__cta mf-frame" href="https://wa.me/557998709362" (click)="closeMenu()"
       >Fale com Felipe</a
     >
   </section>

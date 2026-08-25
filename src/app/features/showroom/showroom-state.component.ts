@@ -29,7 +29,7 @@ export type ShowroomState = 'loading' | 'empty' | 'error' | 'no-results';
           <p class="mf-showroom-state__eyebrow">Showroom</p>
           <h2 id="showroom-empty-title">Ainda não há veículos disponíveis.</h2>
           <p>Conte ao Felipe o que você procura e a curadoria começa por você.</p>
-          <a class="mf-showroom-state__action mf-frame" href="/encontrar-meu-carro">
+          <a class="mf-showroom-state__action mf-frame" href="https://wa.me/557998709362">
             Encontrar meu carro
           </a>
         </section>
@@ -57,7 +57,7 @@ export type ShowroomState = 'loading' | 'empty' | 'error' | 'no-results';
             >
               Ver todos os veículos
             </button>
-            <a class="mf-showroom-state__secondary" href="/encontrar-meu-carro">
+            <a class="mf-showroom-state__secondary" href="https://wa.me/557998709362">
               Encontrar meu carro
             </a>
           </div>

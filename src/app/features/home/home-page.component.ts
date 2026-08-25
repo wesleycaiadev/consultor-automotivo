@@ -21,7 +21,9 @@ import { MfSectionMarkerComponent } from '../../shared/ui/section-marker/mf-sect
             segurança, procedência e clareza.
           </p>
           <div class="mf-hero__actions">
-            <a class="mf-hero__primary mf-frame" href="/encontrar-meu-carro">Encontrar meu carro</a>
+            <a class="mf-hero__primary mf-frame" href="https://wa.me/557998709362"
+              >Encontrar meu carro</a
+            >
             <a class="mf-hero__secondary" href="/showroom">Ver showroom</a>
           </div>
         </div>
@@ -125,20 +127,24 @@ import { MfSectionMarkerComponent } from '../../shared/ui/section-marker/mf-sect
             busca conduzida com critério.
           </p>
         </div>
-        <a class="mf-finder-cta__action mf-frame" href="/encontrar-meu-carro">
+        <a class="mf-finder-cta__action mf-frame" href="https://wa.me/557998709362">
           Iniciar minha busca
         </a>
       </div>
     </section>
 
-    <section class="mf-deliveries-preview mf-section" aria-labelledby="deliveries-preview-title">
+    <section
+      id="entregas"
+      class="mf-deliveries-preview mf-section"
+      aria-labelledby="deliveries-preview-title"
+    >
       <div class="mf-container">
         <div class="mf-deliveries-preview__header">
           <div>
             <app-mf-section-marker label="Entregas" />
             <h2 id="deliveries-preview-title">A escolha certa continua na estrada.</h2>
           </div>
-          <a class="mf-editorial-link" href="/entregas">Ver todas as entregas</a>
+          <a class="mf-editorial-link" href="/#entregas">Ver todas as entregas</a>
         </div>
 
         <div class="mf-deliveries-preview__list">
@@ -185,7 +191,7 @@ import { MfSectionMarkerComponent } from '../../shared/ui/section-marker/mf-sect
             Felipe conduz cada busca com atenção ao contexto de quem vai dirigir, à história do
             veículo e ao que precisa fazer sentido depois da entrega.
           </p>
-          <a class="mf-editorial-link" href="/sobre">Conhecer a forma de trabalhar</a>
+          <a class="mf-editorial-link" href="/#sobre">Conhecer a forma de trabalhar</a>
         </div>
       </div>
     </section>
@@ -210,7 +216,7 @@ import { MfSectionMarkerComponent } from '../../shared/ui/section-marker/mf-sect
         <nav class="mf-footer__links" aria-label="Navegação do rodapé">
           <a href="/#curadoria">Curadoria</a>
           <a href="/showroom">Showroom</a>
-          <a href="/entregas">Entregas</a>
+          <a href="/#entregas">Entregas</a>
         </nav>
 
         <address class="mf-footer__contact">
@@ -221,10 +227,6 @@ import { MfSectionMarkerComponent } from '../../shared/ui/section-marker/mf-sect
 
         <div class="mf-footer__bottom">
           <small>© 2026 Marques Felipe</small>
-          <a class="mf-footer__admin" href="/admin" aria-label="Acessar área administrativa">
-            <span class="mf-footer__admin-lock" aria-hidden="true"></span>
-            Admin
-          </a>
         </div>
       </div>
     </footer>

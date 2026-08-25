@@ -25,7 +25,7 @@ describe('HomePageComponent', () => {
     );
     expect(
       fixture.nativeElement.querySelector('.mf-finder-cta__action')?.getAttribute('href'),
-    ).toBe('/encontrar-meu-carro');
+    ).toBe('https://wa.me/557998709362');
     expect(fixture.nativeElement.querySelectorAll('.mf-delivery-preview')).toHaveLength(2);
     expect(fixture.nativeElement.querySelector('#deliveries-preview-title')?.textContent).toContain(
       'continua na estrada',
@@ -46,9 +46,7 @@ describe('HomePageComponent', () => {
     ).toBe('https://wa.me/557998709362');
     expect(fixture.nativeElement.querySelector('.mf-footer')).toBeTruthy();
     expect(fixture.nativeElement.querySelectorAll('.mf-footer__links a')).toHaveLength(3);
-    expect(fixture.nativeElement.querySelector('.mf-footer__admin')?.getAttribute('href')).toBe(
-      '/admin',
-    );
+    expect(fixture.nativeElement.querySelector('.mf-footer__admin')).toBeFalsy();
 
     const firstRisk = fixture.nativeElement.querySelector(
       'app-mf-accordion-item button',
@@ -57,7 +55,7 @@ describe('HomePageComponent', () => {
     fixture.detectChanges();
 
     expect(firstRisk.getAttribute('aria-expanded')).toBe('true');
-    expect(actions[0].getAttribute('href')).toBe('/encontrar-meu-carro');
+    expect(actions[0].getAttribute('href')).toBe('https://wa.me/557998709362');
     expect(actions[1].getAttribute('href')).toBe('/showroom');
   });
 });

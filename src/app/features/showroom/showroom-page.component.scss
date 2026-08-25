@@ -10,24 +10,28 @@
 }
 
 .mf-showroom-page__header {
-  display: grid;
-  max-inline-size: 47rem;
-  gap: var(--space-4);
+  max-inline-size: 43rem;
   margin-block-end: var(--space-8);
 }
 
-.mf-showroom-page__header h1,
-.mf-showroom-page__header p {
+.mf-showroom-page__intro {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.mf-showroom-page__intro h1,
+.mf-showroom-page__intro p {
   margin: 0;
 }
 
-.mf-showroom-page__header h1 {
+.mf-showroom-page__intro h1 {
+  max-inline-size: 21ch;
   font: 400 var(--type-display-lg) / var(--leading-display) var(--font-display);
   letter-spacing: var(--tracking-display);
 }
 
-.mf-showroom-page__header p:not(.mf-section-marker) {
-  max-inline-size: 37rem;
+.mf-showroom-page__intro p:not(.mf-section-marker) {
+  max-inline-size: 32rem;
   color: var(--mf-graphite);
 }
 
@@ -116,21 +120,14 @@ app-showroom-filters {
   }
 
   .mf-showroom-page__header {
+    display: grid;
     grid-template-columns: repeat(var(--mf-grid-columns), minmax(0, 1fr));
     column-gap: var(--mf-grid-gutter);
+    max-inline-size: none;
   }
 
-  .mf-showroom-page__header app-mf-section-marker {
-    grid-column: 1 / span 2;
-    align-self: start;
-  }
-
-  .mf-showroom-page__header h1 {
-    grid-column: 4 / span 7;
-  }
-
-  .mf-showroom-page__header p:not(.mf-section-marker) {
-    grid-column: 4 / span 5;
+  .mf-showroom-page__intro {
+    grid-column: 1 / span 7;
   }
 
   .mf-showroom-page__grid {

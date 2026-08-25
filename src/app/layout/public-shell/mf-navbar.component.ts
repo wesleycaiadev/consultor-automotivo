@@ -8,9 +8,11 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
   selector: 'app-mf-navbar',
+  imports: [RouterLink, RouterLinkActive],
   templateUrl: './mf-navbar.component.html',
 })
 export class MfNavbarComponent {

@@ -1,8 +1,10 @@
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { MfNavbarComponent } from './mf-navbar.component';
 
 describe('MfNavbarComponent', () => {
   it('opens and closes the mobile menu with keyboard support', async () => {
+    await TestBed.configureTestingModule({ providers: [provideRouter([])] }).compileComponents();
     const fixture = TestBed.createComponent(MfNavbarComponent);
     fixture.detectChanges();
 

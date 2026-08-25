@@ -26,12 +26,14 @@ type ShowroomPageState = 'loading' | 'ready' | 'error';
     <section class="mf-showroom-page" aria-labelledby="showroom-title">
       <div class="mf-container">
         <header class="mf-showroom-page__header">
-          <app-mf-section-marker label="Showroom" />
-          <h1 id="showroom-title">Veículos selecionados para uma decisão mais segura.</h1>
-          <p>
-            Uma seleção reduzida, apresentada com contexto para você avaliar o que realmente faz
-            sentido.
-          </p>
+          <div class="mf-showroom-page__intro">
+            <app-mf-section-marker label="Showroom" />
+            <h1 id="showroom-title">Veículos selecionados para uma decisão mais segura.</h1>
+            <p>
+              Uma seleção reduzida, apresentada com contexto para você avaliar o que realmente faz
+              sentido.
+            </p>
+          </div>
         </header>
 
         <app-showroom-filters />
@@ -69,7 +71,7 @@ type ShowroomPageState = 'loading' | 'ready' | 'error';
           <aside class="mf-showroom-page__finder" aria-labelledby="showroom-finder-title">
             <p>Não encontrou o seu?</p>
             <h2 id="showroom-finder-title">A curadoria pode começar pelo que você precisa.</h2>
-            <a class="mf-frame" href="/encontrar-meu-carro">Iniciar minha busca</a>
+            <a class="mf-frame" href="https://wa.me/557998709362">Iniciar minha busca</a>
           </aside>
         }
       </div>

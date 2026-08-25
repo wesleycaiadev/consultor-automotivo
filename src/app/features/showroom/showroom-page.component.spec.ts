@@ -86,7 +86,7 @@ describe('ShowroomPageComponent', () => {
     expect(fixture.nativeElement.querySelectorAll('app-mf-vehicle-card')).toHaveLength(2);
     expect(
       fixture.nativeElement.querySelector('.mf-showroom-page__finder a')?.getAttribute('href'),
-    ).toBe('/encontrar-meu-carro');
+    ).toBe('https://wa.me/557998709362');
 
     fixture.componentInstance.filters.select('suv');
     fixture.detectChanges();
