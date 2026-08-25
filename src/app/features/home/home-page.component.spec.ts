@@ -20,6 +20,12 @@ describe('HomePageComponent', () => {
     expect(fixture.nativeElement.querySelectorAll('app-mf-accordion-item')).toHaveLength(7);
     expect(fixture.nativeElement.querySelectorAll('.mf-curation__steps li')).toHaveLength(4);
     expect(fixture.nativeElement.querySelectorAll('.mf-vehicle-preview')).toHaveLength(3);
+    expect(fixture.nativeElement.querySelector('#finder-cta-title')?.textContent).toContain(
+      'carro que você procura',
+    );
+    expect(
+      fixture.nativeElement.querySelector('.mf-finder-cta__action')?.getAttribute('href'),
+    ).toBe('/encontrar-meu-carro');
 
     const firstRisk = fixture.nativeElement.querySelector(
       'app-mf-accordion-item button',

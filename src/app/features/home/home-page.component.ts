@@ -114,6 +114,22 @@ import { MfSectionMarkerComponent } from '../../shared/ui/section-marker/mf-sect
         </div>
       </div>
     </section>
+
+    <section class="mf-finder-cta mf-section" aria-labelledby="finder-cta-title">
+      <div class="mf-container mf-finder-cta__inner">
+        <p class="mf-finder-cta__eyebrow">Não encontrou o seu?</p>
+        <div class="mf-finder-cta__content">
+          <h2 id="finder-cta-title">Conte ao Felipe o carro que você procura.</h2>
+          <p>
+            Você não precisa navegar por centenas de anúncios. Informe suas prioridades e receba uma
+            busca conduzida com critério.
+          </p>
+        </div>
+        <a class="mf-finder-cta__action mf-frame" href="/encontrar-meu-carro">
+          Iniciar minha busca
+        </a>
+      </div>
+    </section>
   `,
 })
 export class HomePageComponent {

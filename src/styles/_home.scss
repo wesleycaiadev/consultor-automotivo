@@ -318,6 +318,68 @@
   grid-row: 1;
 }
 
+.mf-finder-cta {
+  border-block: 1px solid var(--mf-silver);
+  background: var(--mf-porcelain);
+}
+
+.mf-finder-cta__inner {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.mf-finder-cta__eyebrow {
+  margin: 0;
+  color: var(--mf-oxide);
+  font-family: var(--font-ui);
+  font-size: var(--type-label);
+  font-weight: 600;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+.mf-finder-cta__content {
+  max-inline-size: 45rem;
+}
+
+.mf-finder-cta__content h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--type-display-lg);
+  font-weight: 400;
+  letter-spacing: var(--tracking-display);
+  line-height: var(--leading-display);
+}
+
+.mf-finder-cta__content p {
+  max-inline-size: 37rem;
+  margin: var(--space-5) 0 0;
+  color: var(--mf-graphite);
+  line-height: var(--leading-body);
+}
+
+.mf-finder-cta__action {
+  display: inline-flex;
+  min-block-size: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  justify-self: start;
+  padding-inline: var(--space-5);
+  background: var(--mf-ink);
+  color: var(--mf-paper);
+  font-family: var(--font-ui);
+  font-size: var(--type-label);
+  font-weight: 600;
+  letter-spacing: var(--tracking-label);
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.mf-finder-cta__action:focus-visible {
+  outline: 2px solid var(--mf-oxide);
+  outline-offset: 0.25rem;
+}
+
 @media (min-width: tokens.$mf-breakpoint-tablet) {
   .mf-hero__inner {
     padding-block-start: clamp(21rem, 48svh, 27rem);
@@ -434,6 +496,26 @@
   }
   .mf-vehicle-preview:nth-child(3) {
     grid-column: 9 / -1;
+  }
+
+  .mf-finder-cta__inner {
+    grid-template-columns: repeat(var(--mf-grid-columns), minmax(0, 1fr));
+    column-gap: var(--mf-grid-gutter);
+    align-items: end;
+  }
+
+  .mf-finder-cta__eyebrow {
+    grid-column: 1 / span 2;
+    align-self: start;
+  }
+
+  .mf-finder-cta__content {
+    grid-column: 4 / span 6;
+  }
+
+  .mf-finder-cta__action {
+    grid-column: 10 / -1;
+    justify-self: end;
   }
 }
 
