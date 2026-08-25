@@ -9,6 +9,12 @@ describe('MfNavbarComponent', () => {
     const trigger = fixture.nativeElement.querySelector(
       '.mf-navbar__menu-trigger',
     ) as HTMLButtonElement;
+    const wordmark = fixture.nativeElement.querySelector(
+      '.mf-navbar__brand-wordmark',
+    ) as HTMLSpanElement;
+
+    expect(wordmark.textContent).toContain('MARQUES FELIPE');
+
     trigger.click();
     fixture.detectChanges();
 
