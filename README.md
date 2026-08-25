@@ -1,59 +1,35 @@
-# MfV3
+# MF V3 — Marques Felipe Curadoria Automotiva
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.1.5.
+Experiência digital para curadoria automotiva: orientação, showroom, busca personalizada, entregas e uma área administrativa enxuta.
 
-## Development server
+## Fundação
 
-To start a local development server, run:
+- Angular 22, TypeScript strict, standalone components e Angular Router
+- SCSS e CSS Custom Properties
+- SSR com hidratação no cliente
+- ESLint, Prettier e Vitest
 
-```bash
-ng serve
-```
+Use Node.js 22.22.3 ou superior.
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Comandos
 
 ```bash
-ng generate component component-name
+npm start
+npm run build
+npm run lint
+npm test -- --watch=false
+npm run format:check
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Ordem de trabalho
 
-```bash
-ng generate --help
-```
+Antes de cada task, consulte nesta ordem:
 
-## Building
+1. `README.md`
+2. `00-MASTER-CONTEXT.md`
+3. `01-PRODUCT-DESIGN-UX.md`
+4. `02-ARCHITECTURE-ENGINEERING.md`
+5. `03-IMPLEMENTATION-TASKS.md`
+6. `04-QUALITY-RELEASE.md`
 
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Execute somente uma task por vez e pare no checkpoint definido em `03-IMPLEMENTATION-TASKS.md`.

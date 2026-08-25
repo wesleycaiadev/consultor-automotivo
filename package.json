@@ -9,7 +9,8 @@
     "test": "ng test",
     "lint": "ng lint",
     "format": "prettier --write \"src/**/*.{ts,html,scss}\" \"*.{json,js}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,html,scss}\" \"*.{json,js}\""
+    "format:check": "prettier --check \"src/**/*.{ts,html,scss}\" \"*.{json,js}\"",
+    "serve:ssr:mf-v3": "node dist/mf-v3/server/server.mjs"
   },
   "private": true,
   "engines": {
@@ -22,7 +23,10 @@
     "@angular/core": "^22.1.0",
     "@angular/forms": "^22.1.0",
     "@angular/platform-browser": "^22.1.0",
+    "@angular/platform-server": "^22.1.0",
     "@angular/router": "^22.1.0",
+    "@angular/ssr": "^22.1.5",
+    "express": "^5.1.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },
@@ -31,6 +35,8 @@
     "@angular/cli": "^22.1.5",
     "@angular/compiler-cli": "^22.1.0",
     "@eslint/js": "^10.0.1",
+    "@types/express": "^5.0.1",
+    "@types/node": "^20.17.19",
     "angular-eslint": "22.1.0",
     "eslint": "^10.6.0",
     "jsdom": "^28.0.0",
