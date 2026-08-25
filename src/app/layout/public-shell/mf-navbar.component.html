@@ -1,0 +1,62 @@
+<header class="mf-navbar" [class.mf-navbar--scrolled]="scrolled()">
+  <a class="mf-navbar__brand" href="/" aria-label="Marques Felipe — Início">
+    <span aria-hidden="true">MF</span>
+  </a>
+
+  <nav class="mf-navbar__desktop-nav" aria-label="Navegação principal">
+    <a class="is-active" href="/" aria-current="page">Início</a>
+    <a href="/#curadoria">Curadoria</a>
+    <a href="/showroom">Showroom</a>
+    <a href="/entregas">Entregas</a>
+    <a href="/sobre">Sobre</a>
+  </nav>
+
+  <a class="mf-navbar__cta mf-frame" href="#fale-com-felipe">Fale com Felipe</a>
+
+  <button
+    #menuTrigger
+    class="mf-navbar__menu-trigger"
+    type="button"
+    [attr.aria-expanded]="menuOpen()"
+    aria-controls="mf-mobile-menu"
+    aria-label="Abrir menu"
+    (click)="toggleMenu()"
+  >
+    <span></span>
+    <span></span>
+  </button>
+</header>
+
+@if (menuOpen()) {
+  <section
+    id="mf-mobile-menu"
+    class="mf-mobile-menu"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Menu principal"
+  >
+    <div class="mf-mobile-menu__header">
+      <a href="/" class="mf-mobile-menu__brand" (click)="closeMenu()">MARQUES FELIPE</a>
+      <button
+        class="mf-mobile-menu__close"
+        type="button"
+        aria-label="Fechar menu"
+        (click)="closeMenu(true)"
+      >
+        Fechar
+      </button>
+    </div>
+
+    <nav class="mf-mobile-menu__nav" aria-label="Navegação principal">
+      <a #firstMobileLink href="/" aria-current="page" (click)="closeMenu()">Início</a>
+      <a href="/#curadoria" (click)="closeMenu()">Curadoria</a>
+      <a href="/showroom" (click)="closeMenu()">Showroom</a>
+      <a href="/entregas" (click)="closeMenu()">Entregas</a>
+      <a href="/sobre" (click)="closeMenu()">Sobre</a>
+    </nav>
+
+    <a class="mf-mobile-menu__cta mf-frame" href="#fale-com-felipe" (click)="closeMenu()"
+      >Fale com Felipe</a
+    >
+  </section>
+}

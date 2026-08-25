@@ -1,0 +1,24 @@
+import { TestBed } from '@angular/core/testing';
+import { MfNavbarComponent } from './mf-navbar.component';
+
+describe('MfNavbarComponent', () => {
+  it('opens and closes the mobile menu with keyboard support', async () => {
+    const fixture = TestBed.createComponent(MfNavbarComponent);
+    fixture.detectChanges();
+
+    const trigger = fixture.nativeElement.querySelector(
+      '.mf-navbar__menu-trigger',
+    ) as HTMLButtonElement;
+    trigger.click();
+    fixture.detectChanges();
+
+    expect(trigger.getAttribute('aria-expanded')).toBe('true');
+    expect(fixture.nativeElement.querySelector('[role="dialog"]')).toBeTruthy();
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    fixture.detectChanges();
+
+    expect(trigger.getAttribute('aria-expanded')).toBe('false');
+    expect(fixture.nativeElement.querySelector('[role="dialog"]')).toBeFalsy();
+  });
+});
