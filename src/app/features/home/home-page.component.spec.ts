@@ -43,8 +43,9 @@ describe('HomePageComponent', () => {
       fixture.nativeElement
         .querySelector('#fale-com-felipe .mf-final-cta__action')
         ?.getAttribute('href'),
-    ).toBe('https://wa.me/');
+    ).toBe('https://wa.me/557998709362');
     expect(fixture.nativeElement.querySelector('.mf-footer')).toBeTruthy();
+    expect(fixture.nativeElement.querySelectorAll('.mf-footer__links a')).toHaveLength(3);
     expect(fixture.nativeElement.querySelector('.mf-footer__admin')?.getAttribute('href')).toBe(
       '/admin',
     );

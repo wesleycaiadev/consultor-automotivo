@@ -194,7 +194,9 @@ import { MfSectionMarkerComponent } from '../../shared/ui/section-marker/mf-sect
       <div class="mf-container mf-final-cta__inner">
         <p class="mf-final-cta__eyebrow">Próxima escolha</p>
         <h2 id="final-cta-title">Uma boa conversa pode ser o começo do carro certo.</h2>
-        <a class="mf-final-cta__action mf-frame" href="https://wa.me/">Falar com Felipe</a>
+        <a class="mf-final-cta__action mf-frame" href="https://wa.me/557998709362"
+          >Falar com Felipe</a
+        >
       </div>
     </section>
 
@@ -206,15 +208,13 @@ import { MfSectionMarkerComponent } from '../../shared/ui/section-marker/mf-sect
         </div>
 
         <nav class="mf-footer__links" aria-label="Navegação do rodapé">
-          <a href="/">Início</a>
           <a href="/#curadoria">Curadoria</a>
           <a href="/showroom">Showroom</a>
           <a href="/entregas">Entregas</a>
-          <a href="/sobre">Sobre</a>
         </nav>
 
         <address class="mf-footer__contact">
-          <a href="https://wa.me/">WhatsApp</a>
+          <a href="https://wa.me/557998709362">WhatsApp</a>
           <a href="https://www.instagram.com/">Instagram</a>
           <span>Aracaju — SE</span>
         </address>
