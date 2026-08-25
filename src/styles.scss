@@ -1,1 +1,22 @@
+@use 'styles/fonts';
 @use 'styles/tokens';
+@use 'styles/typography';
+
+html {
+  font-family: var(--font-body);
+  font-synthesis: none;
+}
+
+body {
+  margin: 0;
+  color: var(--mf-ink);
+  font-size: var(--type-body-md);
+  line-height: var(--leading-body);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}

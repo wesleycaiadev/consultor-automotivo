@@ -1,0 +1,35 @@
+:root {
+  --font-display: 'Instrument Serif', Georgia, serif;
+  --font-body: 'Manrope', Arial, sans-serif;
+  --font-ui: 'Geist', 'Manrope', Arial, sans-serif;
+
+  --type-display-xl: clamp(3.5rem, 7vw, 6rem);
+  --type-display-lg: clamp(2.5rem, 4.5vw, 4rem);
+  --type-heading-md: clamp(1.75rem, 2.5vw, 2rem);
+  --type-body-lg: 1.25rem;
+  --type-body-md: 1rem;
+  --type-label: 0.75rem;
+  --type-ui: 0.875rem;
+
+  --leading-display: 1;
+  --leading-heading: 1.1;
+  --leading-body: 1.6;
+  --leading-ui: 1.4;
+
+  --tracking-display: -0.04em;
+  --tracking-heading: -0.02em;
+  --tracking-label: 0.1em;
+}
+
+.mf-type-display {
+  font-family: var(--font-display);
+  font-weight: 400;
+}
+
+.mf-type-body {
+  font-family: var(--font-body);
+}
+
+.mf-type-ui {
+  font-family: var(--font-ui);
+}
