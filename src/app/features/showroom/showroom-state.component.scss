@@ -1,0 +1,111 @@
+.mf-showroom-state {
+  display: grid;
+  max-inline-size: 42rem;
+  gap: var(--space-5);
+  padding-block: var(--space-10);
+  border-block: 1px solid var(--mf-silver);
+}
+
+.mf-showroom-state__eyebrow,
+.mf-showroom-state h2,
+.mf-showroom-state p {
+  margin: 0;
+}
+
+.mf-showroom-state__eyebrow {
+  color: var(--mf-oxide);
+  font-family: var(--font-ui);
+  font-size: var(--type-label);
+  font-weight: 600;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+.mf-showroom-state h2 {
+  font-family: var(--font-display);
+  font-size: var(--type-display-lg);
+  font-weight: 400;
+  letter-spacing: var(--tracking-display);
+  line-height: var(--leading-display);
+}
+
+.mf-showroom-state p:not(.mf-showroom-state__eyebrow) {
+  max-inline-size: 34rem;
+  color: var(--mf-graphite);
+}
+
+.mf-showroom-state__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.mf-showroom-state__action {
+  display: inline-flex;
+  min-block-size: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  justify-self: start;
+  padding-inline: var(--space-5);
+  border: 0;
+  background: var(--mf-ink);
+  color: var(--mf-paper);
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: var(--type-label);
+  font-weight: 600;
+  letter-spacing: var(--tracking-label);
+  line-height: var(--leading-ui);
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.mf-showroom-state__secondary {
+  min-block-size: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+  border-block-end: 1px solid currentcolor;
+  color: var(--mf-ink);
+  font-family: var(--font-ui);
+  font-size: var(--type-label);
+  font-weight: 600;
+  letter-spacing: var(--tracking-label);
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.mf-showroom-state__action:focus-visible,
+.mf-showroom-state__secondary:focus-visible {
+  outline: 2px solid var(--mf-oxide);
+  outline-offset: 0.25rem;
+}
+
+.mf-showroom-state__skeletons {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.mf-showroom-state__skeletons span {
+  display: block;
+  aspect-ratio: 0.8;
+  background: linear-gradient(90deg, var(--mf-porcelain), var(--mf-paper), var(--mf-porcelain));
+  background-size: 200% 100%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .mf-showroom-state__skeletons span {
+    animation: mf-showroom-skeleton 1.4s var(--ease-standard) infinite;
+  }
+}
+
+@keyframes mf-showroom-skeleton {
+  from {
+    background-position: 100% 0;
+  }
+
+  to {
+    background-position: -100% 0;
+  }
+}
