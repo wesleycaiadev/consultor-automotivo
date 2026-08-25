@@ -18,6 +18,7 @@ describe('HomePageComponent', () => {
       'não deveria ser uma aposta',
     );
     expect(fixture.nativeElement.querySelectorAll('app-mf-accordion-item')).toHaveLength(7);
+    expect(fixture.nativeElement.querySelectorAll('.mf-curation__steps li')).toHaveLength(4);
 
     const firstRisk = fixture.nativeElement.querySelector(
       'app-mf-accordion-item button',

@@ -60,9 +60,55 @@ import { MfSectionMarkerComponent } from '../../shared/ui/section-marker/mf-sect
         </div>
       </div>
     </section>
+
+    <section id="curadoria" class="mf-curation mf-section" aria-labelledby="curation-title">
+      <div class="mf-container mf-curation__inner">
+        <div class="mf-curation__intro">
+          <app-mf-section-marker label="A curadoria" />
+          <h2 id="curation-title">Uma escolha segura é construída antes da negociação.</h2>
+          <p>
+            Um processo objetivo para entender o que importa, filtrar opções e chegar à decisão com
+            mais clareza.
+          </p>
+        </div>
+
+        <ol class="mf-curation__steps">
+          @for (step of steps; track step.number) {
+            <li>
+              <span aria-hidden="true">{{ step.number }}</span>
+              <h3>{{ step.title }}</h3>
+              <p>{{ step.copy }}</p>
+            </li>
+          }
+        </ol>
+      </div>
+    </section>
   `,
 })
 export class HomePageComponent {
+  readonly steps = [
+    {
+      number: '01',
+      title: 'Perfil',
+      copy: 'Entendemos sua rotina, prioridades e o que uma boa compra precisa resolver.',
+    },
+    {
+      number: '02',
+      title: 'Curadoria',
+      copy: 'Filtramos opções coerentes com seu contexto, sem excesso de escolhas ou ruído.',
+    },
+    {
+      number: '03',
+      title: 'Validação',
+      copy: 'Procedência, condição e custo real entram na avaliação antes de avançar.',
+    },
+    {
+      number: '04',
+      title: 'Negociação',
+      copy: 'A decisão chega à mesa com referência de valor, critério e segurança.',
+    },
+  ] as const;
+
   readonly risks = [
     {
       id: 'procedencia',
