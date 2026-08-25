@@ -83,9 +83,64 @@ import { MfSectionMarkerComponent } from '../../shared/ui/section-marker/mf-sect
         </ol>
       </div>
     </section>
+
+    <section class="mf-showroom-preview mf-section" aria-labelledby="showroom-preview-title">
+      <div class="mf-container">
+        <div class="mf-showroom-preview__header">
+          <div>
+            <app-mf-section-marker label="Showroom" />
+            <h2 id="showroom-preview-title">Veículos selecionados.</h2>
+          </div>
+          <a class="mf-editorial-link" href="/showroom">Explorar showroom</a>
+        </div>
+
+        <div class="mf-showroom-preview__grid">
+          @for (vehicle of vehicles; track vehicle.model) {
+            <article class="mf-vehicle-preview">
+              <img
+                [src]="vehicle.image"
+                [alt]="vehicle.model"
+                width="1200"
+                height="800"
+                loading="lazy"
+              />
+              <div class="mf-vehicle-preview__meta">
+                <h3>{{ vehicle.model }}</h3>
+                <p>{{ vehicle.details }}</p>
+                <span>{{ vehicle.price }}</span>
+              </div>
+            </article>
+          }
+        </div>
+      </div>
+    </section>
   `,
 })
 export class HomePageComponent {
+  readonly vehicles = [
+    {
+      model: 'Porsche 911 Carrera',
+      details: '2023 · 3.000 km · PDK',
+      price: 'Consulte',
+      image:
+        'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1400&q=85',
+    },
+    {
+      model: 'Range Rover Autobiography',
+      details: '2022 · 18.500 km · Automático',
+      price: 'R$ 1.450.000',
+      image:
+        'https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=1400&q=85',
+    },
+    {
+      model: 'BMW M3 Competition',
+      details: '2023 · 12.000 km · Automático',
+      price: 'Consulte',
+      image:
+        'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1400&q=85',
+    },
+  ] as const;
+
   readonly steps = [
     {
       number: '01',

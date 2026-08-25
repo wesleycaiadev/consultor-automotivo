@@ -19,6 +19,7 @@ describe('HomePageComponent', () => {
     );
     expect(fixture.nativeElement.querySelectorAll('app-mf-accordion-item')).toHaveLength(7);
     expect(fixture.nativeElement.querySelectorAll('.mf-curation__steps li')).toHaveLength(4);
+    expect(fixture.nativeElement.querySelectorAll('.mf-vehicle-preview')).toHaveLength(3);
 
     const firstRisk = fixture.nativeElement.querySelector(
       'app-mf-accordion-item button',
