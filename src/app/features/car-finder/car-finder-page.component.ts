@@ -1,6 +1,10 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MfButtonComponent } from '../../shared/ui/button/mf-button.component';
-import { type FinderCategory, FinderStateService } from './finder-state.service';
+import {
+  type FinderCategory,
+  type FinderCondition,
+  FinderStateService,
+} from './finder-state.service';
 
 const CATEGORY_OPTIONS: readonly { readonly label: string; readonly value: FinderCategory }[] = [
   { label: 'SUV', value: 'suv' },
@@ -17,6 +21,15 @@ const BUDGET_OPTIONS = [
   'De R$ 250 mil a R$ 400 mil',
   'Acima de R$ 400 mil',
 ] as const;
+
+const CONDITION_OPTIONS: readonly {
+  readonly label: string;
+  readonly value: FinderCondition;
+}[] = [
+  { label: 'Novo', value: 'new' },
+  { label: 'Seminovo', value: 'used' },
+  { label: 'Tanto faz', value: 'either' },
+];
 
 @Component({
   selector: 'app-car-finder-page',
@@ -88,6 +101,41 @@ const BUDGET_OPTIONS = [
 
           <div class="mf-finder__actions">
             <app-mf-button variant="secondary" (click)="goBack()">Voltar</app-mf-button>
+            @if (state.draft().budget !== null) {
+              <app-mf-button (click)="goNext()">Continuar</app-mf-button>
+            }
+          </div>
+        } @else if (state.currentStep() === 'condition') {
+          <p class="mf-finder__progress">Etapa 3 de 8</p>
+          <h1 id="finder-title">Você prefere um veículo novo ou seminovo?</h1>
+          <p class="mf-finder__intro">
+            Se as duas opções funcionam para você, deixe Felipe avaliar.
+          </p>
+
+          <fieldset class="mf-finder__choices">
+            <legend>Condição do veículo</legend>
+            @for (option of conditionOptions; track option.value) {
+              <label [class.is-selected]="state.draft().condition === option.value">
+                <input
+                  type="radio"
+                  name="finder-condition"
+                  [value]="option.value"
+                  [checked]="state.draft().condition === option.value"
+                  (change)="selectCondition(option.value)"
+                />
+                <span>{{ option.label }}</span>
+              </label>
+            }
+          </fieldset>
+
+          @if (state.draft().condition !== null) {
+            <p class="mf-finder__selection" aria-live="polite">
+              Preferência selecionada: {{ conditionLabel(state.draft().condition) }}.
+            </p>
+          }
+
+          <div class="mf-finder__actions">
+            <app-mf-button variant="secondary" (click)="goBack()">Voltar</app-mf-button>
           </div>
         }
       </div>
@@ -98,6 +146,7 @@ export class CarFinderPageComponent {
   readonly state = inject(FinderStateService);
   readonly categoryOptions = CATEGORY_OPTIONS;
   readonly budgetOptions = BUDGET_OPTIONS;
+  readonly conditionOptions = CONDITION_OPTIONS;
 
   selectCategory(category: FinderCategory): void {
     this.state.selectCategory(category);
@@ -105,6 +154,10 @@ export class CarFinderPageComponent {
 
   selectBudget(budget: string): void {
     this.state.selectBudget(budget);
+  }
+
+  selectCondition(condition: FinderCondition): void {
+    this.state.selectCondition(condition);
   }
 
   goNext(): void {
@@ -117,5 +170,9 @@ export class CarFinderPageComponent {
 
   categoryLabel(category: FinderCategory | null): string {
     return CATEGORY_OPTIONS.find((option) => option.value === category)?.label ?? '';
+  }
+
+  conditionLabel(condition: FinderCondition | null): string {
+    return CONDITION_OPTIONS.find((option) => option.value === condition)?.label ?? '';
   }
 }

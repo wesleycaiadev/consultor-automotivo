@@ -54,4 +54,41 @@ describe('CarFinderPageComponent', () => {
     expect(fixture.componentInstance.state.draft().category).toBe('hatch');
     expect(fixture.nativeElement.querySelector('.is-selected')?.textContent).toContain('Hatch');
   });
+
+  it('offers a clear condition choice after a valid budget', () => {
+    const fixture = TestBed.createComponent(CarFinderPageComponent);
+    fixture.detectChanges();
+
+    const select = (index: number): void => {
+      const options = fixture.nativeElement.querySelectorAll(
+        '.mf-finder__choices input',
+      ) as NodeListOf<HTMLInputElement>;
+      options[index].dispatchEvent(new Event('change'));
+      fixture.detectChanges();
+    };
+    const continueFlow = (): void => {
+      const buttons = fixture.nativeElement.querySelectorAll(
+        'app-mf-button button',
+      ) as NodeListOf<HTMLButtonElement>;
+      buttons[buttons.length - 1].click();
+      fixture.detectChanges();
+    };
+
+    select(0);
+    continueFlow();
+    select(0);
+    continueFlow();
+
+    expect(fixture.componentInstance.state.currentStep()).toBe('condition');
+    const conditions = fixture.nativeElement.querySelectorAll(
+      '.mf-finder__choices input',
+    ) as NodeListOf<HTMLInputElement>;
+    expect(Array.from(conditions, (option) => option.value)).toEqual(['new', 'used', 'either']);
+
+    conditions[1].dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.state.draft().condition).toBe('used');
+    expect(fixture.nativeElement.querySelector('.is-selected')?.textContent).toContain('Seminovo');
+  });
 });
