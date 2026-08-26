@@ -14,7 +14,8 @@
 
 .mf-finder__progress,
 .mf-finder__intro,
-.mf-finder__selection {
+.mf-finder__selection,
+.mf-finder__feedback {
   color: var(--mf-graphite);
 }
 
@@ -150,7 +151,19 @@
   margin: var(--space-5) 0 0;
 }
 
+.mf-finder__feedback,
+.mf-finder__error {
+  margin: 0 0 var(--space-5);
+  font: 600 var(--type-label) / var(--leading-ui) var(--font-ui);
+}
+
+.mf-finder__error {
+  color: var(--mf-oxide);
+}
+
 .mf-finder__actions {
+  display: grid;
+  gap: var(--space-4);
   margin-block-start: var(--space-6);
 }
 
@@ -179,6 +192,13 @@
 }
 
 @media (min-width: 30rem) {
+  .mf-finder__actions {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: var(--space-3);
+    row-gap: var(--space-4);
+  }
+
   .mf-finder__actions app-mf-button {
     inline-size: auto;
   }

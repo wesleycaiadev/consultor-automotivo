@@ -1,3 +1,23 @@
+.mf-finder__progress-meter {
+  block-size: 0.125rem;
+  margin-block-end: var(--space-6);
+  overflow: hidden;
+  background: var(--mf-silver);
+}
+
+.mf-finder__progress-meter span {
+  display: block;
+  block-size: 100%;
+  background: var(--mf-oxide);
+  transition: width var(--motion-ui) var(--ease-standard);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mf-finder__progress-meter span {
+    transition: none;
+  }
+}
+
 .mf-finder__summary {
   display: grid;
   margin: var(--space-8) 0 0;

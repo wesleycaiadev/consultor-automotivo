@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import {
   type FinderWhatsappInput,
   WhatsappComposerService,
@@ -20,7 +20,8 @@ const CATEGORY_OPTIONS: readonly { readonly label: string; readonly value: Finde
 ];
 
 const BUDGET_OPTIONS = [
-  'Até R$ 100 mil',
+  'Até R$ 50 mil',
+  'De R$ 50 mil a R$ 100 mil',
   'De R$ 100 mil a R$ 150 mil',
   'De R$ 150 mil a R$ 250 mil',
   'De R$ 250 mil a R$ 400 mil',
@@ -52,6 +53,26 @@ interface FinderSummaryItem {
   template: `
     <section class="mf-finder" aria-labelledby="finder-title">
       <div class="mf-container mf-finder__inner">
+        <div
+          class="mf-finder__progress-meter"
+          role="progressbar"
+          aria-label="Progresso da busca"
+          aria-valuemin="1"
+          aria-valuemax="8"
+          [attr.aria-valuenow]="state.stepIndex() + 1"
+          [attr.aria-valuetext]="'Etapa ' + (state.stepIndex() + 1) + ' de 8'"
+        >
+          <span [style.width.%]="state.progress() * 100"></span>
+        </div>
+
+        @if (feedback()) {
+          <p class="mf-finder__feedback" role="status" aria-live="polite">{{ feedback() }}</p>
+        }
+
+        @if (errorMessage()) {
+          <p class="mf-finder__error" role="alert">{{ errorMessage() }}</p>
+        }
+
         @if (state.currentStep() === 'category') {
           <p class="mf-finder__progress">Etapa 1 de 8</p>
           <h1 id="finder-title">Qual tipo de veículo faz sentido para você?</h1>
@@ -300,6 +321,8 @@ interface FinderSummaryItem {
 export class CarFinderPageComponent {
   readonly state = inject(FinderStateService);
   readonly whatsapp = inject(WhatsappComposerService);
+  readonly errorMessage = signal<string | null>(null);
+  readonly feedback = signal<string | null>(null);
   readonly categoryOptions = CATEGORY_OPTIONS;
   readonly budgetOptions = BUDGET_OPTIONS;
   readonly conditionOptions = CONDITION_OPTIONS;
@@ -307,35 +330,46 @@ export class CarFinderPageComponent {
 
   selectCategory(category: FinderCategory): void {
     this.state.selectCategory(category);
+    this.clearMessages();
   }
 
   selectBudget(budget: string): void {
     this.state.selectBudget(budget);
+    this.clearMessages();
   }
 
   selectCondition(condition: FinderCondition): void {
     this.state.selectCondition(condition);
+    this.clearMessages();
   }
 
   setBrand(brand: string): void {
     this.state.setBrand(brand);
+    this.clearMessages();
   }
 
   setModel(model: string): void {
     this.state.setModel(model);
+    this.clearMessages();
   }
 
   setNotes(notes: string): void {
     this.state.setNotes(notes);
+    this.clearMessages();
   }
 
   skipBrand(): void {
     this.state.setBrand('');
+    this.feedback.set('Sem preferência de marca registrada.');
+    this.errorMessage.set(null);
     this.state.goNext();
   }
 
   skipModel(): void {
     this.state.setModel('');
+    this.feedback.set('Sem preferência de modelo registrada.');
+    this.errorMessage.set(null);
+    this.state.goNext();
   }
 
   edit(step: FinderStep): void {
@@ -343,11 +377,20 @@ export class CarFinderPageComponent {
   }
 
   goNext(): void {
-    this.state.goNext();
+    if (this.state.goNext()) {
+      this.clearMessages();
+      return;
+    }
+
+    const message = this.advanceErrorMessage();
+    this.errorMessage.set(message);
+    this.feedback.set(null);
+    console.warn('[Car Finder] avanço bloqueado', { step: this.state.currentStep(), message });
   }
 
   goBack(): void {
     this.state.goBack();
+    this.clearMessages();
   }
 
   categoryLabel(category: FinderCategory | null): string {
@@ -382,5 +425,23 @@ export class CarFinderPageComponent {
       model: draft.model,
       notes: draft.notes,
     };
+  }
+
+  private advanceErrorMessage(): string {
+    switch (this.state.currentStep()) {
+      case 'category':
+        return 'Escolha um tipo de veículo para continuar.';
+      case 'budget':
+        return 'Escolha uma faixa de investimento para continuar.';
+      case 'condition':
+        return 'Escolha a condição do veículo para continuar.';
+      default:
+        return 'Não foi possível avançar agora. Tente novamente.';
+    }
+  }
+
+  private clearMessages(): void {
+    this.errorMessage.set(null);
+    this.feedback.set(null);
   }
 }

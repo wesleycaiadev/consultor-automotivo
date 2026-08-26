@@ -41,8 +41,16 @@ describe('CarFinderPageComponent', () => {
     const budgetOptions = fixture.nativeElement.querySelectorAll(
       '.mf-finder__choices input',
     ) as NodeListOf<HTMLInputElement>;
-    expect(budgetOptions).toHaveLength(5);
-    budgetOptions[1].dispatchEvent(new Event('change'));
+    expect(budgetOptions).toHaveLength(6);
+    expect(Array.from(budgetOptions, (option) => option.value)).toEqual([
+      'Até R$ 50 mil',
+      'De R$ 50 mil a R$ 100 mil',
+      'De R$ 100 mil a R$ 150 mil',
+      'De R$ 150 mil a R$ 250 mil',
+      'De R$ 250 mil a R$ 400 mil',
+      'Acima de R$ 400 mil',
+    ]);
+    budgetOptions[2].dispatchEvent(new Event('change'));
     fixture.detectChanges();
 
     expect(fixture.componentInstance.state.draft().budget).toBe('De R$ 100 mil a R$ 150 mil');
@@ -135,7 +143,7 @@ describe('CarFinderPageComponent', () => {
 
     expect(fixture.componentInstance.state.currentStep()).toBe('brand');
     expect(fixture.componentInstance.state.draft()).toMatchObject({
-      budget: 'Até R$ 100 mil',
+      budget: 'Até R$ 50 mil',
       category: 'suv',
       condition: 'either',
     });
@@ -218,5 +226,51 @@ describe('CarFinderPageComponent', () => {
     expect(link.rel).toContain('noopener');
     expect(url.searchParams.get('text')).toContain('Tipo de veículo: SUV');
     expect(url.searchParams.get('text')).not.toContain('Marca:');
+  });
+
+  it('exposes the current Finder step through an accessible progress indicator', () => {
+    const fixture = TestBed.createComponent(CarFinderPageComponent);
+    const { state } = fixture.componentInstance;
+    state.goTo('summary');
+    fixture.detectChanges();
+
+    const progress = fixture.nativeElement.querySelector(
+      '.mf-finder__progress-meter',
+    ) as HTMLDivElement;
+    expect(progress.getAttribute('role')).toBe('progressbar');
+    expect(progress.getAttribute('aria-valuetext')).toBe('Etapa 7 de 8');
+    expect(progress.querySelector('span')?.style.width).toBe('87.5%');
+
+    state.goTo('whatsapp');
+    fixture.detectChanges();
+
+    expect(progress.getAttribute('aria-valuetext')).toBe('Etapa 8 de 8');
+    expect(progress.querySelector('span')?.style.width).toBe('100%');
+  });
+
+  it('advances after skipping the model and explains blocked progression', () => {
+    const fixture = TestBed.createComponent(CarFinderPageComponent);
+    const { state } = fixture.componentInstance;
+    state.goTo('model');
+    fixture.detectChanges();
+
+    const modelButtons = fixture.nativeElement.querySelectorAll(
+      'app-mf-button button',
+    ) as NodeListOf<HTMLButtonElement>;
+    modelButtons[1].click();
+    fixture.detectChanges();
+
+    expect(state.currentStep()).toBe('notes');
+    expect(fixture.nativeElement.querySelector('.mf-finder__feedback')?.textContent).toContain(
+      'Sem preferência de modelo registrada',
+    );
+
+    state.reset();
+    fixture.componentInstance.goNext();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.mf-finder__error')?.textContent).toContain(
+      'Escolha um tipo de veículo',
+    );
   });
 });
