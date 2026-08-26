@@ -60,6 +60,15 @@ describe('VehicleDetailPageComponent', () => {
 
     expect(fixture.nativeElement.querySelector('h1')?.textContent).toContain('Porsche 911 Carrera');
     expect(fixture.nativeElement.querySelector('app-vehicle-gallery')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.mf-vehicle-detail__price')?.textContent).toContain(
+      'Consulte',
+    );
+    expect(fixture.nativeElement.querySelector('.mf-vehicle-detail__specs')?.textContent).toContain(
+      '3.000 km',
+    );
+    expect(fixture.nativeElement.querySelector('#vehicle-equipment-title')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('#vehicle-observations-title')).toBeTruthy();
+    expect(fixture.componentInstance.formatPrice(1450000)).toContain('1.450.000');
     expect(
       fixture.nativeElement.querySelector('.mf-vehicle-detail__back')?.getAttribute('href'),
     ).toBe('/showroom');
