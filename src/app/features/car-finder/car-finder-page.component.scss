@@ -99,6 +99,20 @@
   margin: var(--space-5) 0 0;
 }
 
+.mf-finder__actions {
+  margin-block-start: var(--space-6);
+}
+
+.mf-finder__actions app-mf-button {
+  inline-size: 100%;
+}
+
+@media (min-width: 30rem) {
+  .mf-finder__actions app-mf-button {
+    inline-size: auto;
+  }
+}
+
 @media (min-width: 48rem) {
   .mf-finder {
     padding-block: var(--space-15) var(--space-20);
