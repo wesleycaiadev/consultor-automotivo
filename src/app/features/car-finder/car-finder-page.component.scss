@@ -95,6 +95,38 @@
   outline-offset: 0.25rem;
 }
 
+.mf-finder__field {
+  display: grid;
+  gap: var(--space-3);
+  margin-block-start: var(--space-8);
+}
+
+.mf-finder__field label {
+  font: 600 var(--type-label) var(--font-ui);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+.mf-finder__field label span {
+  color: var(--mf-graphite);
+  font-weight: 400;
+}
+
+.mf-finder__field input {
+  min-block-size: 4rem;
+  padding-inline: var(--space-5);
+  border: 1px solid var(--mf-silver);
+  border-radius: 0;
+  background: transparent;
+  color: var(--mf-ink);
+  font: 400 var(--type-heading-md) / var(--leading-heading) var(--font-display);
+}
+
+.mf-finder__field input:focus-visible {
+  outline: 2px solid var(--mf-oxide);
+  outline-offset: 0.25rem;
+}
+
 .mf-finder__selection {
   margin: var(--space-5) 0 0;
 }

@@ -91,4 +91,53 @@ describe('CarFinderPageComponent', () => {
     expect(fixture.componentInstance.state.draft().condition).toBe('used');
     expect(fixture.nativeElement.querySelector('.is-selected')?.textContent).toContain('Seminovo');
   });
+
+  it('lets the user skip brand and return without losing previous answers', () => {
+    const fixture = TestBed.createComponent(CarFinderPageComponent);
+    fixture.detectChanges();
+
+    const select = (index: number): void => {
+      const options = fixture.nativeElement.querySelectorAll(
+        '.mf-finder__choices input',
+      ) as NodeListOf<HTMLInputElement>;
+      options[index].dispatchEvent(new Event('change'));
+      fixture.detectChanges();
+    };
+    const continueFlow = (): void => {
+      const buttons = fixture.nativeElement.querySelectorAll(
+        'app-mf-button button',
+      ) as NodeListOf<HTMLButtonElement>;
+      buttons[buttons.length - 1].click();
+      fixture.detectChanges();
+    };
+
+    select(0);
+    continueFlow();
+    select(0);
+    continueFlow();
+    select(2);
+    continueFlow();
+
+    expect(fixture.componentInstance.state.currentStep()).toBe('brand');
+    expect(fixture.nativeElement.querySelector('#finder-brand')).not.toBeNull();
+
+    const buttons = fixture.nativeElement.querySelectorAll(
+      'app-mf-button button',
+    ) as NodeListOf<HTMLButtonElement>;
+    buttons[1].click();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.state.currentStep()).toBe('model');
+    expect(fixture.componentInstance.state.draft().brand).toBe('');
+
+    (fixture.nativeElement.querySelector('app-mf-button button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.state.currentStep()).toBe('brand');
+    expect(fixture.componentInstance.state.draft()).toMatchObject({
+      budget: 'Até R$ 100 mil',
+      category: 'suv',
+      condition: 'either',
+    });
+  });
 });

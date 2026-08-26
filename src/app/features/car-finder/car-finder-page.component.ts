@@ -136,6 +136,68 @@ const CONDITION_OPTIONS: readonly {
 
           <div class="mf-finder__actions">
             <app-mf-button variant="secondary" (click)="goBack()">Voltar</app-mf-button>
+            @if (state.draft().condition !== null) {
+              <app-mf-button (click)="goNext()">Continuar</app-mf-button>
+            }
+          </div>
+        } @else if (state.currentStep() === 'brand') {
+          <p class="mf-finder__progress">Etapa 4 de 8</p>
+          <h1 id="finder-title">Tem alguma marca em mente?</h1>
+          <p class="mf-finder__intro">Esta resposta é opcional. Uma preferência já é suficiente.</p>
+
+          <div class="mf-finder__field">
+            <label for="finder-brand">Marca desejada <span>(opcional)</span></label>
+            <input
+              #brand
+              id="finder-brand"
+              name="finder-brand"
+              autocomplete="off"
+              [value]="state.draft().brand"
+              (input)="setBrand(brand.value)"
+            />
+          </div>
+
+          @if (state.draft().brand) {
+            <p class="mf-finder__selection" aria-live="polite">
+              Marca informada: {{ state.draft().brand }}.
+            </p>
+          }
+
+          <div class="mf-finder__actions">
+            <app-mf-button variant="secondary" (click)="goBack()">Voltar</app-mf-button>
+            <app-mf-button variant="secondary" (click)="skipBrand()">Pular marca</app-mf-button>
+            <app-mf-button (click)="goNext()">Continuar</app-mf-button>
+          </div>
+        } @else if (state.currentStep() === 'model') {
+          <p class="mf-finder__progress">Etapa 5 de 8</p>
+          <h1 id="finder-title">E algum modelo específico?</h1>
+          <p class="mf-finder__intro">
+            Você pode deixar em branco se ainda estiver explorando opções.
+          </p>
+
+          <div class="mf-finder__field">
+            <label for="finder-model">Modelo desejado <span>(opcional)</span></label>
+            <input
+              #model
+              id="finder-model"
+              name="finder-model"
+              autocomplete="off"
+              [value]="state.draft().model"
+              (input)="setModel(model.value)"
+            />
+          </div>
+
+          @if (state.draft().model) {
+            <p class="mf-finder__selection" aria-live="polite">
+              Modelo informado: {{ state.draft().model }}.
+            </p>
+          }
+
+          <div class="mf-finder__actions">
+            <app-mf-button variant="secondary" (click)="goBack()">Voltar</app-mf-button>
+            <app-mf-button variant="secondary" (click)="skipModel()">
+              Sem preferência de modelo
+            </app-mf-button>
           </div>
         }
       </div>
@@ -158,6 +220,23 @@ export class CarFinderPageComponent {
 
   selectCondition(condition: FinderCondition): void {
     this.state.selectCondition(condition);
+  }
+
+  setBrand(brand: string): void {
+    this.state.setBrand(brand);
+  }
+
+  setModel(model: string): void {
+    this.state.setModel(model);
+  }
+
+  skipBrand(): void {
+    this.state.setBrand('');
+    this.state.goNext();
+  }
+
+  skipModel(): void {
+    this.state.setModel('');
   }
 
   goNext(): void {
