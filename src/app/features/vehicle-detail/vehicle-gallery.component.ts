@@ -1,4 +1,4 @@
-import { isPlatformBrowser } from '@angular/common';
+import { DOCUMENT, isPlatformBrowser } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -76,6 +76,7 @@ export interface VehicleGalleryImage {
 
     @if (fullscreenOpen() && activeImage(); as fullscreenImage) {
       <section
+        #modal
         class="mf-vehicle-gallery__modal"
         role="dialog"
         aria-modal="true"
@@ -126,13 +127,20 @@ export class VehicleGalleryComponent {
   );
 
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly document = inject(DOCUMENT);
   private readonly coverTrigger = viewChild<ElementRef<HTMLButtonElement>>('coverTrigger');
   private readonly closeButton = viewChild<ElementRef<HTMLButtonElement>>('closeButton');
+  private readonly modal = viewChild<ElementRef<HTMLElement>>('modal');
   private readonly pointerStartX = signal<number | null>(null);
 
   @HostListener('document:keydown', ['$event'])
   onDocumentKeydown(event: KeyboardEvent): void {
     if (!this.fullscreenOpen()) {
+      return;
+    }
+
+    if (event.key === 'Tab') {
+      this.trapModalFocus(event);
       return;
     }
 
@@ -216,5 +224,29 @@ export class VehicleGalleryComponent {
     }
 
     setTimeout(() => target()?.nativeElement.focus());
+  }
+
+  private trapModalFocus(event: KeyboardEvent): void {
+    const controls = Array.from(
+      this.modal()?.nativeElement.querySelectorAll<HTMLButtonElement>('button:not([disabled])') ??
+        [],
+    );
+    const firstControl = controls[0];
+    const lastControl = controls.at(-1);
+
+    if (firstControl === undefined || lastControl === undefined) {
+      return;
+    }
+
+    const activeElement = this.document.activeElement;
+    if (event.shiftKey && activeElement === firstControl) {
+      event.preventDefault();
+      lastControl.focus();
+    }
+
+    if (!event.shiftKey && activeElement === lastControl) {
+      event.preventDefault();
+      firstControl.focus();
+    }
   }
 }

@@ -46,6 +46,27 @@ describe('VehicleGalleryComponent', () => {
     expect(fixture.nativeElement.querySelector('[role="dialog"]')).toBeFalsy();
   });
 
+  it('keeps keyboard focus inside the fullscreen modal', () => {
+    const fixture = TestBed.createComponent(VehicleGalleryComponent);
+    fixture.componentRef.setInput('images', images);
+    fixture.detectChanges();
+
+    (
+      fixture.nativeElement.querySelector('.mf-vehicle-gallery__cover') as HTMLButtonElement
+    ).click();
+    fixture.detectChanges();
+
+    const controls = fixture.nativeElement.querySelectorAll(
+      '.mf-vehicle-gallery__modal button',
+    ) as NodeListOf<HTMLButtonElement>;
+    controls[0].focus();
+    document.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true }),
+    );
+
+    expect(document.activeElement).toBe(controls[controls.length - 1]);
+  });
+
   it('moves between images on a horizontal touch gesture', () => {
     const fixture = TestBed.createComponent(VehicleGalleryComponent);
     fixture.componentRef.setInput('images', images);
