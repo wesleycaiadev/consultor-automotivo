@@ -2,6 +2,18 @@ import { Injectable, PLATFORM_ID, computed, inject, signal } from '@angular/core
 import { isPlatformBrowser } from '@angular/common';
 import { createClient, type Session, type SupabaseClient } from '@supabase/supabase-js';
 
+export interface AdminVehicleListItem {
+  readonly id: string;
+  readonly brand: string;
+  readonly model: string;
+  readonly version: string;
+  readonly manufacturing_year: number;
+  readonly model_year: number;
+  readonly price: number | null;
+  readonly status: 'draft' | 'published' | 'sold';
+  readonly updated_at: string;
+}
+
 const supabaseUrl = 'https://urjcjtwveunzixxkdikf.supabase.co';
 const supabasePublishableKey = 'sb_publishable_cpqdy12viM8aHIrkRqAuww_PL4nH8yx';
 
@@ -52,5 +64,15 @@ export class AdminAuthService {
       return;
     }
     this.session.set(data.session);
+  }
+
+  async listVehicles(): Promise<readonly AdminVehicleListItem[]> {
+    if (!this.#client) throw new Error('Sessão administrativa indisponível.');
+    const { data, error } = await this.#client
+      .from('vehicles')
+      .select('id,brand,model,version,manufacturing_year,model_year,price,status,updated_at')
+      .order('updated_at', { ascending: false });
+    if (error) throw error;
+    return (data ?? []) as readonly AdminVehicleListItem[];
   }
 }

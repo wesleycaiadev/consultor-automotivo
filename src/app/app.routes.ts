@@ -8,6 +8,7 @@ import { AdminShellComponent } from './layout/admin-shell/admin-shell.component'
 import { adminAuthGuard } from './core/guards/admin-auth.guard';
 import { AdminLoginPageComponent } from './features/admin-login/admin-login-page.component';
 import { AdminDashboardPageComponent } from './features/admin-dashboard/admin-dashboard-page.component';
+import { AdminVehicleListPageComponent } from './features/admin-vehicles/admin-vehicle-list-page.component';
 
 export const routes: Routes = [
   {
@@ -43,7 +44,7 @@ export const routes: Routes = [
     canActivate: [adminAuthGuard],
     children: [
       { path: '', component: AdminDashboardPageComponent },
-      { path: 'veiculos', component: AdminDashboardPageComponent },
+      { path: 'veiculos', component: AdminVehicleListPageComponent },
       { path: 'entregas', component: AdminDashboardPageComponent },
       { path: 'feedbacks', component: AdminDashboardPageComponent },
       { path: 'configuracoes', component: AdminDashboardPageComponent },
