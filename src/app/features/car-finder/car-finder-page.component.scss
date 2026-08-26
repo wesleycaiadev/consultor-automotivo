@@ -1,0 +1,110 @@
+:host {
+  display: block;
+}
+
+.mf-finder {
+  min-block-size: calc(100svh - 4.5rem);
+  padding-block: var(--space-10) var(--space-15);
+  background: var(--mf-paper);
+}
+
+.mf-finder__inner {
+  max-inline-size: 48rem;
+}
+
+.mf-finder__progress,
+.mf-finder__intro,
+.mf-finder__selection {
+  color: var(--mf-graphite);
+}
+
+.mf-finder__progress {
+  margin: 0 0 var(--space-4);
+  font: 600 var(--type-label) var(--font-ui);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+.mf-finder h1 {
+  max-inline-size: 16ch;
+  margin: 0;
+  font: 400 var(--type-display-lg) / var(--leading-display) var(--font-display);
+  letter-spacing: var(--tracking-display);
+}
+
+.mf-finder__intro {
+  max-inline-size: 32rem;
+  margin: var(--space-4) 0 0;
+}
+
+.mf-finder__choices {
+  display: grid;
+  gap: var(--space-3);
+  margin: var(--space-8) 0 0;
+  padding: 0;
+  border: 0;
+}
+
+.mf-finder__choices legend {
+  margin-block-end: var(--space-3);
+  font: 600 var(--type-label) var(--font-ui);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+.mf-finder__choices label {
+  position: relative;
+  display: flex;
+  min-block-size: 4.5rem;
+  align-items: center;
+  justify-content: space-between;
+  padding-inline: var(--space-5);
+  border: 1px solid var(--mf-silver);
+  color: var(--mf-ink);
+  cursor: pointer;
+  font: 400 var(--type-heading-md) / var(--leading-heading) var(--font-display);
+  letter-spacing: var(--tracking-display);
+}
+
+.mf-finder__choices label::after {
+  color: var(--mf-oxide);
+  content: '+';
+  font-family: var(--font-ui);
+  font-size: var(--type-body-lg);
+}
+
+.mf-finder__choices label.is-selected {
+  border-color: var(--mf-ink);
+  background: var(--mf-ink);
+  color: var(--mf-paper);
+}
+
+.mf-finder__choices label.is-selected::after {
+  content: '✓';
+}
+
+.mf-finder__choices input {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  opacity: 0;
+}
+
+.mf-finder__choices label:has(input:focus-visible) {
+  outline: 2px solid var(--mf-oxide);
+  outline-offset: 0.25rem;
+}
+
+.mf-finder__selection {
+  margin: var(--space-5) 0 0;
+}
+
+@media (min-width: 48rem) {
+  .mf-finder {
+    padding-block: var(--space-15) var(--space-20);
+  }
+
+  .mf-finder__choices {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

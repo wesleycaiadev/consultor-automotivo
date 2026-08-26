@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { CarFinderPageComponent } from './features/car-finder/car-finder-page.component';
 import { HomePageComponent } from './features/home/home-page.component';
 import { ShowroomPageComponent } from './features/showroom/showroom-page.component';
 import { VehicleDetailPageComponent } from './features/vehicle-detail/vehicle-detail-page.component';
@@ -18,5 +19,10 @@ export const routes: Routes = [
     path: 'showroom/:slug',
     component: VehicleDetailPageComponent,
     title: 'Veículo — Marques Felipe Curadoria Automotiva',
+  },
+  {
+    path: 'encontrar-meu-carro',
+    component: CarFinderPageComponent,
+    title: 'Encontrar meu carro — Marques Felipe Curadoria Automotiva',
   },
 ];
