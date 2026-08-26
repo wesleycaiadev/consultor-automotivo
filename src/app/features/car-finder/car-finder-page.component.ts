@@ -31,6 +31,8 @@ const CONDITION_OPTIONS: readonly {
   { label: 'Tanto faz', value: 'either' },
 ];
 
+const NOTES_MAX_LENGTH = 500;
+
 @Component({
   selector: 'app-car-finder-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -198,6 +200,38 @@ const CONDITION_OPTIONS: readonly {
             <app-mf-button variant="secondary" (click)="skipModel()">
               Sem preferência de modelo
             </app-mf-button>
+            <app-mf-button (click)="goNext()">Continuar</app-mf-button>
+          </div>
+        } @else if (state.currentStep() === 'notes') {
+          <p class="mf-finder__progress">Etapa 6 de 8</p>
+          <h1 id="finder-title">Há algo importante para Felipe saber?</h1>
+          <p class="mf-finder__intro">
+            Conte o que pode ajudar na curadoria: uso, prioridades ou detalhes desejados.
+          </p>
+
+          <div class="mf-finder__field">
+            <label for="finder-notes">Observações <span>(opcional)</span></label>
+            <textarea
+              #notes
+              id="finder-notes"
+              name="finder-notes"
+              autocomplete="off"
+              enterkeyhint="next"
+              [maxLength]="notesMaxLength"
+              [value]="state.draft().notes"
+              aria-describedby="finder-notes-helper"
+              (input)="setNotes(notes.value)"
+            ></textarea>
+            <p id="finder-notes-helper" class="mf-finder__helper">
+              Até {{ notesMaxLength }} caracteres. Pode deixar em branco.
+            </p>
+            <p class="mf-finder__count" aria-live="polite">
+              {{ state.draft().notes.length }} de {{ notesMaxLength }}
+            </p>
+          </div>
+
+          <div class="mf-finder__actions">
+            <app-mf-button variant="secondary" (click)="goBack()">Voltar</app-mf-button>
           </div>
         }
       </div>
@@ -209,6 +243,7 @@ export class CarFinderPageComponent {
   readonly categoryOptions = CATEGORY_OPTIONS;
   readonly budgetOptions = BUDGET_OPTIONS;
   readonly conditionOptions = CONDITION_OPTIONS;
+  readonly notesMaxLength = NOTES_MAX_LENGTH;
 
   selectCategory(category: FinderCategory): void {
     this.state.selectCategory(category);
@@ -228,6 +263,10 @@ export class CarFinderPageComponent {
 
   setModel(model: string): void {
     this.state.setModel(model);
+  }
+
+  setNotes(notes: string): void {
+    this.state.setNotes(notes);
   }
 
   skipBrand(): void {

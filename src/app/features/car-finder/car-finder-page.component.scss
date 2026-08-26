@@ -112,7 +112,8 @@
   font-weight: 400;
 }
 
-.mf-finder__field input {
+.mf-finder__field input,
+.mf-finder__field textarea {
   min-block-size: 4rem;
   padding-inline: var(--space-5);
   border: 1px solid var(--mf-silver);
@@ -122,9 +123,27 @@
   font: 400 var(--type-heading-md) / var(--leading-heading) var(--font-display);
 }
 
-.mf-finder__field input:focus-visible {
+.mf-finder__field textarea {
+  min-block-size: 10rem;
+  padding-block: var(--space-4);
+  resize: vertical;
+}
+
+.mf-finder__field input:focus-visible,
+.mf-finder__field textarea:focus-visible {
   outline: 2px solid var(--mf-oxide);
   outline-offset: 0.25rem;
+}
+
+.mf-finder__helper,
+.mf-finder__count {
+  margin: 0;
+  color: var(--mf-graphite);
+  font: 400 var(--type-label) / var(--leading-ui) var(--font-ui);
+}
+
+.mf-finder__count {
+  justify-self: end;
 }
 
 .mf-finder__selection {

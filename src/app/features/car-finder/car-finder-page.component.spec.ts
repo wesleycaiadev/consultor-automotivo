@@ -140,4 +140,23 @@ describe('CarFinderPageComponent', () => {
       condition: 'either',
     });
   });
+
+  it('keeps optional notes within the visible character limit', () => {
+    const fixture = TestBed.createComponent(CarFinderPageComponent);
+    fixture.componentInstance.state.goTo('notes');
+    fixture.detectChanges();
+
+    const notes = fixture.nativeElement.querySelector('#finder-notes') as HTMLTextAreaElement;
+    expect(notes.maxLength).toBe(500);
+    expect(notes.getAttribute('enterkeyhint')).toBe('next');
+
+    notes.value = 'Preciso de conforto para viagens e porta-malas amplo.';
+    notes.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.state.draft().notes).toBe(notes.value);
+    expect(fixture.nativeElement.querySelector('.mf-finder__count')?.textContent).toContain(
+      `${notes.value.length} de 500`,
+    );
+  });
 });
