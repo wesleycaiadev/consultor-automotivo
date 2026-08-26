@@ -159,4 +159,40 @@ describe('CarFinderPageComponent', () => {
       `${notes.value.length} de 500`,
     );
   });
+
+  it('shows every answer in the summary and lets the user edit an earlier step', () => {
+    const fixture = TestBed.createComponent(CarFinderPageComponent);
+    const { state } = fixture.componentInstance;
+    state.selectCategory('suv');
+    state.selectBudget('Até R$ 100 mil');
+    state.selectCondition('either');
+    state.setNotes('Uso familiar e viagens longas.');
+    state.goTo('summary');
+    fixture.detectChanges();
+
+    const summary = fixture.nativeElement.querySelector('.mf-finder__summary') as HTMLElement;
+    expect(summary.textContent).toContain('SUV');
+    expect(summary.textContent).toContain('Até R$ 100 mil');
+    expect(summary.textContent).toContain('Tanto faz');
+    expect(summary.textContent).toContain('Não informado');
+    expect(summary.textContent).toContain('Uso familiar e viagens longas.');
+
+    const editBudget = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>(
+        '.mf-finder__edit',
+      ),
+    ).find((button) => button.getAttribute('aria-label') === 'Editar Faixa de investimento');
+    if (!editBudget) {
+      throw new Error('Botão para editar orçamento não encontrado.');
+    }
+    editBudget.click();
+    fixture.detectChanges();
+
+    expect(state.currentStep()).toBe('budget');
+    expect(state.draft()).toMatchObject({
+      budget: 'Até R$ 100 mil',
+      category: 'suv',
+      notes: 'Uso familiar e viagens longas.',
+    });
+  });
 });

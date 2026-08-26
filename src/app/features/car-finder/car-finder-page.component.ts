@@ -3,6 +3,7 @@ import { MfButtonComponent } from '../../shared/ui/button/mf-button.component';
 import {
   type FinderCategory,
   type FinderCondition,
+  type FinderStep,
   FinderStateService,
 } from './finder-state.service';
 
@@ -32,6 +33,12 @@ const CONDITION_OPTIONS: readonly {
 ];
 
 const NOTES_MAX_LENGTH = 500;
+
+interface FinderSummaryItem {
+  readonly label: string;
+  readonly step: FinderStep;
+  readonly value: string;
+}
 
 @Component({
   selector: 'app-car-finder-page',
@@ -232,6 +239,36 @@ const NOTES_MAX_LENGTH = 500;
 
           <div class="mf-finder__actions">
             <app-mf-button variant="secondary" (click)="goBack()">Voltar</app-mf-button>
+            <app-mf-button (click)="goNext()">Revisar busca</app-mf-button>
+          </div>
+        } @else if (state.currentStep() === 'summary') {
+          <p class="mf-finder__progress">Etapa 7 de 8</p>
+          <h1 id="finder-title">Confira sua busca antes de enviar.</h1>
+          <p class="mf-finder__intro">
+            Felipe receberá exatamente as preferências abaixo. Você pode ajustar qualquer uma.
+          </p>
+
+          <dl class="mf-finder__summary" aria-label="Resumo da busca">
+            @for (item of summaryItems(); track item.step) {
+              <div class="mf-finder__summary-item">
+                <div>
+                  <dt>{{ item.label }}</dt>
+                  <dd [class.is-empty]="item.value === 'Não informado'">{{ item.value }}</dd>
+                </div>
+                <button
+                  class="mf-finder__edit"
+                  type="button"
+                  [attr.aria-label]="'Editar ' + item.label"
+                  (click)="edit(item.step)"
+                >
+                  Editar
+                </button>
+              </div>
+            }
+          </dl>
+
+          <div class="mf-finder__actions">
+            <app-mf-button variant="secondary" (click)="goBack()">Voltar</app-mf-button>
           </div>
         }
       </div>
@@ -278,6 +315,10 @@ export class CarFinderPageComponent {
     this.state.setModel('');
   }
 
+  edit(step: FinderStep): void {
+    this.state.goTo(step);
+  }
+
   goNext(): void {
     this.state.goNext();
   }
@@ -292,5 +333,18 @@ export class CarFinderPageComponent {
 
   conditionLabel(condition: FinderCondition | null): string {
     return CONDITION_OPTIONS.find((option) => option.value === condition)?.label ?? '';
+  }
+
+  summaryItems(): readonly FinderSummaryItem[] {
+    const draft = this.state.draft();
+
+    return [
+      { label: 'Tipo de veículo', step: 'category', value: this.categoryLabel(draft.category) },
+      { label: 'Faixa de investimento', step: 'budget', value: draft.budget ?? 'Não informado' },
+      { label: 'Condição', step: 'condition', value: this.conditionLabel(draft.condition) },
+      { label: 'Marca', step: 'brand', value: draft.brand || 'Não informado' },
+      { label: 'Modelo', step: 'model', value: draft.model || 'Não informado' },
+      { label: 'Observações', step: 'notes', value: draft.notes || 'Não informado' },
+    ];
   }
 }
