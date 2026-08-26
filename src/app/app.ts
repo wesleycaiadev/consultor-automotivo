@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
-import { PublicShellComponent } from './layout/public-shell/public-shell.component';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
-  imports: [PublicShellComponent],
+  imports: [RouterOutlet],
   selector: 'app-root',
   styleUrl: './app.scss',
   templateUrl: './app.html',
