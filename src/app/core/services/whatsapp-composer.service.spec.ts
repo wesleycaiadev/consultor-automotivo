@@ -1,5 +1,5 @@
 import { type Vehicle } from '../../shared/models/vehicle.model';
-import { WhatsappComposerService } from './whatsapp-composer.service';
+import { type FinderWhatsappInput, WhatsappComposerService } from './whatsapp-composer.service';
 
 const vehicle: Vehicle = {
   id: 'vehicle-1',
@@ -23,6 +23,15 @@ const vehicle: Vehicle = {
   images: [],
 };
 
+const finderInput: FinderWhatsappInput = {
+  brand: 'Porsche',
+  budget: 'De R$ 150 mil a R$ 250 mil',
+  category: 'SUV',
+  condition: 'Seminovo',
+  model: 'Macan',
+  notes: 'Uso familiar e viagens longas.',
+};
+
 describe('WhatsappComposerService', () => {
   it('creates an encoded vehicle interest message', () => {
     const url = new URL(new WhatsappComposerService().vehicleInterest(vehicle));
@@ -31,5 +40,49 @@ describe('WhatsappComposerService', () => {
     expect(url.pathname).toBe('/557998709362');
     expect(url.searchParams.get('text')).toContain('Porsche 911 Carrera PDK');
     expect(url.searchParams.get('text')).toContain('2023 · 3.000 km');
+  });
+
+  it('creates an encoded Finder message in Portuguese with filled optional preferences', () => {
+    const url = new URL(new WhatsappComposerService().finderSearch(finderInput));
+
+    expect(url.origin).toBe('https://wa.me');
+    expect(url.pathname).toBe('/557998709362');
+    expect(url.searchParams.get('text')).toBe(
+      [
+        'Olá, Felipe! Gostaria da sua ajuda para encontrar um veículo.',
+        '',
+        'Tipo de veículo: SUV',
+        'Faixa de investimento: De R$ 150 mil a R$ 250 mil',
+        'Condição: Seminovo',
+        'Marca: Porsche',
+        'Modelo: Macan',
+        'Observações: Uso familiar e viagens longas.',
+        '',
+        'Podemos conversar?',
+      ].join('\n'),
+    );
+  });
+
+  it('omits empty Finder optional preferences from the message', () => {
+    const url = new URL(
+      new WhatsappComposerService().finderSearch({
+        ...finderInput,
+        brand: ' ',
+        model: '',
+        notes: '   ',
+      }),
+    );
+
+    expect(url.searchParams.get('text')).toBe(
+      [
+        'Olá, Felipe! Gostaria da sua ajuda para encontrar um veículo.',
+        '',
+        'Tipo de veículo: SUV',
+        'Faixa de investimento: De R$ 150 mil a R$ 250 mil',
+        'Condição: Seminovo',
+        '',
+        'Podemos conversar?',
+      ].join('\n'),
+    );
   });
 });

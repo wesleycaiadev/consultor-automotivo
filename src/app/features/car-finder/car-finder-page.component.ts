@@ -1,4 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+  type FinderWhatsappInput,
+  WhatsappComposerService,
+} from '../../core/services/whatsapp-composer.service';
 import { MfButtonComponent } from '../../shared/ui/button/mf-button.component';
 import {
   type FinderCategory,
@@ -269,6 +273,24 @@ interface FinderSummaryItem {
 
           <div class="mf-finder__actions">
             <app-mf-button variant="secondary" (click)="goBack()">Voltar</app-mf-button>
+            <app-mf-button (click)="goNext()">Continuar</app-mf-button>
+          </div>
+        } @else if (state.currentStep() === 'whatsapp') {
+          <p class="mf-finder__progress">Etapa 8 de 8</p>
+          <h1 id="finder-title">Entendi o que você procura.</h1>
+          <p class="mf-finder__intro">
+            Envie sua busca para Felipe e ele seguirá a conversa pelo WhatsApp.
+          </p>
+
+          <div class="mf-finder__actions">
+            <a
+              class="mf-finder__whatsapp mf-frame"
+              [href]="whatsapp.finderSearch(finderWhatsappInput())"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Enviar minha busca para Felipe →
+            </a>
           </div>
         }
       </div>
@@ -277,6 +299,7 @@ interface FinderSummaryItem {
 })
 export class CarFinderPageComponent {
   readonly state = inject(FinderStateService);
+  readonly whatsapp = inject(WhatsappComposerService);
   readonly categoryOptions = CATEGORY_OPTIONS;
   readonly budgetOptions = BUDGET_OPTIONS;
   readonly conditionOptions = CONDITION_OPTIONS;
@@ -346,5 +369,18 @@ export class CarFinderPageComponent {
       { label: 'Modelo', step: 'model', value: draft.model || 'Não informado' },
       { label: 'Observações', step: 'notes', value: draft.notes || 'Não informado' },
     ];
+  }
+
+  finderWhatsappInput(): FinderWhatsappInput {
+    const draft = this.state.draft();
+
+    return {
+      brand: draft.brand,
+      budget: draft.budget ?? '',
+      category: this.categoryLabel(draft.category),
+      condition: this.conditionLabel(draft.condition),
+      model: draft.model,
+      notes: draft.notes,
+    };
   }
 }

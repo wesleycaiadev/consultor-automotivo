@@ -195,4 +195,28 @@ describe('CarFinderPageComponent', () => {
       notes: 'Uso familiar e viagens longas.',
     });
   });
+
+  it('opens WhatsApp with the Finder search after the review', () => {
+    const fixture = TestBed.createComponent(CarFinderPageComponent);
+    const { state } = fixture.componentInstance;
+    state.selectCategory('suv');
+    state.selectBudget('Até R$ 100 mil');
+    state.selectCondition('either');
+    state.goTo('summary');
+    fixture.detectChanges();
+
+    const buttons = fixture.nativeElement.querySelectorAll(
+      'app-mf-button button',
+    ) as NodeListOf<HTMLButtonElement>;
+    buttons[1].click();
+    fixture.detectChanges();
+
+    const link = fixture.nativeElement.querySelector('.mf-finder__whatsapp') as HTMLAnchorElement;
+    const url = new URL(link.href);
+    expect(state.currentStep()).toBe('whatsapp');
+    expect(link.target).toBe('_blank');
+    expect(link.rel).toContain('noopener');
+    expect(url.searchParams.get('text')).toContain('Tipo de veículo: SUV');
+    expect(url.searchParams.get('text')).not.toContain('Marca:');
+  });
 });
