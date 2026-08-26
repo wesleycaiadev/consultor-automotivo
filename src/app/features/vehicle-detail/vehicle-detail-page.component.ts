@@ -4,6 +4,7 @@ import {
   type VehicleRepository,
   VEHICLE_REPOSITORY,
 } from '../../core/services/vehicle-repository.service';
+import { WhatsappComposerService } from '../../core/services/whatsapp-composer.service';
 import { type Vehicle } from '../../shared/models/vehicle.model';
 import { type VehicleGalleryImage, VehicleGalleryComponent } from './vehicle-gallery.component';
 
@@ -97,6 +98,13 @@ import { type VehicleGalleryImage, VehicleGalleryComponent } from './vehicle-gal
               <p>{{ detailFor(currentVehicle).observations }}</p>
             </section>
           </div>
+
+          <aside class="mf-vehicle-detail__interest" aria-label="Tenho interesse neste veículo">
+            <p>Quer avaliar este veículo com mais contexto?</p>
+            <a class="mf-frame" [href]="whatsapp.vehicleInterest(currentVehicle)">
+              Tenho interesse neste veículo
+            </a>
+          </aside>
         } @else {
           <div class="mf-vehicle-detail__status" role="alert">
             <h1 id="vehicle-detail-title">Veículo indisponível.</h1>
@@ -110,6 +118,7 @@ import { type VehicleGalleryImage, VehicleGalleryComponent } from './vehicle-gal
 export class VehicleDetailPageComponent {
   readonly #repository = inject<VehicleRepository>(VEHICLE_REPOSITORY);
   readonly #route = inject(ActivatedRoute);
+  readonly whatsapp = inject(WhatsappComposerService);
   readonly state = signal<'loading' | 'ready'>('loading');
   readonly vehicle = signal<Vehicle | undefined>(undefined);
 

@@ -1,0 +1,50 @@
+.mf-vehicle-detail__interest {
+  position: fixed;
+  z-index: var(--layer-raised);
+  inset-inline: var(--mf-page-margin);
+  inset-block-end: 0;
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-4) calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
+  border: 1px solid var(--mf-silver);
+  background: var(--mf-paper);
+}
+
+.mf-vehicle-detail__interest p {
+  margin: 0;
+  color: var(--mf-graphite);
+  font: var(--type-label) / var(--leading-body) var(--font-ui);
+}
+
+.mf-vehicle-detail__interest a {
+  display: inline-flex;
+  min-block-size: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  padding-inline: var(--space-5);
+  background: var(--mf-ink);
+  color: var(--mf-paper);
+  font: 600 var(--type-label) var(--font-ui);
+  letter-spacing: var(--tracking-label);
+  text-align: center;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.mf-vehicle-detail__interest a:focus-visible {
+  outline: 2px solid var(--mf-oxide);
+  outline-offset: 0.25rem;
+}
+
+@media (min-width: 48rem) {
+  .mf-vehicle-detail__interest {
+    position: sticky;
+    inset-inline: auto;
+    inset-block-end: var(--space-4);
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    max-inline-size: 42rem;
+    margin: var(--space-8) 0 0 auto;
+    padding: var(--space-4);
+  }
+}

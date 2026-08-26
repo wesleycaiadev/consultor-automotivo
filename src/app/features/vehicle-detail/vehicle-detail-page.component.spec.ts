@@ -70,6 +70,9 @@ describe('VehicleDetailPageComponent', () => {
     expect(fixture.nativeElement.querySelector('#vehicle-observations-title')).toBeTruthy();
     expect(fixture.componentInstance.formatPrice(1450000)).toContain('1.450.000');
     expect(
+      fixture.nativeElement.querySelector('.mf-vehicle-detail__interest a')?.getAttribute('href'),
+    ).toContain('https://wa.me/557998709362?text=');
+    expect(
       fixture.nativeElement.querySelector('.mf-vehicle-detail__back')?.getAttribute('href'),
     ).toBe('/showroom');
   });
