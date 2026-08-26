@@ -1,17 +1,18 @@
 import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { AdminAuthService, type AdminVehicleListItem } from '../../core/auth/admin-auth.service';
 
 @Component({
   selector: 'app-admin-vehicle-list-page',
-  imports: [DatePipe],
+  imports: [DatePipe, RouterLink],
   template: `<section class="vehicles">
     <header>
       <div>
         <p>SHOWROOM</p>
         <h1>Veículos</h1>
       </div>
-      <button>Novo veículo</button>
+      <a class="new-vehicle" routerLink="/admin/veiculos/novo">Novo veículo</a>
     </header>
     @if (loading()) {
       <p>Carregando veículos…</p>
@@ -57,12 +58,17 @@ import { AdminAuthService, type AdminVehicleListItem } from '../../core/auth/adm
         margin: 0;
         font: 400 var(--type-display-lg) var(--font-display);
       }
-      button {
+      .new-vehicle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         min-block-size: 2.75rem;
         padding-inline: var(--space-4);
         border: 0;
         background: var(--mf-ink);
         color: var(--mf-paper);
+        font: 600 var(--type-label) var(--font-ui);
+        text-decoration: none;
       }
       .table {
         margin-top: var(--space-6);

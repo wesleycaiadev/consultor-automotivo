@@ -13,9 +13,55 @@ export interface AdminVehicleListItem {
   readonly status: 'draft' | 'published' | 'sold';
   readonly updated_at: string;
 }
+export interface VehicleDraft {
+  slug: string;
+  brand: string;
+  model: string;
+  version: string;
+  manufacturing_year: number;
+  model_year: number;
+  mileage: number;
+  price: number | null;
+  transmission: string;
+  fuel: string;
+  steering: string;
+  color: string;
+  location: string;
+  description: string;
+  equipment: string[];
+  status: 'draft' | 'published' | 'sold';
+  featured: boolean;
+  fipe_code: string | null;
+  fipe_price: number | null;
+  fipe_reference_month: string | null;
+  fipe_last_sync: string | null;
+}
+export interface CatalogBrand {
+  readonly id: string;
+  readonly name: string;
+  readonly fipeCode: string;
+}
+export interface CatalogModel {
+  readonly id: string;
+  readonly name: string;
+  readonly fipeModelCode: string;
+}
+export interface CatalogFipeYear {
+  readonly code: string;
+  readonly name: string;
+  readonly modelYear: number;
+}
+export interface FipeReference {
+  readonly code: string;
+  readonly price: number;
+  readonly referenceMonth: string;
+  readonly fuel: string;
+  readonly modelYear: number;
+}
 
 const supabaseUrl = 'https://urjcjtwveunzixxkdikf.supabase.co';
 const supabasePublishableKey = 'sb_publishable_cpqdy12viM8aHIrkRqAuww_PL4nH8yx';
+const fipeBaseUrl = 'https://fipe.parallelum.com.br/api/v2/cars';
 
 @Injectable({ providedIn: 'root' })
 export class AdminAuthService {
@@ -74,5 +120,161 @@ export class AdminAuthService {
       .order('updated_at', { ascending: false });
     if (error) throw error;
     return (data ?? []) as readonly AdminVehicleListItem[];
+  }
+  async createVehicle(
+    draft: VehicleDraft,
+    photos: readonly File[] = [],
+    onPhotoUploaded?: (completed: number, total: number) => void,
+  ): Promise<void> {
+    if (!this.#client) throw new Error('Sessão administrativa indisponível.');
+    const { data, error } = await this.#client.from('vehicles').insert(draft).select('id').single();
+    if (error) throw error;
+
+    const uploadedPaths: string[] = [];
+    try {
+      for (const [index, photo] of photos.entries()) {
+        const safeName = photo.name
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/[^a-z0-9.]+/g, '-')
+          .replace(/(^-|-$)/g, '');
+        const storagePath = `${data.id}/${Date.now()}-${index}-${safeName}`;
+        const { error: uploadError } = await this.#client.storage
+          .from('vehicles')
+          .upload(storagePath, photo, { contentType: photo.type, upsert: false });
+        if (uploadError) throw uploadError;
+        uploadedPaths.push(storagePath);
+
+        const { error: imageError } = await this.#client.from('vehicle_images').insert({
+          vehicle_id: data.id,
+          storage_path: storagePath,
+          alt_text: `${draft.brand} ${draft.model} — foto ${index + 1}`,
+          sort_order: index,
+          is_cover: index === 0,
+        });
+        if (imageError) throw imageError;
+        onPhotoUploaded?.(index + 1, photos.length);
+      }
+    } catch (mediaError) {
+      if (uploadedPaths.length) await this.#client.storage.from('vehicles').remove(uploadedPaths);
+      await this.#client.from('vehicles').delete().eq('id', data.id);
+      throw mediaError;
+    }
+  }
+  async listCatalogBrands(): Promise<readonly CatalogBrand[]> {
+    if (!this.#client) throw new Error('Sessão administrativa indisponível.');
+    const { data, error } = await this.#client
+      .from('vehicle_brands')
+      .select('id,name,fipe_code')
+      .eq('active', true)
+      .order('name');
+    if (error) throw error;
+    return (data ?? []).map((brand) => ({
+      id: brand.id as string,
+      name: brand.name as string,
+      fipeCode: brand.fipe_code as string,
+    }));
+  }
+  async listCatalogModels(brandId: string): Promise<readonly CatalogModel[]> {
+    if (!this.#client) throw new Error('Sessão administrativa indisponível.');
+    const { data, error } = await this.#client
+      .from('vehicle_models')
+      .select('id,name,fipe_model_code')
+      .eq('brand_id', brandId)
+      .eq('active', true)
+      .order('name');
+    if (error) throw error;
+    return (data ?? []).map((model) => ({
+      id: model.id as string,
+      name: model.name as string,
+      fipeModelCode: model.fipe_model_code as string,
+    }));
+  }
+
+  async listFipeYears(brandCode: string, modelCode: string): Promise<readonly CatalogFipeYear[]> {
+    const years = await this.fipeGet<readonly { code: string; name: string }[]>(
+      `/brands/${brandCode}/models/${modelCode}/years`,
+      `years-${brandCode}-${modelCode}`,
+      7 * 24 * 60 * 60 * 1000,
+    );
+    return years.map((year) => ({
+      code: year.code,
+      name: year.name,
+      modelYear: Number.parseInt(year.name, 10),
+    }));
+  }
+
+  async getFipeReference(
+    brandCode: string,
+    modelCode: string,
+    yearCode: string,
+  ): Promise<FipeReference> {
+    const reference = await this.fipeGet<{
+      codeFipe: string;
+      price: string;
+      referenceMonth: string;
+      fuel: string;
+      modelYear: number;
+    }>(
+      `/brands/${brandCode}/models/${modelCode}/years/${yearCode}`,
+      `reference-${brandCode}-${modelCode}-${yearCode}`,
+      24 * 60 * 60 * 1000,
+    );
+    return {
+      code: reference.codeFipe,
+      price: this.parseFipePrice(reference.price),
+      referenceMonth: reference.referenceMonth,
+      fuel: reference.fuel,
+      modelYear: Number(reference.modelYear),
+    };
+  }
+
+  private async fipeGet<T>(path: string, cacheKey: string, ttl: number): Promise<T> {
+    const cached = this.readFipeCache<T>(cacheKey);
+    if (cached) return cached;
+
+    let response: Response;
+    try {
+      response = await fetch(`${fipeBaseUrl}${path}`, { signal: AbortSignal.timeout(12_000) });
+    } catch {
+      throw new Error('Não foi possível consultar a FIPE agora.');
+    }
+    if (!response.ok) throw new Error(`A FIPE retornou indisponibilidade (${response.status}).`);
+
+    const data = (await response.json()) as T;
+    this.writeFipeCache(cacheKey, data, ttl);
+    return data;
+  }
+
+  private readFipeCache<T>(key: string): T | null {
+    if (!isPlatformBrowser(this.#platformId)) return null;
+    try {
+      const cached = JSON.parse(localStorage.getItem(`mf-fipe-${key}`) ?? 'null') as {
+        expiresAt: number;
+        data: T;
+      } | null;
+      return cached && cached.expiresAt > Date.now() ? cached.data : null;
+    } catch {
+      return null;
+    }
+  }
+
+  private writeFipeCache<T>(key: string, data: T, ttl: number): void {
+    if (!isPlatformBrowser(this.#platformId)) return;
+    try {
+      localStorage.setItem(`mf-fipe-${key}`, JSON.stringify({ data, expiresAt: Date.now() + ttl }));
+    } catch {
+      // O cadastro continua funcionando caso o navegador bloqueie armazenamento local.
+    }
+  }
+
+  private parseFipePrice(value: string): number {
+    return Number(
+      value
+        .replace(/[^\d,]/g, '')
+        .replace(/\./g, '')
+        .replace(',', '.'),
+    );
   }
 }

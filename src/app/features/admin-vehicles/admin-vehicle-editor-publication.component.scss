@@ -1,0 +1,122 @@
+.publication-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.publication-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-block-size: 6.5rem;
+  padding: var(--space-4);
+  border: 1px solid var(--mf-silver);
+  cursor: pointer;
+}
+
+.publication-option input {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  opacity: 0;
+}
+
+.publication-option > span {
+  display: grid;
+  flex: 1;
+  gap: var(--space-1);
+}
+
+.publication-option small,
+.publication-note {
+  color: var(--mf-graphite);
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+.publication-option > b {
+  display: grid;
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  place-items: center;
+  border: 1px solid var(--mf-graphite);
+  border-radius: 50%;
+}
+
+.publication-option.is-selected {
+  border-color: var(--mf-ink);
+  background: var(--mf-ink);
+  color: var(--mf-paper);
+}
+
+.publication-option.is-selected small {
+  color: var(--mf-paper);
+  opacity: 0.75;
+}
+
+.publication-option.is-selected > b {
+  border-color: var(--mf-paper);
+  background: var(--mf-paper);
+  box-shadow: inset 0 0 0 0.25rem var(--mf-ink);
+}
+
+.publication-note {
+  margin: var(--space-4) 0 0;
+}
+
+.publication .feature-toggle {
+  margin-block-start: var(--space-4);
+}
+
+@media (max-width: 48rem) {
+  .publication-options {
+    grid-template-columns: 1fr;
+  }
+}
+.fipe-state {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin: var(--space-4) 0 0;
+  padding: var(--space-3) var(--space-4);
+  border-inline-start: 3px solid var(--mf-ink);
+  background: var(--mf-porcelain);
+  color: var(--mf-graphite);
+  line-height: 1.45;
+}
+
+.fipe-state--warning {
+  border-color: var(--mf-oxide);
+  background: color-mix(in srgb, var(--mf-oxide) 8%, var(--mf-paper));
+  color: #7d2416;
+}
+
+.fipe-state button,
+.manual-fipe-button {
+  flex: 0 0 auto;
+  min-block-size: 2.5rem;
+  padding-inline: var(--space-3);
+  border: 1px solid currentColor;
+  background: transparent;
+  color: inherit;
+  font: 600 var(--type-label) var(--font-ui);
+  cursor: pointer;
+}
+
+.manual-fipe-button {
+  margin-block-start: var(--space-4);
+  color: var(--mf-ink);
+}
+
+.form-actions .save-hint {
+  margin-block-start: var(--space-1);
+  color: #7d2416;
+}
+
+@media (max-width: 48rem) {
+  .fipe-state {
+    align-items: start;
+    flex-direction: column;
+  }
+}

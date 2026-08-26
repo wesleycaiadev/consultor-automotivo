@@ -9,6 +9,7 @@ import { adminAuthGuard } from './core/guards/admin-auth.guard';
 import { AdminLoginPageComponent } from './features/admin-login/admin-login-page.component';
 import { AdminDashboardPageComponent } from './features/admin-dashboard/admin-dashboard-page.component';
 import { AdminVehicleListPageComponent } from './features/admin-vehicles/admin-vehicle-list-page.component';
+import { AdminVehicleEditorPageComponent } from './features/admin-vehicles/admin-vehicle-editor-page.component';
 
 export const routes: Routes = [
   {
@@ -45,6 +46,7 @@ export const routes: Routes = [
     children: [
       { path: '', component: AdminDashboardPageComponent },
       { path: 'veiculos', component: AdminVehicleListPageComponent },
+      { path: 'veiculos/novo', component: AdminVehicleEditorPageComponent },
       { path: 'entregas', component: AdminDashboardPageComponent },
       { path: 'feedbacks', component: AdminDashboardPageComponent },
       { path: 'configuracoes', component: AdminDashboardPageComponent },

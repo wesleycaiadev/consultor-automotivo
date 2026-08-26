@@ -1,0 +1,129 @@
+.picker {
+  z-index: 2;
+}
+
+.picker:focus-within {
+  z-index: 5;
+}
+
+.picker-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  inline-size: 100%;
+  min-block-size: 3.25rem;
+  padding-inline: var(--space-3);
+  border: 1px solid var(--mf-silver);
+  background: var(--mf-paper);
+  color: var(--mf-ink);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.picker-trigger:hover:not(:disabled),
+.picker-trigger[aria-expanded='true'] {
+  border-color: var(--mf-ink);
+}
+
+.picker-trigger:disabled {
+  cursor: not-allowed;
+  background: var(--mf-porcelain);
+  color: var(--mf-graphite);
+}
+
+.picker-trigger span {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.picker-trigger .is-placeholder {
+  color: var(--mf-graphite);
+}
+
+.picker-trigger b {
+  font-size: 1.1rem;
+  font-weight: 400;
+}
+
+.picker-panel {
+  position: absolute;
+  inset-block-start: calc(100% - 1.25rem);
+  inset-inline: 0;
+  z-index: var(--layer-overlay);
+  overflow: hidden;
+  border: 1px solid var(--mf-ink);
+  background: var(--mf-paper);
+  box-shadow: 0 1rem 2.5rem rgb(27 28 26 / 16%);
+}
+
+.picker-search {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border-block-end: 1px solid var(--mf-silver);
+  background: var(--mf-porcelain);
+}
+
+.picker-search label {
+  color: var(--mf-graphite);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+.picker-search input {
+  min-block-size: 2.75rem;
+}
+
+.picker-results {
+  max-block-size: 18rem;
+  overflow: auto;
+}
+
+.picker-results button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  inline-size: 100%;
+  min-block-size: 3.25rem;
+  padding: var(--space-3);
+  border: 0;
+  border-block-end: 1px solid var(--mf-silver);
+  background: transparent;
+  color: var(--mf-ink);
+  text-align: start;
+  cursor: pointer;
+}
+
+.picker-results button:hover,
+.picker-results button[aria-selected='true'] {
+  background: var(--mf-ink);
+  color: var(--mf-paper);
+}
+
+.picker-results button span {
+  flex: 1;
+}
+
+.picker-results button small {
+  color: var(--mf-graphite);
+  font-size: 0.72rem;
+}
+
+.picker-results button:hover small,
+.picker-results button[aria-selected='true'] small {
+  color: inherit;
+  opacity: 0.7;
+}
+
+.picker-panel .option-state {
+  margin: 0;
+  padding: var(--space-4);
+  color: var(--mf-graphite);
+}
