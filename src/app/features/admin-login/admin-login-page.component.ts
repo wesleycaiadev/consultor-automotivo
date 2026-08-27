@@ -7,15 +7,28 @@ import { AdminAuthService } from '../../core/auth/admin-auth.service';
   selector: 'app-admin-login-page',
   imports: [FormsModule],
   template: `<main class="login">
-    <form (ngSubmit)="submit()">
+    <form (ngSubmit)="submit()" [attr.aria-busy]="loading()">
       <p>MARQUES FELIPE</p>
       <h1>Acesso administrativo</h1>
-      <label>E-mail<input name="email" [(ngModel)]="email" type="email" required /></label
-      ><label>Senha<input name="password" [(ngModel)]="password" type="password" required /></label>
+      <label
+        >E-mail<input
+          name="email"
+          [(ngModel)]="email"
+          type="email"
+          autocomplete="email"
+          required /></label
+      ><label
+        >Senha<input
+          name="password"
+          [(ngModel)]="password"
+          type="password"
+          autocomplete="current-password"
+          required
+      /></label>
       @if (auth.error()) {
         <p role="alert">{{ auth.error() }}</p>
       }
-      <button [disabled]="loading()">{{ loading() ? 'Entrando…' : 'Entrar' }}</button>
+      <button type="submit" [disabled]="loading()">{{ loading() ? 'Entrando…' : 'Entrar' }}</button>
     </form>
   </main>`,
   styles: [
@@ -56,6 +69,11 @@ import { AdminAuthService } from '../../core/auth/admin-auth.service';
         background: var(--mf-ink);
         color: var(--mf-paper);
         font-weight: 600;
+      }
+      input:focus-visible,
+      button:focus-visible {
+        outline: 2px solid var(--mf-oxide);
+        outline-offset: 2px;
       }
     `,
   ],

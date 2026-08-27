@@ -17,6 +17,7 @@ type FeedbackStatus = FeedbackDraft['status'];
 export class AdminFeedbackListPageComponent implements OnInit {
   readonly auth = inject(AdminAuthService);
   readonly loading = signal(true);
+  readonly loadError = signal<string | null>(null);
   readonly error = signal<string | null>(null);
   readonly feedbacks = signal<readonly AdminFeedbackListItem[]>([]);
   readonly editingFeedback = signal<AdminFeedbackListItem | null>(null);
@@ -32,7 +33,7 @@ export class AdminFeedbackListPageComponent implements OnInit {
     try {
       this.feedbacks.set(await this.auth.listFeedbacks());
     } catch {
-      this.error.set(
+      this.loadError.set(
         'Não foi possível carregar os feedbacks. Atualize a página e tente novamente.',
       );
     } finally {

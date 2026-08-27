@@ -178,4 +178,17 @@ describe('AdminDeliveryListPageComponent', () => {
     expect(auth.deleteDelivery).toHaveBeenCalledWith('delivery-1');
     expect(component.deliveries()).toHaveLength(0);
   });
+
+  it('keeps the delivery list visible after an action error', async () => {
+    const { auth, fixture } = await setup();
+    auth.deleteDelivery.mockRejectedValue(new Error('delete failed'));
+    const component = fixture.componentInstance;
+
+    await component.deleteDelivery(delivery);
+    fixture.detectChanges();
+
+    expect(component.error()).toContain('Não foi possível apagar');
+    expect(component.deliveries()).toHaveLength(1);
+    expect(fixture.nativeElement.textContent).toContain('Marina Costa');
+  });
 });

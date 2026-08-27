@@ -1,21 +1,36 @@
 import { Component, inject } from '@angular/core';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AdminAuthService } from '../../core/auth/admin-auth.service';
 
 @Component({
   selector: 'app-admin-shell',
-  imports: [RouterLink, RouterOutlet],
+  imports: [RouterLink, RouterLinkActive, RouterOutlet],
   template: `<div class="admin">
     <aside>
       <a class="admin-brand" routerLink="/admin" aria-label="Marques Felipe — Administração">
         <strong>MARQUES FELIPE</strong><small>ADMINISTRAÇÃO</small>
       </a>
       <nav>
-        <a routerLink="/admin">Visão geral</a><a routerLink="/admin/veiculos">Showroom</a
-        ><a routerLink="/admin/entregas">Entregas</a><a routerLink="/admin/feedbacks">Feedbacks</a
-        ><a routerLink="/admin/configuracoes">Configurações</a>
+        <a
+          routerLink="/admin"
+          routerLinkActive="is-active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          ariaCurrentWhenActive="page"
+          >Visão geral</a
+        ><a routerLink="/admin/veiculos" routerLinkActive="is-active" ariaCurrentWhenActive="page"
+          >Showroom</a
+        ><a routerLink="/admin/entregas" routerLinkActive="is-active" ariaCurrentWhenActive="page"
+          >Entregas</a
+        ><a routerLink="/admin/feedbacks" routerLinkActive="is-active" ariaCurrentWhenActive="page"
+          >Feedbacks</a
+        ><a
+          routerLink="/admin/configuracoes"
+          routerLinkActive="is-active"
+          ariaCurrentWhenActive="page"
+          >Configurações</a
+        >
       </nav>
-      <button (click)="auth.signOut()">Sair</button>
+      <button type="button" (click)="auth.signOut()">Sair</button>
     </aside>
     <main><router-outlet /></main>
   </div>`,
@@ -59,8 +74,21 @@ import { AdminAuthService } from '../../core/auth/admin-auth.service';
         display: grid;
         gap: var(--space-4);
       }
+      .admin nav a {
+        padding-block: var(--space-2);
+        border-block-end: 1px solid transparent;
+      }
+      .admin nav a.is-active {
+        border-color: var(--mf-oxide);
+        color: var(--mf-paper);
+      }
       .admin button {
         margin-top: auto;
+      }
+      .admin a:focus-visible,
+      .admin button:focus-visible {
+        outline: 2px solid var(--mf-oxide);
+        outline-offset: 3px;
       }
       @media (max-width: 48rem) {
         .admin {

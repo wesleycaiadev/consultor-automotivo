@@ -10,9 +10,13 @@
 
   @if (loading()) {
     <p class="state">Carregando entregas…</p>
-  } @else if (error()) {
-    <p class="state state--error" role="alert">{{ error() }}</p>
+  } @else if (loadError()) {
+    <p class="state state--error" role="alert">{{ loadError() }}</p>
   } @else {
+    @if (error()) {
+      <p class="state state--error" role="alert">{{ error() }}</p>
+    }
+
     @if (isCreating() || editingDelivery()) {
       <section class="editor" aria-labelledby="delivery-editor-title">
         <header>

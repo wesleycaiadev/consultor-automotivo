@@ -24,6 +24,7 @@ const maxDeliveryMedia = 8;
 export class AdminDeliveryListPageComponent implements OnInit {
   readonly auth = inject(AdminAuthService);
   readonly loading = signal(true);
+  readonly loadError = signal<string | null>(null);
   readonly error = signal<string | null>(null);
   readonly deliveries = signal<readonly AdminDeliveryListItem[]>([]);
   readonly vehicles = signal<readonly AdminVehicleListItem[]>([]);
@@ -56,7 +57,9 @@ export class AdminDeliveryListPageComponent implements OnInit {
       this.deliveries.set(deliveries);
       this.vehicles.set(vehicles);
     } catch {
-      this.error.set('Não foi possível carregar as entregas. Atualize a página e tente novamente.');
+      this.loadError.set(
+        'Não foi possível carregar as entregas. Atualize a página e tente novamente.',
+      );
     } finally {
       this.loading.set(false);
     }

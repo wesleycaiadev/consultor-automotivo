@@ -10,9 +10,13 @@
 
   @if (loading()) {
     <p class="state">Carregando feedbacks…</p>
-  } @else if (error()) {
-    <p class="state state--error" role="alert">{{ error() }}</p>
+  } @else if (loadError()) {
+    <p class="state state--error" role="alert">{{ loadError() }}</p>
   } @else {
+    @if (error()) {
+      <p class="state state--error" role="alert">{{ error() }}</p>
+    }
+
     @if (isCreating() || editingFeedback()) {
       <section class="editor" aria-labelledby="feedback-editor-title">
         <header>

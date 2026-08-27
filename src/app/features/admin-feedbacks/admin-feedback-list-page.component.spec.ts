@@ -145,4 +145,17 @@ describe('AdminFeedbackListPageComponent', () => {
     expect(auth.reorderFeedbacks).toHaveBeenCalledWith(['feedback-2']);
     expect(component.feedbacks()).toEqual([{ ...feedbacks[1], sort_order: 0 }]);
   });
+
+  it('keeps the feedback list visible after an action error', async () => {
+    const { auth, fixture } = await setup();
+    auth.updateFeedback.mockRejectedValue(new Error('update failed'));
+    const component = fixture.componentInstance;
+
+    await component.toggleStatus(feedbacks[1]);
+    fixture.detectChanges();
+
+    expect(component.error()).toContain('visibilidade');
+    expect(component.feedbacks()).toHaveLength(2);
+    expect(fixture.nativeElement.textContent).toContain('Marina Costa');
+  });
 });
