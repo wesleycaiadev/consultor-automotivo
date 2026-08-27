@@ -1,128 +1,48 @@
-import { DatePipe } from '@angular/common';
+import { CurrencyPipe, DecimalPipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { AdminAuthService, type AdminVehicleListItem } from '../../core/auth/admin-auth.service';
+import {
+  AdminAuthService,
+  type AdminVehicleImage,
+  type AdminVehicleListItem,
+  type VehicleQuickUpdate,
+} from '../../core/auth/admin-auth.service';
+
+type QuickStatus = VehicleQuickUpdate['status'];
+interface QuickVehicleDraft {
+  mileage: number;
+  price: number | null;
+  status: QuickStatus;
+  featured: boolean;
+}
 
 @Component({
   selector: 'app-admin-vehicle-list-page',
-  imports: [DatePipe, RouterLink],
-  template: `<section class="vehicles">
-    <header>
-      <div>
-        <p>SHOWROOM</p>
-        <h1>Veículos</h1>
-      </div>
-      <a class="new-vehicle" routerLink="/admin/veiculos/novo">Novo veículo</a>
-    </header>
-    @if (loading()) {
-      <p>Carregando veículos…</p>
-    } @else if (error()) {
-      <p role="alert">{{ error() }}</p>
-    } @else if (!vehicles().length) {
-      <div class="empty">
-        <h2>Nenhum veículo cadastrado.</h2>
-        <p>Adicione o primeiro veículo quando a edição estiver disponível.</p>
-      </div>
-    } @else {
-      <div class="table">
-        <div class="row head">
-          <span>Veículo</span><span>Ano</span><span>Preço</span><span>Status</span
-          ><span>Atualizado</span>
-        </div>
-        @for (vehicle of vehicles(); track vehicle.id) {
-          <div class="row">
-            <span
-              ><b>{{ vehicle.brand }} {{ vehicle.model }}</b
-              ><small>{{ vehicle.version }}</small></span
-            ><span>{{ vehicle.manufacturing_year }}/{{ vehicle.model_year }}</span
-            ><span>{{ vehicle.price ?? 'Consulte' }}</span
-            ><span>{{ vehicle.status }}</span
-            ><span>{{ vehicle.updated_at | date: 'dd/MM/yyyy' }}</span>
-          </div>
-        }
-      </div>
-    }
-  </section>`,
-  styles: [
-    `
-      .vehicles {
-        padding: var(--space-8);
-      }
-      header {
-        display: flex;
-        align-items: end;
-        justify-content: space-between;
-        gap: var(--space-4);
-      }
-      h1 {
-        margin: 0;
-        font: 400 var(--type-display-lg) var(--font-display);
-      }
-      .new-vehicle {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-block-size: 2.75rem;
-        padding-inline: var(--space-4);
-        border: 0;
-        background: var(--mf-ink);
-        color: var(--mf-paper);
-        font: 600 var(--type-label) var(--font-ui);
-        text-decoration: none;
-      }
-      .table {
-        margin-top: var(--space-6);
-        border: 1px solid var(--mf-silver);
-      }
-      .row {
-        display: grid;
-        grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
-        gap: var(--space-3);
-        padding: var(--space-4);
-        border-top: 1px solid var(--mf-silver);
-      }
-      .row:first-child {
-        border: 0;
-      }
-      .head {
-        font: 600 var(--type-label) var(--font-ui);
-        text-transform: uppercase;
-      }
-      .row span {
-        display: grid;
-        gap: var(--space-1);
-      }
-      small {
-        color: var(--mf-graphite);
-      }
-      .empty {
-        margin-top: var(--space-6);
-        padding: var(--space-8);
-        border: 1px solid var(--mf-silver);
-      }
-      @media (max-width: 48rem) {
-        .vehicles {
-          padding: var(--space-5);
-        }
-        .head {
-          display: none;
-        }
-        .row {
-          grid-template-columns: 1fr 1fr;
-        }
-        .row span:first-child {
-          grid-column: span 2;
-        }
-      }
-    `,
-  ],
+  imports: [CurrencyPipe, DecimalPipe, FormsModule, RouterLink],
+  templateUrl: './admin-vehicle-list-page.component.html',
+  styleUrl: './admin-vehicle-list-page.component.scss',
 })
 export class AdminVehicleListPageComponent implements OnInit {
   readonly auth = inject(AdminAuthService);
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
   readonly vehicles = signal<readonly AdminVehicleListItem[]>([]);
-  async ngOnInit() {
+  readonly editingVehicle = signal<AdminVehicleListItem | null>(null);
+  readonly images = signal<readonly AdminVehicleImage[]>([]);
+  readonly selectedCoverId = signal<string | null>(null);
+  readonly loadingImages = signal(false);
+  readonly saving = signal(false);
+  readonly saveError = signal<string | null>(null);
+
+  quickDraft: QuickVehicleDraft = {
+    mileage: 0,
+    price: null,
+    status: 'draft',
+    featured: false,
+  };
+
+  async ngOnInit(): Promise<void> {
     try {
       this.vehicles.set(await this.auth.listVehicles());
     } catch {
@@ -130,5 +50,89 @@ export class AdminVehicleListPageComponent implements OnInit {
     } finally {
       this.loading.set(false);
     }
+  }
+
+  async openQuickEdit(vehicle: AdminVehicleListItem): Promise<void> {
+    this.editingVehicle.set(vehicle);
+    this.quickDraft = {
+      mileage: vehicle.mileage,
+      price: vehicle.price,
+      status: vehicle.status,
+      featured: vehicle.featured,
+    };
+    this.images.set([]);
+    this.selectedCoverId.set(null);
+    this.saveError.set(null);
+    this.loadingImages.set(true);
+    try {
+      const images = await this.auth.listVehicleImages(vehicle.id);
+      this.images.set(images);
+      this.selectedCoverId.set(images.find((image) => image.isCover)?.id ?? null);
+    } catch {
+      this.saveError.set(
+        'As fotos não puderam ser carregadas agora. Os demais dados continuam editáveis.',
+      );
+    } finally {
+      this.loadingImages.set(false);
+    }
+  }
+
+  closeQuickEdit(): void {
+    this.editingVehicle.set(null);
+    this.images.set([]);
+    this.selectedCoverId.set(null);
+    this.saveError.set(null);
+  }
+
+  setStatus(status: QuickStatus): void {
+    this.quickDraft.status = status;
+    if (status !== 'published') this.quickDraft.featured = false;
+  }
+
+  selectCover(imageId: string): void {
+    this.selectedCoverId.set(imageId);
+  }
+
+  async saveQuickEdit(): Promise<void> {
+    const vehicle = this.editingVehicle();
+    if (!vehicle) return;
+    if (!Number.isFinite(Number(this.quickDraft.mileage)) || Number(this.quickDraft.mileage) < 0) {
+      this.saveError.set('Informe uma quilometragem válida para salvar.');
+      return;
+    }
+    if (this.quickDraft.price !== null && Number(this.quickDraft.price) < 0) {
+      this.saveError.set('O preço não pode ser negativo.');
+      return;
+    }
+
+    this.saving.set(true);
+    this.saveError.set(null);
+    try {
+      const update: VehicleQuickUpdate = {
+        ...this.quickDraft,
+        mileage: Number(this.quickDraft.mileage),
+        price: this.quickDraft.price === null ? null : Number(this.quickDraft.price),
+        featured: this.quickDraft.status === 'published' && this.quickDraft.featured,
+      };
+      const updated = await this.auth.updateVehicleQuick(vehicle.id, update);
+      const initialCoverId = this.images().find((image) => image.isCover)?.id ?? null;
+      const selectedCoverId = this.selectedCoverId();
+      if (selectedCoverId && selectedCoverId !== initialCoverId) {
+        await this.auth.setVehicleCover(vehicle.id, selectedCoverId);
+      }
+      this.vehicles.update((vehicles) =>
+        vehicles.map((current) => (current.id === updated.id ? updated : current)),
+      );
+      this.closeQuickEdit();
+    } catch (saveError) {
+      console.error('Falha na edição rápida do veículo:', saveError);
+      this.saveError.set('Não foi possível salvar a alteração. Revise os dados e tente novamente.');
+    } finally {
+      this.saving.set(false);
+    }
+  }
+
+  statusLabel(status: QuickStatus): string {
+    return { draft: 'Em preparação', published: 'No showroom', sold: 'Vendido' }[status];
   }
 }

@@ -9,9 +9,24 @@ export interface AdminVehicleListItem {
   readonly version: string;
   readonly manufacturing_year: number;
   readonly model_year: number;
+  readonly mileage: number;
   readonly price: number | null;
   readonly status: 'draft' | 'published' | 'sold';
+  readonly featured: boolean;
   readonly updated_at: string;
+}
+export interface AdminVehicleImage {
+  readonly id: string;
+  readonly storagePath: string;
+  readonly isCover: boolean;
+  readonly sortOrder: number;
+  readonly signedUrl: string | null;
+}
+export interface VehicleQuickUpdate {
+  readonly mileage: number;
+  readonly price: number | null;
+  readonly status: 'draft' | 'published' | 'sold';
+  readonly featured: boolean;
 }
 export interface VehicleDraft {
   slug: string;
@@ -116,10 +131,69 @@ export class AdminAuthService {
     if (!this.#client) throw new Error('Sessão administrativa indisponível.');
     const { data, error } = await this.#client
       .from('vehicles')
-      .select('id,brand,model,version,manufacturing_year,model_year,price,status,updated_at')
+      .select(
+        'id,brand,model,version,manufacturing_year,model_year,mileage,price,status,featured,updated_at',
+      )
       .order('updated_at', { ascending: false });
     if (error) throw error;
     return (data ?? []) as readonly AdminVehicleListItem[];
+  }
+
+  async updateVehicleQuick(
+    vehicleId: string,
+    update: VehicleQuickUpdate,
+  ): Promise<AdminVehicleListItem> {
+    if (!this.#client) throw new Error('Sessão administrativa indisponível.');
+    const { data, error } = await this.#client
+      .from('vehicles')
+      .update(update)
+      .eq('id', vehicleId)
+      .select(
+        'id,brand,model,version,manufacturing_year,model_year,mileage,price,status,featured,updated_at',
+      )
+      .single();
+    if (error) throw error;
+    return data as AdminVehicleListItem;
+  }
+
+  async listVehicleImages(vehicleId: string): Promise<readonly AdminVehicleImage[]> {
+    if (!this.#client) throw new Error('Sessão administrativa indisponível.');
+    const { data, error } = await this.#client
+      .from('vehicle_images')
+      .select('id,storage_path,is_cover,sort_order')
+      .eq('vehicle_id', vehicleId)
+      .order('sort_order');
+    if (error) throw error;
+    return Promise.all(
+      (data ?? []).map(async (image) => {
+        const { data: signed, error: signedError } = await this.#client!.storage.from(
+          'vehicles',
+        ).createSignedUrl(image.storage_path as string, 60 * 10);
+        return {
+          id: image.id as string,
+          storagePath: image.storage_path as string,
+          isCover: image.is_cover as boolean,
+          sortOrder: image.sort_order as number,
+          signedUrl: signedError ? null : (signed?.signedUrl ?? null),
+        };
+      }),
+    );
+  }
+
+  async setVehicleCover(vehicleId: string, imageId: string): Promise<void> {
+    if (!this.#client) throw new Error('Sessão administrativa indisponível.');
+    const { error: clearError } = await this.#client
+      .from('vehicle_images')
+      .update({ is_cover: false })
+      .eq('vehicle_id', vehicleId);
+    if (clearError) throw clearError;
+
+    const { error: coverError } = await this.#client
+      .from('vehicle_images')
+      .update({ is_cover: true })
+      .eq('id', imageId)
+      .eq('vehicle_id', vehicleId);
+    if (coverError) throw coverError;
   }
   async createVehicle(
     draft: VehicleDraft,

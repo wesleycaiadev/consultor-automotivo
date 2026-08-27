@@ -1,0 +1,188 @@
+<section class="vehicles">
+  <header class="vehicles__header">
+    <div>
+      <p class="eyebrow">SHOWROOM · GESTÃO</p>
+      <h1>Veículos</h1>
+      <p class="intro">Ajuste informações frequentes sem reabrir o cadastro completo.</p>
+    </div>
+    <a class="new-vehicle" routerLink="/admin/veiculos/novo">Novo veículo</a>
+  </header>
+
+  @if (loading()) {
+    <p class="state">Carregando veículos…</p>
+  } @else if (error()) {
+    <p class="state state--error" role="alert">{{ error() }}</p>
+  } @else if (!vehicles().length) {
+    <div class="empty">
+      <h2>Nenhum veículo cadastrado.</h2>
+      <p>Cadastre o primeiro veículo para administrar o showroom por aqui.</p>
+      <a routerLink="/admin/veiculos/novo">Cadastrar veículo</a>
+    </div>
+  } @else {
+    <div class="table" aria-label="Veículos cadastrados">
+      <div class="row head" aria-hidden="true">
+        <span>Veículo</span><span>Ano</span><span>Preço</span><span>Status</span><span></span>
+      </div>
+      @for (vehicle of vehicles(); track vehicle.id) {
+        <article class="row" [class.is-editing]="editingVehicle()?.id === vehicle.id">
+          <span class="vehicle-name"
+            ><b>{{ vehicle.brand }} {{ vehicle.model }}</b
+            ><small>{{ vehicle.version }} · {{ vehicle.mileage | number }} km</small></span
+          ><span class="metadata">{{ vehicle.manufacturing_year }}/{{ vehicle.model_year }}</span
+          ><span class="metadata">{{
+            vehicle.price === null ? 'Consulte' : (vehicle.price | currency: 'BRL')
+          }}</span
+          ><span class="status" [attr.data-status]="vehicle.status">{{
+            statusLabel(vehicle.status)
+          }}</span>
+          <button
+            class="quick-edit-trigger"
+            type="button"
+            [attr.aria-expanded]="editingVehicle()?.id === vehicle.id"
+            (click)="
+              editingVehicle()?.id === vehicle.id ? closeQuickEdit() : openQuickEdit(vehicle)
+            "
+          >
+            {{ editingVehicle()?.id === vehicle.id ? 'Fechar' : 'Edição rápida' }}
+          </button>
+
+          @if (editingVehicle()?.id === vehicle.id) {
+            <section
+              class="quick-editor"
+              [attr.aria-label]="'Edição rápida de ' + vehicle.brand + ' ' + vehicle.model"
+            >
+              <header>
+                <div>
+                  <p class="eyebrow">EDIÇÃO RÁPIDA</p>
+                  <h2>{{ vehicle.brand }} {{ vehicle.model }}</h2>
+                </div>
+                <button type="button" (click)="closeQuickEdit()" aria-label="Fechar edição rápida">
+                  ×
+                </button>
+              </header>
+
+              <div class="quick-editor__fields">
+                <label
+                  >Preço anunciado
+                  <span class="input-prefix"
+                    ><b>R$</b
+                    ><input
+                      name="quick-price"
+                      [(ngModel)]="quickDraft.price"
+                      type="number"
+                      min="0"
+                      placeholder="Consulte"
+                  /></span>
+                </label>
+                <label
+                  >Quilometragem
+                  <span class="input-suffix"
+                    ><input
+                      name="quick-mileage"
+                      [(ngModel)]="quickDraft.mileage"
+                      type="number"
+                      min="0"
+                      required
+                    /><b>km</b></span
+                  >
+                </label>
+              </div>
+
+              <fieldset class="quick-editor__visibility">
+                <legend>Visibilidade</legend>
+                <div>
+                  <label [class.is-selected]="quickDraft.status === 'draft'">
+                    <input
+                      type="radio"
+                      name="quick-status"
+                      [checked]="quickDraft.status === 'draft'"
+                      (change)="setStatus('draft')"
+                    /><span>Em preparação</span>
+                  </label>
+                  <label [class.is-selected]="quickDraft.status === 'published'">
+                    <input
+                      type="radio"
+                      name="quick-status"
+                      [checked]="quickDraft.status === 'published'"
+                      (change)="setStatus('published')"
+                    /><span>No showroom</span>
+                  </label>
+                  <label [class.is-selected]="quickDraft.status === 'sold'">
+                    <input
+                      type="radio"
+                      name="quick-status"
+                      [checked]="quickDraft.status === 'sold'"
+                      (change)="setStatus('sold')"
+                    /><span>Vendido</span>
+                  </label>
+                </div>
+                <small>Vendido remove o veículo da vitrine sem apagar seu histórico.</small>
+              </fieldset>
+
+              @if (quickDraft.status === 'published') {
+                <label class="feature-toggle" [class.is-selected]="quickDraft.featured">
+                  <input name="quick-featured" [(ngModel)]="quickDraft.featured" type="checkbox" />
+                  <span
+                    ><strong>Destacar no showroom</strong
+                    ><small>Prioriza este veículo na vitrine pública.</small></span
+                  ><b aria-hidden="true"></b>
+                </label>
+              }
+
+              <section class="cover-picker" aria-labelledby="cover-title">
+                <div>
+                  <p class="eyebrow">FOTO DE CAPA</p>
+                  <h3 id="cover-title">Escolha a imagem principal</h3>
+                </div>
+                @if (loadingImages()) {
+                  <p>Carregando fotos…</p>
+                } @else if (images().length) {
+                  <div class="cover-grid">
+                    @for (image of images(); track image.id; let index = $index) {
+                      <button
+                        type="button"
+                        [class.is-selected]="selectedCoverId() === image.id"
+                        (click)="selectCover(image.id)"
+                      >
+                        @if (image.signedUrl) {
+                          <img
+                            [src]="image.signedUrl"
+                            [alt]="
+                              'Foto ' + (index + 1) + ' de ' + vehicle.brand + ' ' + vehicle.model
+                            "
+                          />
+                        } @else {
+                          <span>Imagem indisponível</span>
+                        }
+                        <b>{{
+                          selectedCoverId() === image.id ? 'Capa selecionada' : 'Usar como capa'
+                        }}</b>
+                      </button>
+                    }
+                  </div>
+                } @else {
+                  <p>Este veículo ainda não possui fotos. O envio fica no gerenciador de mídia.</p>
+                }
+              </section>
+
+              @if (saveError()) {
+                <p class="quick-editor__error" role="alert">{{ saveError() }}</p>
+              }
+              <footer>
+                <button type="button" class="secondary" (click)="closeQuickEdit()">Cancelar</button>
+                <button
+                  type="button"
+                  class="primary"
+                  [disabled]="saving()"
+                  (click)="saveQuickEdit()"
+                >
+                  {{ saving() ? 'Salvando…' : 'Salvar alterações' }}
+                </button>
+              </footer>
+            </section>
+          }
+        </article>
+      }
+    </div>
+  }
+</section>
