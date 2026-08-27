@@ -9,6 +9,7 @@ import { adminAuthGuard } from './core/guards/admin-auth.guard';
 import { AdminLoginPageComponent } from './features/admin-login/admin-login-page.component';
 import { AdminDashboardPageComponent } from './features/admin-dashboard/admin-dashboard-page.component';
 import { AdminDeliveryListPageComponent } from './features/admin-deliveries/admin-delivery-list-page.component';
+import { AdminFeedbackListPageComponent } from './features/admin-feedbacks/admin-feedback-list-page.component';
 import { AdminVehicleListPageComponent } from './features/admin-vehicles/admin-vehicle-list-page.component';
 import { AdminVehicleEditorPageComponent } from './features/admin-vehicles/admin-vehicle-editor-page.component';
 
@@ -49,7 +50,7 @@ export const routes: Routes = [
       { path: 'veiculos', component: AdminVehicleListPageComponent },
       { path: 'veiculos/novo', component: AdminVehicleEditorPageComponent },
       { path: 'entregas', component: AdminDeliveryListPageComponent },
-      { path: 'feedbacks', component: AdminDashboardPageComponent },
+      { path: 'feedbacks', component: AdminFeedbackListPageComponent },
       { path: 'configuracoes', component: AdminDashboardPageComponent },
     ],
   },

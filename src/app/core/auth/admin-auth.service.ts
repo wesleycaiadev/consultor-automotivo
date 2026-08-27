@@ -48,6 +48,19 @@ export interface DeliveryDraft {
   delivery_date: string;
   status: 'draft' | 'published';
 }
+export interface AdminFeedbackListItem {
+  readonly id: string;
+  readonly author: string;
+  readonly text: string;
+  readonly status: 'draft' | 'published';
+  readonly sort_order: number;
+}
+export interface FeedbackDraft {
+  author: string;
+  text: string;
+  status: 'draft' | 'published';
+  sort_order: number;
+}
 export interface VehicleQuickUpdate {
   readonly mileage: number;
   readonly price: number | null;
@@ -558,6 +571,56 @@ export class AdminAuthService {
         .update({ sort_order: index })
         .eq('id', imageId)
         .eq('delivery_id', deliveryId);
+      if (error) throw error;
+    }
+  }
+
+  async listFeedbacks(): Promise<readonly AdminFeedbackListItem[]> {
+    if (!this.#client) throw new Error('Sessão administrativa indisponível.');
+    const { data, error } = await this.#client
+      .from('feedbacks')
+      .select('id,author,text,status,sort_order')
+      .order('sort_order', { ascending: true });
+    if (error) throw error;
+    return (data ?? []) as readonly AdminFeedbackListItem[];
+  }
+
+  async createFeedback(draft: FeedbackDraft): Promise<AdminFeedbackListItem> {
+    if (!this.#client) throw new Error('Sessão administrativa indisponível.');
+    const { data, error } = await this.#client
+      .from('feedbacks')
+      .insert(draft)
+      .select('id,author,text,status,sort_order')
+      .single();
+    if (error) throw error;
+    return data as AdminFeedbackListItem;
+  }
+
+  async updateFeedback(feedbackId: string, draft: FeedbackDraft): Promise<AdminFeedbackListItem> {
+    if (!this.#client) throw new Error('Sessão administrativa indisponível.');
+    const { data, error } = await this.#client
+      .from('feedbacks')
+      .update(draft)
+      .eq('id', feedbackId)
+      .select('id,author,text,status,sort_order')
+      .single();
+    if (error) throw error;
+    return data as AdminFeedbackListItem;
+  }
+
+  async deleteFeedback(feedbackId: string): Promise<void> {
+    if (!this.#client) throw new Error('Sessão administrativa indisponível.');
+    const { error } = await this.#client.from('feedbacks').delete().eq('id', feedbackId);
+    if (error) throw error;
+  }
+
+  async reorderFeedbacks(feedbackIds: readonly string[]): Promise<void> {
+    if (!this.#client || !feedbackIds.length) return;
+    for (const [index, feedbackId] of feedbackIds.entries()) {
+      const { error } = await this.#client
+        .from('feedbacks')
+        .update({ sort_order: index })
+        .eq('id', feedbackId);
       if (error) throw error;
     }
   }

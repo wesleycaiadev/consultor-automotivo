@@ -1,0 +1,141 @@
+<section class="feedbacks">
+  <header class="feedbacks__header">
+    <div>
+      <p class="eyebrow">FEEDBACKS · GESTÃO</p>
+      <h1>Feedbacks</h1>
+      <p class="intro">Organize depoimentos curtos e publique apenas o que reforça confiança.</p>
+    </div>
+    <button type="button" class="primary" (click)="startCreate()">Novo feedback</button>
+  </header>
+
+  @if (loading()) {
+    <p class="state">Carregando feedbacks…</p>
+  } @else if (error()) {
+    <p class="state state--error" role="alert">{{ error() }}</p>
+  } @else {
+    @if (isCreating() || editingFeedback()) {
+      <section class="editor" aria-labelledby="feedback-editor-title">
+        <header>
+          <div>
+            <p class="eyebrow">{{ isCreating() ? 'NOVO FEEDBACK' : 'EDIÇÃO' }}</p>
+            <h2 id="feedback-editor-title">
+              {{ isCreating() ? 'Registrar feedback' : draft.author }}
+            </h2>
+          </div>
+          <button type="button" (click)="closeEditor()" aria-label="Fechar edição">×</button>
+        </header>
+
+        <label
+          >Autor
+          <input name="feedback-author" [(ngModel)]="draft.author" required />
+        </label>
+
+        <label
+          >Texto
+          <textarea
+            name="feedback-text"
+            [(ngModel)]="draft.text"
+            rows="4"
+            maxlength="240"
+            required
+          ></textarea>
+          <small>{{ draft.text.length }}/240</small>
+        </label>
+
+        <fieldset class="visibility">
+          <legend>Visibilidade</legend>
+          <div>
+            <label [class.is-selected]="draft.status === 'draft'">
+              <input
+                type="radio"
+                name="feedback-status"
+                [checked]="draft.status === 'draft'"
+                (change)="setStatus('draft')"
+              />
+              <span>Oculto</span>
+            </label>
+            <label [class.is-selected]="draft.status === 'published'">
+              <input
+                type="radio"
+                name="feedback-status"
+                [checked]="draft.status === 'published'"
+                (change)="setStatus('published')"
+              />
+              <span>Publicado</span>
+            </label>
+          </div>
+        </fieldset>
+
+        @if (saveError()) {
+          <p class="editor__error" role="alert">{{ saveError() }}</p>
+        }
+
+        <footer>
+          <button type="button" class="secondary" (click)="closeEditor()">Cancelar</button>
+          <button type="button" class="primary" [disabled]="saving()" (click)="saveFeedback()">
+            {{ saving() ? 'Salvando…' : isCreating() ? 'Criar feedback' : 'Salvar feedback' }}
+          </button>
+        </footer>
+      </section>
+    }
+
+    @if (!feedbacks().length) {
+      <div class="empty">
+        <h2>Nenhum feedback cadastrado.</h2>
+        <p>Cadastre depoimentos curtos para alimentar as áreas públicas aprovadas.</p>
+        <button type="button" (click)="startCreate()">Cadastrar feedback</button>
+      </div>
+    } @else {
+      <div class="table" aria-label="Feedbacks cadastrados">
+        <div class="row head" aria-hidden="true">
+          <span>Feedback</span><span>Status</span><span>Ordem</span><span></span>
+        </div>
+        @for (feedback of feedbacks(); track feedback.id; let first = $first; let last = $last) {
+          <article class="row" [class.is-editing]="editingFeedback()?.id === feedback.id">
+            <span class="quote">
+              <b>{{ feedback.author }}</b>
+              <small>{{ feedback.text }}</small>
+            </span>
+            <span class="status" [attr.data-status]="feedback.status">
+              {{ statusLabel(feedback.status) }}
+            </span>
+            <span class="order-actions">
+              <button
+                type="button"
+                title="Mover para cima"
+                [disabled]="first || movingId() === feedback.id"
+                (click)="moveFeedback(feedback.id, -1)"
+                aria-label="Mover feedback para cima"
+              >
+                ↑
+              </button>
+              <button
+                type="button"
+                title="Mover para baixo"
+                [disabled]="last || movingId() === feedback.id"
+                (click)="moveFeedback(feedback.id, 1)"
+                aria-label="Mover feedback para baixo"
+              >
+                ↓
+              </button>
+            </span>
+            <span class="actions">
+              <button type="button" class="secondary" (click)="openEdit(feedback)">Editar</button>
+              <button type="button" class="secondary" (click)="toggleStatus(feedback)">
+                {{ feedback.status === 'published' ? 'Ocultar' : 'Publicar' }}
+              </button>
+              <button
+                type="button"
+                class="danger"
+                [disabled]="deletingId() === feedback.id"
+                (click)="deleteFeedback(feedback)"
+              >
+                {{ deletingId() === feedback.id ? 'Apagando…' : 'Apagar' }}
+              </button>
+            </span>
+          </article>
+        }
+      </div>
+    }
+  }
+</section>
