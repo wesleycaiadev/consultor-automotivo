@@ -1,0 +1,292 @@
+<section class="deliveries">
+  <header class="deliveries__header">
+    <div>
+      <p class="eyebrow">ENTREGAS · GESTÃO</p>
+      <h1>Entregas</h1>
+      <p class="intro">Publique provas sociais curtas, documentais e fáceis de manter.</p>
+    </div>
+    <button type="button" class="primary" (click)="startCreate()">Nova entrega</button>
+  </header>
+
+  @if (loading()) {
+    <p class="state">Carregando entregas…</p>
+  } @else if (error()) {
+    <p class="state state--error" role="alert">{{ error() }}</p>
+  } @else {
+    @if (isCreating() || editingDelivery()) {
+      <section class="editor" aria-labelledby="delivery-editor-title">
+        <header>
+          <div>
+            <p class="eyebrow">{{ isCreating() ? 'NOVA ENTREGA' : 'EDIÇÃO' }}</p>
+            <h2 id="delivery-editor-title">
+              {{ isCreating() ? 'Registrar entrega' : draft.customer_name }}
+            </h2>
+          </div>
+          <button type="button" (click)="closeEditor()" aria-label="Fechar edição">×</button>
+        </header>
+
+        <div class="editor__fields">
+          <label
+            >Cliente
+            <input name="customer" [(ngModel)]="draft.customer_name" required />
+          </label>
+
+          <label
+            >Vincular veículo
+            <select
+              name="vehicle-id"
+              [ngModel]="draft.vehicle_id ?? ''"
+              (ngModelChange)="selectVehicle($event)"
+            >
+              <option value="">Sem vínculo</option>
+              @for (vehicle of vehicles(); track vehicle.id) {
+                <option [value]="vehicle.id">
+                  {{ vehicle.brand }} {{ vehicle.model }} · {{ vehicle.version }}
+                </option>
+              }
+            </select>
+          </label>
+
+          <label
+            >Veículo entregue
+            <input name="vehicle-name" [(ngModel)]="draft.vehicle_name" required />
+          </label>
+
+          <label
+            >Cidade
+            <input name="city" [(ngModel)]="draft.city" required />
+          </label>
+
+          <label
+            >Data
+            <input name="delivery-date" [(ngModel)]="draft.delivery_date" type="date" required />
+          </label>
+        </div>
+
+        <label class="testimonial"
+          >Frase curta
+          <textarea
+            name="testimonial"
+            [(ngModel)]="draft.testimonial"
+            rows="3"
+            maxlength="180"
+            required
+          ></textarea>
+          <small>{{ draft.testimonial.length }}/180</small>
+        </label>
+
+        <fieldset class="visibility">
+          <legend>Status</legend>
+          <div>
+            <label [class.is-selected]="draft.status === 'draft'">
+              <input
+                type="radio"
+                name="delivery-status"
+                [checked]="draft.status === 'draft'"
+                (change)="setStatus('draft')"
+              />
+              <span>Rascunho</span>
+            </label>
+            <label [class.is-selected]="draft.status === 'published'">
+              <input
+                type="radio"
+                name="delivery-status"
+                [checked]="draft.status === 'published'"
+                (change)="setStatus('published')"
+              />
+              <span>Publicado</span>
+            </label>
+          </div>
+          <small>Publicado pode aparecer nas áreas públicas de prova social.</small>
+        </fieldset>
+
+        <section class="media" aria-labelledby="delivery-media-title">
+          <div class="media__header">
+            <div>
+              <p class="eyebrow">IMAGENS</p>
+              <h3 id="delivery-media-title">Fotos da entrega</h3>
+            </div>
+            <span class="media-counter">
+              {{ isCreating() ? pendingFiles().length : images().length }}/8
+            </span>
+          </div>
+
+          @if (loadingImages()) {
+            <p class="media-state">Carregando fotos…</p>
+          } @else {
+            @if (!uploading() && (isCreating() ? pendingFiles().length : images().length) < 8) {
+              <label
+                class="dropzone"
+                for="delivery-media-upload"
+                (dragover)="$event.preventDefault()"
+                (drop)="dropMedia($event)"
+              >
+                <input
+                  id="delivery-media-upload"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  multiple
+                  (change)="selectMedia($event)"
+                />
+                <strong>Arraste fotos ou clique para enviar</strong>
+                <small>JPEG, PNG ou WebP · até 10 MB por arquivo</small>
+              </label>
+            }
+
+            @if (uploading()) {
+              <div
+                class="progress"
+                role="progressbar"
+                [attr.aria-valuenow]="uploadProgress()"
+                [attr.aria-valuemax]="uploadTotal()"
+                aria-label="Progresso do envio de fotos"
+              >
+                <div class="progress__bar" [style.width.%]="uploadPercent()"></div>
+                <span>Enviando {{ uploadProgress() }} de {{ uploadTotal() }}…</span>
+              </div>
+            }
+
+            @if (mediaError()) {
+              <p class="media-error" role="alert">{{ mediaError() }}</p>
+            }
+
+            @if (isCreating() && pendingFiles().length) {
+              <div class="pending-list" aria-label="Fotos selecionadas">
+                @for (file of pendingFiles(); track file.name + file.size) {
+                  <span>{{ file.name }}</span>
+                }
+              </div>
+            } @else if (!isCreating() && images().length) {
+              <div class="media-grid" aria-label="Fotos da entrega">
+                @for (
+                  image of images();
+                  track image.id;
+                  let index = $index;
+                  let first = $first;
+                  let last = $last
+                ) {
+                  <figure
+                    class="media-card"
+                    [class.is-cover]="selectedCoverId() === image.id"
+                    [class.is-busy]="movingImageId() === image.id"
+                  >
+                    @if (image.signedUrl) {
+                      <img
+                        [src]="image.signedUrl"
+                        [alt]="'Foto ' + (index + 1) + ' da entrega de ' + draft.vehicle_name"
+                      />
+                    } @else {
+                      <div class="placeholder">Indisponível</div>
+                    }
+                    <figcaption>
+                      <span>{{
+                        selectedCoverId() === image.id ? 'CAPA' : 'FOTO ' + (index + 1)
+                      }}</span>
+                      <div>
+                        <button
+                          type="button"
+                          title="Mover para cima"
+                          [disabled]="first || movingImageId() === image.id"
+                          (click)="moveImage(image.id, -1)"
+                          aria-label="Mover foto para cima"
+                        >
+                          ↑
+                        </button>
+                        <button
+                          type="button"
+                          title="Mover para baixo"
+                          [disabled]="last || movingImageId() === image.id"
+                          (click)="moveImage(image.id, 1)"
+                          aria-label="Mover foto para baixo"
+                        >
+                          ↓
+                        </button>
+                        <button
+                          type="button"
+                          [class.is-active]="selectedCoverId() === image.id"
+                          (click)="selectCover(image.id)"
+                          [attr.aria-label]="
+                            selectedCoverId() === image.id ? 'Capa atual' : 'Definir como capa'
+                          "
+                        >
+                          {{ selectedCoverId() === image.id ? '★' : '☆' }}
+                        </button>
+                        <button
+                          type="button"
+                          class="remove"
+                          [disabled]="movingImageId() === image.id"
+                          (click)="removeMedia(image)"
+                          [attr.aria-label]="'Remover foto ' + (index + 1)"
+                        >
+                          Remover
+                        </button>
+                      </div>
+                    </figcaption>
+                  </figure>
+                }
+              </div>
+            } @else {
+              <p class="media-state">Nenhuma foto adicionada.</p>
+            }
+          }
+        </section>
+
+        @if (saveError()) {
+          <p class="editor__error" role="alert">{{ saveError() }}</p>
+        }
+
+        <footer>
+          <button type="button" class="secondary" (click)="closeEditor()">Cancelar</button>
+          <button type="button" class="primary" [disabled]="saving()" (click)="saveDelivery()">
+            {{ saving() ? 'Salvando…' : isCreating() ? 'Criar entrega' : 'Salvar entrega' }}
+          </button>
+        </footer>
+      </section>
+    }
+
+    @if (!deliveries().length) {
+      <div class="empty">
+        <h2>Nenhuma entrega cadastrada.</h2>
+        <p>Registre a primeira entrega para alimentar a prova social pública.</p>
+        <button type="button" (click)="startCreate()">Cadastrar entrega</button>
+      </div>
+    } @else {
+      <div class="table" aria-label="Entregas cadastradas">
+        <div class="row head" aria-hidden="true">
+          <span>Entrega</span><span>Cidade</span><span>Data</span><span>Status</span><span></span>
+        </div>
+        @for (delivery of deliveries(); track delivery.id) {
+          <article class="row" [class.is-editing]="editingDelivery()?.id === delivery.id">
+            <span class="delivery-name">
+              <b>{{ delivery.customer_name }}</b>
+              <small>{{ delivery.vehicle_name }}</small>
+            </span>
+            <span class="metadata">{{ delivery.city }}</span>
+            <span class="metadata">{{ delivery.delivery_date | date: 'dd/MM/yyyy' }}</span>
+            <span class="status" [attr.data-status]="delivery.status">
+              {{ statusLabel(delivery.status) }}
+            </span>
+            <span class="actions">
+              <button
+                type="button"
+                class="secondary"
+                [attr.aria-expanded]="editingDelivery()?.id === delivery.id"
+                (click)="openEdit(delivery)"
+              >
+                Editar
+              </button>
+              <button
+                type="button"
+                class="danger"
+                [disabled]="deletingId() === delivery.id"
+                (click)="deleteDelivery(delivery)"
+              >
+                {{ deletingId() === delivery.id ? 'Apagando…' : 'Apagar' }}
+              </button>
+            </span>
+          </article>
+        }
+      </div>
+    }
+  }
+</section>

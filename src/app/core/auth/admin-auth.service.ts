@@ -22,6 +22,32 @@ export interface AdminVehicleImage {
   readonly sortOrder: number;
   readonly signedUrl: string | null;
 }
+export interface AdminDeliveryListItem {
+  readonly id: string;
+  readonly customer_name: string;
+  readonly vehicle_id: string | null;
+  readonly vehicle_name: string;
+  readonly city: string;
+  readonly testimonial: string;
+  readonly delivery_date: string;
+  readonly status: 'draft' | 'published';
+}
+export interface AdminDeliveryImage {
+  readonly id: string;
+  readonly storagePath: string;
+  readonly isCover: boolean;
+  readonly sortOrder: number;
+  readonly signedUrl: string | null;
+}
+export interface DeliveryDraft {
+  customer_name: string;
+  vehicle_id: string | null;
+  vehicle_name: string;
+  city: string;
+  testimonial: string;
+  delivery_date: string;
+  status: 'draft' | 'published';
+}
 export interface VehicleQuickUpdate {
   readonly mileage: number;
   readonly price: number | null;
@@ -80,6 +106,9 @@ const fipeBaseUrl = 'https://fipe.parallelum.com.br/api/v2/cars';
 const acceptedVehicleImageTypes = new Set(['image/jpeg', 'image/png', 'image/webp']);
 const maxVehicleImageSize = 10 * 1024 * 1024;
 const maxVehicleImageCount = 15;
+const acceptedDeliveryImageTypes = acceptedVehicleImageTypes;
+const maxDeliveryImageSize = maxVehicleImageSize;
+const maxDeliveryImageCount = 8;
 
 @Injectable({ providedIn: 'root' })
 export class AdminAuthService {
@@ -328,6 +357,210 @@ export class AdminAuthService {
       throw mediaError;
     }
   }
+
+  async listDeliveries(): Promise<readonly AdminDeliveryListItem[]> {
+    if (!this.#client) throw new Error('Sessão administrativa indisponível.');
+    const { data, error } = await this.#client
+      .from('deliveries')
+      .select('id,customer_name,vehicle_id,vehicle_name,city,testimonial,delivery_date,status')
+      .order('delivery_date', { ascending: false });
+    if (error) throw error;
+    return (data ?? []) as readonly AdminDeliveryListItem[];
+  }
+
+  async createDelivery(
+    draft: DeliveryDraft,
+    photos: readonly File[] = [],
+    onPhotoUploaded?: (completed: number, total: number) => void,
+  ): Promise<AdminDeliveryListItem> {
+    if (!this.#client) throw new Error('Sessão administrativa indisponível.');
+    this.assertDeliveryImages(photos);
+    if (photos.length > maxDeliveryImageCount)
+      throw new Error('O limite é de 8 fotos por entrega.');
+
+    const { data, error } = await this.#client
+      .from('deliveries')
+      .insert(draft)
+      .select('id,customer_name,vehicle_id,vehicle_name,city,testimonial,delivery_date,status')
+      .single();
+    if (error) throw error;
+
+    const uploadedPaths: string[] = [];
+    try {
+      for (const [index, photo] of photos.entries()) {
+        const storagePath = this.buildDeliveryImagePath(data.id as string, index, photo);
+        const { error: uploadError } = await this.#client.storage
+          .from('deliveries')
+          .upload(storagePath, photo, { contentType: photo.type, upsert: false });
+        if (uploadError) throw uploadError;
+        uploadedPaths.push(storagePath);
+
+        const { error: imageError } = await this.#client.from('delivery_images').insert({
+          delivery_id: data.id,
+          storage_path: storagePath,
+          sort_order: index,
+          is_cover: index === 0,
+        });
+        if (imageError) throw imageError;
+        onPhotoUploaded?.(index + 1, photos.length);
+      }
+    } catch (mediaError) {
+      if (uploadedPaths.length) await this.#client.storage.from('deliveries').remove(uploadedPaths);
+      await this.#client.from('deliveries').delete().eq('id', data.id);
+      throw mediaError;
+    }
+
+    return data as AdminDeliveryListItem;
+  }
+
+  async updateDelivery(deliveryId: string, draft: DeliveryDraft): Promise<AdminDeliveryListItem> {
+    if (!this.#client) throw new Error('Sessão administrativa indisponível.');
+    const { data, error } = await this.#client
+      .from('deliveries')
+      .update(draft)
+      .eq('id', deliveryId)
+      .select('id,customer_name,vehicle_id,vehicle_name,city,testimonial,delivery_date,status')
+      .single();
+    if (error) throw error;
+    return data as AdminDeliveryListItem;
+  }
+
+  async deleteDelivery(deliveryId: string): Promise<void> {
+    if (!this.#client) throw new Error('Sessão administrativa indisponível.');
+    const images = await this.listDeliveryImages(deliveryId);
+    const { error } = await this.#client.from('deliveries').delete().eq('id', deliveryId);
+    if (error) throw error;
+    const paths = images.map((image) => image.storagePath);
+    if (paths.length) await this.#client.storage.from('deliveries').remove(paths);
+  }
+
+  async listDeliveryImages(deliveryId: string): Promise<readonly AdminDeliveryImage[]> {
+    if (!this.#client) throw new Error('Sessão administrativa indisponível.');
+    const { data, error } = await this.#client
+      .from('delivery_images')
+      .select('id,storage_path,is_cover,sort_order')
+      .eq('delivery_id', deliveryId)
+      .order('sort_order');
+    if (error) throw error;
+    return Promise.all(
+      (data ?? []).map(async (image) => {
+        const { data: signed, error: signedError } = await this.#client!.storage.from(
+          'deliveries',
+        ).createSignedUrl(image.storage_path as string, 60 * 10);
+        return {
+          id: image.id as string,
+          storagePath: image.storage_path as string,
+          isCover: image.is_cover as boolean,
+          sortOrder: image.sort_order as number,
+          signedUrl: signedError ? null : (signed?.signedUrl ?? null),
+        };
+      }),
+    );
+  }
+
+  async setDeliveryCover(deliveryId: string, imageId: string): Promise<void> {
+    if (!this.#client) throw new Error('Sessão administrativa indisponível.');
+    const { error: clearError } = await this.#client
+      .from('delivery_images')
+      .update({ is_cover: false })
+      .eq('delivery_id', deliveryId);
+    if (clearError) throw clearError;
+
+    const { error: coverError } = await this.#client
+      .from('delivery_images')
+      .update({ is_cover: true })
+      .eq('id', imageId)
+      .eq('delivery_id', deliveryId);
+    if (coverError) throw coverError;
+  }
+
+  async uploadDeliveryImages(
+    deliveryId: string,
+    photos: readonly File[],
+    onProgress?: (completed: number, total: number) => void,
+  ): Promise<readonly AdminDeliveryImage[]> {
+    if (!this.#client) throw new Error('Sessão administrativa indisponível.');
+    this.assertDeliveryImages(photos);
+    const existing = await this.listDeliveryImages(deliveryId);
+    if (existing.length + photos.length > maxDeliveryImageCount)
+      throw new Error('O limite é de 8 fotos por entrega.');
+
+    const uploadedPaths: string[] = [];
+    const insertedIds: string[] = [];
+    try {
+      for (const [index, photo] of photos.entries()) {
+        const storagePath = this.buildDeliveryImagePath(deliveryId, index, photo);
+        const { error: uploadError } = await this.#client.storage
+          .from('deliveries')
+          .upload(storagePath, photo, { contentType: photo.type, upsert: false });
+        if (uploadError) throw uploadError;
+        uploadedPaths.push(storagePath);
+
+        const { data: image, error: imageError } = await this.#client
+          .from('delivery_images')
+          .insert({
+            delivery_id: deliveryId,
+            storage_path: storagePath,
+            sort_order: existing.length + index,
+            is_cover: existing.length === 0 && index === 0,
+          })
+          .select('id')
+          .single();
+        if (imageError) throw imageError;
+        insertedIds.push(image.id as string);
+        onProgress?.(index + 1, photos.length);
+      }
+    } catch (error) {
+      if (insertedIds.length)
+        await this.#client.from('delivery_images').delete().in('id', insertedIds);
+      if (uploadedPaths.length) await this.#client.storage.from('deliveries').remove(uploadedPaths);
+      throw error;
+    }
+    return this.listDeliveryImages(deliveryId);
+  }
+
+  async removeDeliveryImage(deliveryId: string, image: AdminDeliveryImage): Promise<void> {
+    if (!this.#client) throw new Error('Sessão administrativa indisponível.');
+    const remaining = (await this.listDeliveryImages(deliveryId)).filter(
+      (current) => current.id !== image.id,
+    );
+    if (image.isCover && remaining.length) await this.setDeliveryCover(deliveryId, remaining[0].id);
+
+    const { error: deleteError } = await this.#client
+      .from('delivery_images')
+      .delete()
+      .eq('id', image.id)
+      .eq('delivery_id', deliveryId);
+    if (deleteError) throw deleteError;
+    const { error: storageError } = await this.#client.storage
+      .from('deliveries')
+      .remove([image.storagePath]);
+    if (storageError) throw storageError;
+    await this.reorderDeliveryImages(
+      deliveryId,
+      remaining.map((current) => current.id),
+    );
+  }
+
+  async reorderDeliveryImages(deliveryId: string, imageIds: readonly string[]): Promise<void> {
+    if (!this.#client || !imageIds.length) return;
+    for (const [index, imageId] of imageIds.entries()) {
+      const { error } = await this.#client
+        .from('delivery_images')
+        .update({ sort_order: 1000 + index })
+        .eq('id', imageId)
+        .eq('delivery_id', deliveryId);
+      if (error) throw error;
+    }
+    for (const [index, imageId] of imageIds.entries()) {
+      const { error } = await this.#client
+        .from('delivery_images')
+        .update({ sort_order: index })
+        .eq('id', imageId)
+        .eq('delivery_id', deliveryId);
+      if (error) throw error;
+    }
+  }
   async listCatalogBrands(): Promise<readonly CatalogBrand[]> {
     if (!this.#client) throw new Error('Sessão administrativa indisponível.');
     const { data, error } = await this.#client
@@ -460,5 +693,23 @@ export class AdminAuthService {
         .replace(/[^a-z0-9.]+/g, '-')
         .replace(/(^-|-$)/g, '') || `foto-${index + 1}.jpg`;
     return `${vehicleId}/${Date.now()}-${index}-${safeName}`;
+  }
+
+  private assertDeliveryImages(photos: readonly File[]): void {
+    const invalid = photos.some(
+      (photo) => !acceptedDeliveryImageTypes.has(photo.type) || photo.size > maxDeliveryImageSize,
+    );
+    if (invalid) throw new Error('Use JPEG, PNG ou WebP com até 10 MB por arquivo.');
+  }
+
+  private buildDeliveryImagePath(deliveryId: string, index: number, photo: File): string {
+    const safeName =
+      photo.name
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9.]+/g, '-')
+        .replace(/(^-|-$)/g, '') || `entrega-${index + 1}.jpg`;
+    return `${deliveryId}/${Date.now()}-${index}-${safeName}`;
   }
 }
