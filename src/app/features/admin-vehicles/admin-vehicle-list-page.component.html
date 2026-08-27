@@ -129,39 +129,137 @@
                 </label>
               }
 
-              <section class="cover-picker" aria-labelledby="cover-title">
-                <div>
-                  <p class="eyebrow">FOTO DE CAPA</p>
-                  <h3 id="cover-title">Escolha a imagem principal</h3>
-                </div>
-                @if (loadingImages()) {
-                  <p>Carregando fotos…</p>
-                } @else if (images().length) {
-                  <div class="cover-grid">
-                    @for (image of images(); track image.id; let index = $index) {
-                      <button
-                        type="button"
-                        [class.is-selected]="selectedCoverId() === image.id"
-                        (click)="selectCover(image.id)"
-                      >
-                        @if (image.signedUrl) {
-                          <img
-                            [src]="image.signedUrl"
-                            [alt]="
-                              'Foto ' + (index + 1) + ' de ' + vehicle.brand + ' ' + vehicle.model
-                            "
-                          />
-                        } @else {
-                          <span>Imagem indisponível</span>
-                        }
-                        <b>{{
-                          selectedCoverId() === image.id ? 'Capa selecionada' : 'Usar como capa'
-                        }}</b>
-                      </button>
-                    }
+              <section class="media-manager" aria-labelledby="media-title">
+                <div class="media-manager__header">
+                  <div>
+                    <p class="eyebrow">GERENCIADOR DE MÍDIA</p>
+                    <h3 id="media-title">Fotos do veículo</h3>
                   </div>
+                  @if (images().length) {
+                    <span class="media-counter">{{ images().length }}/15</span>
+                  }
+                </div>
+
+                @if (loadingImages()) {
+                  <p class="media-state">Carregando fotos…</p>
                 } @else {
-                  <p>Este veículo ainda não possui fotos. O envio fica no gerenciador de mídia.</p>
+                  @if (!uploading() && images().length < 15) {
+                    <label
+                      class="media-dropzone"
+                      for="quick-media-upload"
+                      (dragover)="$event.preventDefault()"
+                      (drop)="dropMedia($event)"
+                    >
+                      <input
+                        id="quick-media-upload"
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        multiple
+                        (change)="selectMedia($event)"
+                      />
+                      <strong>Arraste fotos ou clique para enviar</strong>
+                      <small>JPEG, PNG ou WebP · até 10 MB por arquivo</small>
+                    </label>
+                  }
+
+                  @if (uploading()) {
+                    <div
+                      class="media-upload-progress"
+                      role="progressbar"
+                      [attr.aria-valuenow]="uploadProgress()"
+                      [attr.aria-valuemax]="uploadTotal()"
+                      aria-label="Progresso do envio de fotos"
+                    >
+                      <div
+                        class="media-upload-progress__bar"
+                        [style.width.%]="uploadPercent()"
+                      ></div>
+                      <span>Enviando {{ uploadProgress() }} de {{ uploadTotal() }}…</span>
+                    </div>
+                  }
+
+                  @if (mediaError()) {
+                    <p class="media-error" role="alert">{{ mediaError() }}</p>
+                  }
+
+                  @if (images().length) {
+                    <div class="media-grid" aria-label="Fotos do veículo">
+                      @for (
+                        image of images();
+                        track image.id;
+                        let index = $index;
+                        let first = $first;
+                        let last = $last
+                      ) {
+                        <figure
+                          class="media-card"
+                          [class.is-cover]="selectedCoverId() === image.id"
+                          [class.is-busy]="movingImageId() === image.id"
+                        >
+                          @if (image.signedUrl) {
+                            <img
+                              [src]="image.signedUrl"
+                              [alt]="
+                                'Foto ' + (index + 1) + ' de ' + vehicle.brand + ' ' + vehicle.model
+                              "
+                            />
+                          } @else {
+                            <div class="media-placeholder">Indisponível</div>
+                          }
+                          <figcaption>
+                            <span class="media-card__label">{{
+                              selectedCoverId() === image.id ? 'CAPA' : 'FOTO ' + (index + 1)
+                            }}</span>
+                            <div class="media-card__actions">
+                              <button
+                                type="button"
+                                title="Mover para cima"
+                                [disabled]="first || movingImageId() === image.id"
+                                (click)="moveImage(image.id, -1)"
+                                aria-label="Mover foto para cima"
+                              >
+                                ↑
+                              </button>
+                              <button
+                                type="button"
+                                title="Mover para baixo"
+                                [disabled]="last || movingImageId() === image.id"
+                                (click)="moveImage(image.id, 1)"
+                                aria-label="Mover foto para baixo"
+                              >
+                                ↓
+                              </button>
+                              <button
+                                type="button"
+                                [class.is-active]="selectedCoverId() === image.id"
+                                (click)="selectCover(image.id)"
+                                [attr.aria-label]="
+                                  selectedCoverId() === image.id
+                                    ? 'Capa atual'
+                                    : 'Definir como capa'
+                                "
+                              >
+                                {{ selectedCoverId() === image.id ? '★' : '☆' }}
+                              </button>
+                              <button
+                                type="button"
+                                class="media-card__remove"
+                                [disabled]="movingImageId() === image.id"
+                                (click)="removeMedia(image)"
+                                [attr.aria-label]="'Remover foto ' + (index + 1)"
+                              >
+                                Remover
+                              </button>
+                            </div>
+                          </figcaption>
+                        </figure>
+                      }
+                    </div>
+                  } @else {
+                    <p class="media-state">
+                      Nenhuma foto enviada. Use a área acima para adicionar imagens.
+                    </p>
+                  }
                 }
               </section>
 

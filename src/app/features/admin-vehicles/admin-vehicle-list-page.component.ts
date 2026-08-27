@@ -1,5 +1,5 @@
 import { CurrencyPipe, DecimalPipe } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import {
@@ -16,6 +16,9 @@ interface QuickVehicleDraft {
   status: QuickStatus;
   featured: boolean;
 }
+const acceptedMediaTypes = new Set(['image/jpeg', 'image/png', 'image/webp']);
+const maxMediaSize = 10 * 1024 * 1024;
+const maxVehicleMedia = 15;
 
 @Component({
   selector: 'app-admin-vehicle-list-page',
@@ -34,6 +37,14 @@ export class AdminVehicleListPageComponent implements OnInit {
   readonly loadingImages = signal(false);
   readonly saving = signal(false);
   readonly saveError = signal<string | null>(null);
+  readonly uploading = signal(false);
+  readonly uploadProgress = signal(0);
+  readonly uploadTotal = signal(0);
+  readonly uploadPercent = computed(() =>
+    this.uploadTotal() > 0 ? (this.uploadProgress() / this.uploadTotal()) * 100 : 0,
+  );
+  readonly mediaError = signal<string | null>(null);
+  readonly movingImageId = signal<string | null>(null);
 
   quickDraft: QuickVehicleDraft = {
     mileage: 0,
@@ -63,6 +74,10 @@ export class AdminVehicleListPageComponent implements OnInit {
     this.images.set([]);
     this.selectedCoverId.set(null);
     this.saveError.set(null);
+    this.mediaError.set(null);
+    this.uploading.set(false);
+    this.uploadProgress.set(0);
+    this.uploadTotal.set(0);
     this.loadingImages.set(true);
     try {
       const images = await this.auth.listVehicleImages(vehicle.id);
@@ -82,6 +97,11 @@ export class AdminVehicleListPageComponent implements OnInit {
     this.images.set([]);
     this.selectedCoverId.set(null);
     this.saveError.set(null);
+    this.mediaError.set(null);
+    this.uploading.set(false);
+    this.uploadProgress.set(0);
+    this.uploadTotal.set(0);
+    this.movingImageId.set(null);
   }
 
   setStatus(status: QuickStatus): void {
@@ -91,6 +111,111 @@ export class AdminVehicleListPageComponent implements OnInit {
 
   selectCover(imageId: string): void {
     this.selectedCoverId.set(imageId);
+  }
+
+  selectMedia(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    void this.uploadMedia(input.files ? Array.from(input.files) : []);
+    input.value = '';
+  }
+
+  dropMedia(event: DragEvent): void {
+    event.preventDefault();
+    void this.uploadMedia(event.dataTransfer?.files ? Array.from(event.dataTransfer.files) : []);
+  }
+
+  async uploadMedia(files: readonly File[]): Promise<void> {
+    const vehicle = this.editingVehicle();
+    if (!vehicle || !files.length) return;
+    this.mediaError.set(null);
+    const validFiles = files.filter(
+      (file) => acceptedMediaTypes.has(file.type) && file.size <= maxMediaSize,
+    );
+    if (validFiles.length !== files.length) {
+      this.mediaError.set('Algumas fotos foram ignoradas. Use JPEG, PNG ou WebP com até 10 MB.');
+    }
+    if (!validFiles.length) return;
+    if (this.images().length + validFiles.length > maxVehicleMedia) {
+      this.mediaError.set('O limite é de 15 fotos por veículo.');
+      return;
+    }
+
+    this.uploading.set(true);
+    this.uploadProgress.set(0);
+    this.uploadTotal.set(validFiles.length);
+    try {
+      const images = await this.auth.uploadVehicleImages(
+        vehicle.id,
+        vehicle.brand,
+        vehicle.model,
+        validFiles,
+        (completed, total) => {
+          this.uploadProgress.set(completed);
+          this.uploadTotal.set(total);
+        },
+      );
+      this.images.set(images);
+      this.selectedCoverId.set(images.find((image) => image.isCover)?.id ?? null);
+    } catch (uploadError) {
+      console.error('Falha no upload de imagens:', uploadError);
+      this.mediaError.set('Não foi possível enviar as fotos. Nenhuma imagem parcial foi mantida.');
+    } finally {
+      this.uploading.set(false);
+    }
+  }
+
+  async moveImage(imageId: string, direction: -1 | 1): Promise<void> {
+    const vehicle = this.editingVehicle();
+    const images = this.images();
+    const index = images.findIndex((image) => image.id === imageId);
+    const destination = index + direction;
+    if (!vehicle || index < 0 || destination < 0 || destination >= images.length) return;
+
+    this.movingImageId.set(imageId);
+    this.mediaError.set(null);
+    const reordered = [...images];
+    [reordered[index], reordered[destination]] = [reordered[destination], reordered[index]];
+    try {
+      await this.auth.reorderVehicleImages(
+        vehicle.id,
+        reordered.map((image) => image.id),
+      );
+      this.images.set(reordered.map((image, sortOrder) => ({ ...image, sortOrder })));
+    } catch (moveError) {
+      console.error('Falha ao reordenar imagens:', moveError);
+      this.mediaError.set('Não foi possível alterar a ordem das fotos. Tente novamente.');
+    } finally {
+      this.movingImageId.set(null);
+    }
+  }
+
+  async removeMedia(image: AdminVehicleImage): Promise<void> {
+    const vehicle = this.editingVehicle();
+    if (!vehicle) return;
+    this.movingImageId.set(image.id);
+    this.mediaError.set(null);
+    try {
+      await this.auth.removeVehicleImage(vehicle.id, image);
+      const images = this.images().filter((current) => current.id !== image.id);
+      const coverId = image.isCover
+        ? (images[0]?.id ?? null)
+        : images.some((current) => current.id === this.selectedCoverId())
+          ? this.selectedCoverId()
+          : (images.find((current) => current.isCover)?.id ?? null);
+      this.images.set(
+        images.map((current, sortOrder) => ({
+          ...current,
+          sortOrder,
+          isCover: current.id === coverId,
+        })),
+      );
+      this.selectedCoverId.set(coverId);
+    } catch (deleteError) {
+      console.error('Falha ao remover imagem:', deleteError);
+      this.mediaError.set('Não foi possível remover a foto. Tente novamente.');
+    } finally {
+      this.movingImageId.set(null);
+    }
   }
 
   async saveQuickEdit(): Promise<void> {

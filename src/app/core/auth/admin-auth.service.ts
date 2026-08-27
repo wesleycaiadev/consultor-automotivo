@@ -77,6 +77,9 @@ export interface FipeReference {
 const supabaseUrl = 'https://urjcjtwveunzixxkdikf.supabase.co';
 const supabasePublishableKey = 'sb_publishable_cpqdy12viM8aHIrkRqAuww_PL4nH8yx';
 const fipeBaseUrl = 'https://fipe.parallelum.com.br/api/v2/cars';
+const acceptedVehicleImageTypes = new Set(['image/jpeg', 'image/png', 'image/webp']);
+const maxVehicleImageSize = 10 * 1024 * 1024;
+const maxVehicleImageCount = 15;
 
 @Injectable({ providedIn: 'root' })
 export class AdminAuthService {
@@ -195,25 +198,114 @@ export class AdminAuthService {
       .eq('vehicle_id', vehicleId);
     if (coverError) throw coverError;
   }
+
+  async uploadVehicleImages(
+    vehicleId: string,
+    brand: string,
+    model: string,
+    photos: readonly File[],
+    onProgress?: (completed: number, total: number) => void,
+  ): Promise<readonly AdminVehicleImage[]> {
+    if (!this.#client) throw new Error('Sessão administrativa indisponível.');
+    this.assertVehicleImages(photos);
+    const existing = await this.listVehicleImages(vehicleId);
+    if (existing.length + photos.length > maxVehicleImageCount)
+      throw new Error('O limite é de 15 fotos por veículo.');
+
+    const uploadedPaths: string[] = [];
+    const insertedIds: string[] = [];
+    try {
+      for (const [index, photo] of photos.entries()) {
+        const storagePath = this.buildVehicleImagePath(vehicleId, index, photo);
+        const { error: uploadError } = await this.#client.storage
+          .from('vehicles')
+          .upload(storagePath, photo, { contentType: photo.type, upsert: false });
+        if (uploadError) throw uploadError;
+        uploadedPaths.push(storagePath);
+
+        const { data: image, error: imageError } = await this.#client
+          .from('vehicle_images')
+          .insert({
+            vehicle_id: vehicleId,
+            storage_path: storagePath,
+            alt_text: `${brand} ${model} — foto ${existing.length + index + 1}`,
+            sort_order: existing.length + index,
+            is_cover: existing.length === 0 && index === 0,
+          })
+          .select('id')
+          .single();
+        if (imageError) throw imageError;
+        insertedIds.push(image.id as string);
+        onProgress?.(index + 1, photos.length);
+      }
+    } catch (error) {
+      if (insertedIds.length)
+        await this.#client.from('vehicle_images').delete().in('id', insertedIds);
+      if (uploadedPaths.length) await this.#client.storage.from('vehicles').remove(uploadedPaths);
+      throw error;
+    }
+    return this.listVehicleImages(vehicleId);
+  }
+
+  async removeVehicleImage(vehicleId: string, image: AdminVehicleImage): Promise<void> {
+    if (!this.#client) throw new Error('Sessão administrativa indisponível.');
+    const remaining = (await this.listVehicleImages(vehicleId)).filter(
+      (current) => current.id !== image.id,
+    );
+    if (image.isCover && remaining.length) await this.setVehicleCover(vehicleId, remaining[0].id);
+
+    const { error: deleteError } = await this.#client
+      .from('vehicle_images')
+      .delete()
+      .eq('id', image.id)
+      .eq('vehicle_id', vehicleId);
+    if (deleteError) throw deleteError;
+    const { error: storageError } = await this.#client.storage
+      .from('vehicles')
+      .remove([image.storagePath]);
+    if (storageError) throw storageError;
+    await this.reorderVehicleImages(
+      vehicleId,
+      remaining.map((current) => current.id),
+    );
+  }
+
+  async reorderVehicleImages(vehicleId: string, imageIds: readonly string[]): Promise<void> {
+    if (!this.#client || !imageIds.length) return;
+    for (const [index, imageId] of imageIds.entries()) {
+      const { error } = await this.#client
+        .from('vehicle_images')
+        .update({ sort_order: 1000 + index })
+        .eq('id', imageId)
+        .eq('vehicle_id', vehicleId);
+      if (error) throw error;
+    }
+    for (const [index, imageId] of imageIds.entries()) {
+      const { error } = await this.#client
+        .from('vehicle_images')
+        .update({ sort_order: index })
+        .eq('id', imageId)
+        .eq('vehicle_id', vehicleId);
+      if (error) throw error;
+    }
+  }
+
   async createVehicle(
     draft: VehicleDraft,
     photos: readonly File[] = [],
     onPhotoUploaded?: (completed: number, total: number) => void,
   ): Promise<void> {
     if (!this.#client) throw new Error('Sessão administrativa indisponível.');
+    this.assertVehicleImages(photos);
+    if (photos.length > maxVehicleImageCount)
+      throw new Error('O limite é de 15 fotos por veículo.');
     const { data, error } = await this.#client.from('vehicles').insert(draft).select('id').single();
     if (error) throw error;
 
     const uploadedPaths: string[] = [];
     try {
       for (const [index, photo] of photos.entries()) {
-        const safeName = photo.name
-          .toLowerCase()
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
-          .replace(/[^a-z0-9.]+/g, '-')
-          .replace(/(^-|-$)/g, '');
-        const storagePath = `${data.id}/${Date.now()}-${index}-${safeName}`;
+        const storagePath = this.buildVehicleImagePath(data.id as string, index, photo);
         const { error: uploadError } = await this.#client.storage
           .from('vehicles')
           .upload(storagePath, photo, { contentType: photo.type, upsert: false });
@@ -350,5 +442,23 @@ export class AdminAuthService {
         .replace(/\./g, '')
         .replace(',', '.'),
     );
+  }
+
+  private assertVehicleImages(photos: readonly File[]): void {
+    const invalid = photos.some(
+      (photo) => !acceptedVehicleImageTypes.has(photo.type) || photo.size > maxVehicleImageSize,
+    );
+    if (invalid) throw new Error('Use JPEG, PNG ou WebP com até 10 MB por arquivo.');
+  }
+
+  private buildVehicleImagePath(vehicleId: string, index: number, photo: File): string {
+    const safeName =
+      photo.name
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9.]+/g, '-')
+        .replace(/(^-|-$)/g, '') || `foto-${index + 1}.jpg`;
+    return `${vehicleId}/${Date.now()}-${index}-${safeName}`;
   }
 }

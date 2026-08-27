@@ -261,46 +261,153 @@ button:focus-visible {
   background: var(--mf-ink);
   box-shadow: inset 0 0 0 0.25rem var(--mf-paper);
 }
-.cover-picker {
+.media-manager {
   display: grid;
   gap: var(--space-4);
   padding-block-start: var(--space-5);
   border-block-start: 1px solid var(--mf-silver);
 }
-.cover-grid {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: var(--space-3);
+.media-manager__header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--space-4);
 }
-.cover-grid button {
-  position: relative;
-  overflow: hidden;
-  padding: 0;
-  border: 1px solid var(--mf-silver);
+.media-counter {
+  padding: var(--space-1) var(--space-2);
   background: var(--mf-ink);
   color: var(--mf-paper);
+  font: 600 0.75rem var(--font-ui);
+}
+.media-state {
+  padding: var(--space-4);
+  color: var(--mf-graphite);
+  font-style: italic;
+}
+.media-dropzone {
+  position: relative;
+  display: grid;
+  min-block-size: 7rem;
+  place-items: center;
+  align-content: center;
+  gap: var(--space-2);
+  padding: var(--space-5);
+  border: 1px dashed var(--mf-graphite);
+  background: var(--mf-porcelain);
+  text-align: center;
   cursor: pointer;
 }
-.cover-grid button.is-selected {
-  border: 3px solid var(--mf-oxide);
+.media-dropzone:hover {
+  border-color: var(--mf-oxide);
+  background: color-mix(in srgb, var(--mf-oxide) 6%, var(--mf-paper));
 }
-.cover-grid img,
-.cover-grid span {
+.media-dropzone input {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  opacity: 0;
+}
+.media-dropzone small {
+  color: var(--mf-graphite);
+}
+.media-upload-progress {
+  position: relative;
+  overflow: hidden;
+  block-size: 2.5rem;
+  background: var(--mf-porcelain);
+}
+.media-upload-progress__bar {
+  position: absolute;
+  inset: 0;
+  background: var(--mf-ink);
+  transition: width var(--motion-ui) var(--ease-editorial);
+}
+.media-upload-progress span {
+  position: relative;
+  z-index: 1;
   display: grid;
+  block-size: 100%;
+  place-items: center;
+  color: var(--mf-paper);
+  font: 600 0.75rem var(--font-ui);
+  letter-spacing: var(--tracking-label);
+  mix-blend-mode: difference;
+}
+.media-error {
+  padding: var(--space-3);
+  border: 1px solid #7d2416;
+  color: #7d2416;
+  font-size: 0.875rem;
+}
+.media-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: var(--space-3);
+}
+.media-card {
+  margin: 0;
+  border: 1px solid var(--mf-silver);
+  background: var(--mf-ink);
+}
+.media-card.is-cover {
+  border: 2px solid var(--mf-oxide);
+}
+.media-card.is-busy {
+  opacity: 0.5;
+  pointer-events: none;
+}
+.media-card img,
+.media-placeholder {
+  display: block;
   inline-size: 100%;
   aspect-ratio: 4 / 3;
   object-fit: cover;
-  place-items: center;
 }
-.cover-grid b {
-  position: absolute;
-  inset-inline: 0;
-  inset-block-end: 0;
+.media-placeholder {
+  display: grid;
+  place-items: center;
+  color: var(--mf-paper);
+  font-size: 0.75rem;
+}
+.media-card figcaption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
   padding: var(--space-2);
-  background: rgb(27 28 26 / 82%);
+}
+.media-card__label {
+  color: var(--mf-paper);
   font: 600 0.65rem var(--font-ui);
   letter-spacing: var(--tracking-label);
-  text-transform: uppercase;
+}
+.media-card__actions {
+  display: flex;
+  gap: var(--space-1);
+}
+.media-card__actions button {
+  display: grid;
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(255 255 255 / 0.2);
+  background: transparent;
+  color: var(--mf-paper);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background var(--motion-micro) var(--ease-standard);
+}
+.media-card__actions button:hover:not(:disabled) {
+  background: rgba(255 255 255 / 0.15);
+}
+.media-card__actions button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+.media-card__actions button.is-active {
+  color: var(--mf-oxide);
+  border-color: var(--mf-oxide);
 }
 .quick-editor > footer {
   justify-content: end;
@@ -315,9 +422,6 @@ button:focus-visible {
   }
   .row > :nth-child(4) {
     display: none;
-  }
-  .cover-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 @media (max-width: 48rem) {
@@ -347,7 +451,7 @@ button:focus-visible {
   .quick-editor__visibility > div {
     grid-template-columns: 1fr;
   }
-  .cover-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .media-dropzone {
+    padding: var(--space-4);
   }
 }

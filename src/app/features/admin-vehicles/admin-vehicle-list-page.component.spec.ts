@@ -32,6 +32,24 @@ describe('AdminVehicleListPageComponent', () => {
       ]),
       updateVehicleQuick: vi.fn().mockResolvedValue({ ...vehicle, price: 27500 }),
       setVehicleCover: vi.fn().mockResolvedValue(undefined),
+      uploadVehicleImages: vi.fn().mockResolvedValue([
+        {
+          id: 'image-1',
+          storagePath: 'vehicle-1/cover.jpg',
+          isCover: true,
+          sortOrder: 0,
+          signedUrl: 'https://example.com/cover.jpg',
+        },
+        {
+          id: 'image-2',
+          storagePath: 'vehicle-1/new.jpg',
+          isCover: false,
+          sortOrder: 1,
+          signedUrl: 'https://example.com/new.jpg',
+        },
+      ]),
+      reorderVehicleImages: vi.fn().mockResolvedValue(undefined),
+      removeVehicleImage: vi.fn().mockResolvedValue(undefined),
     };
     await TestBed.configureTestingModule({
       imports: [AdminVehicleListPageComponent],
@@ -87,5 +105,99 @@ describe('AdminVehicleListPageComponent', () => {
     await component.saveQuickEdit();
 
     expect(auth.setVehicleCover).toHaveBeenCalledWith('vehicle-1', 'image-2');
+  });
+
+  it('rejects unsupported and oversized media before upload', async () => {
+    const { auth, fixture } = await setup();
+    const component = fixture.componentInstance;
+    await component.openQuickEdit(vehicle);
+
+    await component.uploadMedia([new File(['texto'], 'contrato.txt', { type: 'text/plain' })]);
+    expect(auth.uploadVehicleImages).not.toHaveBeenCalled();
+    expect(component.mediaError()).toContain('foram ignoradas');
+
+    const largePhoto = new File([new Uint8Array(10 * 1024 * 1024 + 1)], 'grande.jpg', {
+      type: 'image/jpeg',
+    });
+    await component.uploadMedia([largePhoto]);
+    expect(auth.uploadVehicleImages).not.toHaveBeenCalled();
+    expect(component.mediaError()).toContain('foram ignoradas');
+  });
+
+  it('uploads valid media and exposes progress', async () => {
+    const { auth, fixture } = await setup();
+    const component = fixture.componentInstance;
+    await component.openQuickEdit(vehicle);
+
+    await component.uploadMedia([new File(['image'], 'nova.jpg', { type: 'image/jpeg' })]);
+
+    expect(auth.uploadVehicleImages).toHaveBeenCalledWith(
+      'vehicle-1',
+      'Fiat',
+      'Siena EL',
+      expect.any(Array),
+      expect.any(Function),
+    );
+    expect(component.images()).toHaveLength(2);
+    expect(component.selectedCoverId()).toBe('image-1');
+  });
+
+  it('reorders media without losing cover state', async () => {
+    const { auth, fixture } = await setup();
+    auth.listVehicleImages.mockResolvedValue([
+      {
+        id: 'image-1',
+        storagePath: 'vehicle-1/cover.jpg',
+        isCover: true,
+        sortOrder: 0,
+        signedUrl: 'https://example.com/cover.jpg',
+      },
+      {
+        id: 'image-2',
+        storagePath: 'vehicle-1/second.jpg',
+        isCover: false,
+        sortOrder: 1,
+        signedUrl: 'https://example.com/second.jpg',
+      },
+    ]);
+    const component = fixture.componentInstance;
+    await component.openQuickEdit(vehicle);
+
+    await component.moveImage('image-2', -1);
+
+    expect(auth.reorderVehicleImages).toHaveBeenCalledWith('vehicle-1', ['image-2', 'image-1']);
+    expect(component.images().map((image) => image.id)).toEqual(['image-2', 'image-1']);
+    expect(component.images().find((image) => image.id === 'image-1')?.isCover).toBe(true);
+  });
+
+  it('removes the cover and promotes the next image locally', async () => {
+    const { auth, fixture } = await setup();
+    auth.listVehicleImages.mockResolvedValue([
+      {
+        id: 'image-1',
+        storagePath: 'vehicle-1/cover.jpg',
+        isCover: true,
+        sortOrder: 0,
+        signedUrl: 'https://example.com/cover.jpg',
+      },
+      {
+        id: 'image-2',
+        storagePath: 'vehicle-1/second.jpg',
+        isCover: false,
+        sortOrder: 1,
+        signedUrl: 'https://example.com/second.jpg',
+      },
+    ]);
+    const component = fixture.componentInstance;
+    await component.openQuickEdit(vehicle);
+
+    await component.removeMedia(component.images()[0]);
+
+    expect(auth.removeVehicleImage).toHaveBeenCalledWith(
+      'vehicle-1',
+      expect.objectContaining({ id: 'image-1' }),
+    );
+    expect(component.selectedCoverId()).toBe('image-2');
+    expect(component.images()[0]).toMatchObject({ id: 'image-2', isCover: true, sortOrder: 0 });
   });
 });
