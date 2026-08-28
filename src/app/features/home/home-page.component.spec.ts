@@ -21,6 +21,7 @@ const repository: VehicleRepository = {
       price: null,
       transmission: 'Automático',
       fuel: 'Gasolina',
+      category: 'other',
       color: 'Cinza',
       location: 'Aracaju — SE',
       description: 'Teste',

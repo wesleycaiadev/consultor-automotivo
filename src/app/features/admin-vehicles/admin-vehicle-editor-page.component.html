@@ -241,6 +241,17 @@
           </select>
         </div>
         <div class="field">
+          <label for="category">Tipo de carro</label
+          ><select id="category" name="category" [(ngModel)]="draft.category" required>
+            <option value="suv">SUV</option>
+            <option value="sedan">Sedã</option>
+            <option value="hatch">Hatch</option>
+            <option value="pickup">Picape</option>
+            <option value="other">Outro</option>
+          </select>
+          <small class="helper">Usado para organizar a vitrine pública.</small>
+        </div>
+        <div class="field">
           <label for="color">Cor</label
           ><input
             id="color"

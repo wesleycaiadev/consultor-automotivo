@@ -1,5 +1,6 @@
 import {
   type Vehicle,
+  type VehicleCategory,
   type VehicleImage,
   type VehicleImageRecord,
   type VehicleRecord,
@@ -30,6 +31,7 @@ export function mapVehicleRecord(record: VehicleRecord): Vehicle {
     price: record.price,
     transmission: record.transmission,
     fuel: record.fuel,
+    category: record.category ?? legacyCategory(record),
     color: record.color,
     location: record.location,
     description: record.description,
@@ -39,4 +41,16 @@ export function mapVehicleRecord(record: VehicleRecord): Vehicle {
     updatedAt: record.updated_at,
     images: record.images.map(mapVehicleImageRecord),
   };
+}
+
+/**
+ * Compatibility only for rows created before the category migration is applied.
+ * New and migrated records always carry their own persisted category.
+ */
+function legacyCategory(record: VehicleRecord): VehicleCategory {
+  const identity = `${record.brand} ${record.model} ${record.version}`.toLocaleLowerCase('pt-BR');
+
+  if (identity.includes('range rover')) return 'suv';
+  if (identity.includes('siena')) return 'sedan';
+  return 'other';
 }

@@ -70,6 +70,7 @@ describe('SeoService', () => {
       price: null,
       transmission: 'Automático',
       fuel: 'Gasolina',
+      category: 'other',
       color: 'Cinza Ágata',
       location: 'Aracaju — SE',
       description: 'Veículo selecionado para a curadoria.',

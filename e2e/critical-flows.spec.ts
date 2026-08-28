@@ -11,6 +11,7 @@ interface MockVehicle {
   description: string;
   featured: boolean;
   fuel: string;
+  category: 'suv' | 'sedan' | 'hatch' | 'pickup' | 'other';
   manufacturing_year: number;
   mileage: number;
   model: string;
@@ -38,6 +39,7 @@ function vehicleFixture(): MockVehicle {
     description: 'Veículo de teste para validar o fluxo essencial da vitrine.',
     featured: false,
     fuel: 'Flex',
+    category: 'sedan',
     manufacturing_year: 2010,
     mileage: 211000,
     model: 'Siena EL 1.0 mpi Fire Flex 8V 4p',
@@ -181,6 +183,9 @@ test('percorre showroom até o detalhe do veículo', async ({ page }) => {
       name: 'Veículos selecionados para uma decisão mais segura.',
     }),
   ).toBeVisible();
+  await page.getByRole('button', { name: 'Sedã' }).click();
+  await expect(page.getByRole('button', { name: 'Sedã' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('link', { name: /fiat siena/i })).toBeVisible();
   await page.getByRole('link', { name: /fiat siena/i }).click();
 
   await expect(page).toHaveURL(/\/showroom\/fiat-siena-2010$/);

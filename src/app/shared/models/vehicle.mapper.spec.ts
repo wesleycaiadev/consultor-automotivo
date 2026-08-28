@@ -16,6 +16,7 @@ describe('mapVehicleRecord', () => {
       price: null,
       transmission: 'Automático',
       fuel: 'Gasolina',
+      category: 'other',
       color: 'Cinza Ágata',
       location: 'Aracaju — SE',
       description: 'Descrição de teste.',
@@ -40,6 +41,7 @@ describe('mapVehicleRecord', () => {
     expect(vehicle).toMatchObject({
       manufacturingYear: 2023,
       modelYear: 2024,
+      category: 'other',
       createdAt: '2026-08-01T12:00:00.000Z',
       images: [
         {
@@ -50,5 +52,31 @@ describe('mapVehicleRecord', () => {
       ],
     });
     expect('manufacturing_year' in vehicle).toBe(false);
+  });
+
+  it('keeps pre-migration records filterable while category is being deployed', () => {
+    const vehicle = mapVehicleRecord({
+      id: 'vehicle-siena',
+      slug: 'fiat-siena-2010',
+      brand: 'Fiat',
+      model: 'Siena EL',
+      version: '1.0 Fire Flex',
+      manufacturing_year: 2010,
+      model_year: 2010,
+      mileage: 211000,
+      price: 26000,
+      transmission: 'Manual',
+      fuel: 'Flex',
+      color: 'Prata',
+      location: 'Aracaju — SE',
+      description: 'Registro criado antes da categoria.',
+      status: 'published',
+      featured: false,
+      created_at: '2026-08-01T12:00:00.000Z',
+      updated_at: '2026-08-20T12:00:00.000Z',
+      images: [],
+    });
+
+    expect(vehicle.category).toBe('sedan');
   });
 });

@@ -4,7 +4,7 @@ import { type MfFilterTab } from '../../shared/ui/filter-tabs/mf-filter-tabs.com
 export const SHOWROOM_FILTERS = [
   { id: 'all', label: 'Todos' },
   { id: 'suv', label: 'SUV' },
-  { id: 'sedan', label: 'Sedan' },
+  { id: 'sedan', label: 'Sedã' },
   { id: 'hatch', label: 'Hatch' },
   { id: 'pickup', label: 'Picape' },
 ] as const satisfies readonly MfFilterTab[];

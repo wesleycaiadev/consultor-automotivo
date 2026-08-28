@@ -89,6 +89,7 @@ export class AdminVehicleEditorPageComponent implements OnInit, OnDestroy {
     price: null,
     transmission: 'Automático',
     fuel: 'Gasolina',
+    category: 'other',
     steering: 'Elétrica',
     color: '',
     location: 'Aracaju — SE',

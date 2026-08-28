@@ -1,6 +1,8 @@
 export const VEHICLE_STATUSES = ['draft', 'published', 'sold'] as const;
+export const VEHICLE_CATEGORIES = ['suv', 'sedan', 'hatch', 'pickup', 'other'] as const;
 
 export type VehicleStatus = (typeof VEHICLE_STATUSES)[number];
+export type VehicleCategory = (typeof VEHICLE_CATEGORIES)[number];
 
 export interface VehicleImage {
   readonly id: string;
@@ -24,6 +26,7 @@ export interface Vehicle {
   readonly price: number | null;
   readonly transmission: string;
   readonly fuel: string;
+  readonly category: VehicleCategory;
   readonly color: string;
   readonly location: string;
   readonly description: string;
@@ -56,6 +59,7 @@ export interface VehicleRecord {
   readonly price: number | null;
   readonly transmission: string;
   readonly fuel: string;
+  readonly category?: VehicleCategory;
   readonly color: string;
   readonly location: string;
   readonly description: string;

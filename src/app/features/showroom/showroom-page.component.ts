@@ -7,7 +7,7 @@ import { type Vehicle } from '../../shared/models/vehicle.model';
 import { MfSectionMarkerComponent } from '../../shared/ui/section-marker/mf-section-marker.component';
 import { MfVehicleCardComponent } from '../../shared/ui/vehicle-card/mf-vehicle-card.component';
 import { ShowroomFiltersComponent } from './showroom-filters.component';
-import { type ShowroomFilter, ShowroomFiltersStore } from './showroom-filters.store';
+import { ShowroomFiltersStore } from './showroom-filters.store';
 import { ShowroomStateComponent } from './showroom-state.component';
 
 type ShowroomPageState = 'loading' | 'ready' | 'error';
@@ -93,7 +93,7 @@ export class ShowroomPageComponent {
       return vehicles;
     }
 
-    return vehicles.filter((vehicle) => this.categoryFor(vehicle) === selectedFilter);
+    return vehicles.filter((vehicle) => vehicle.category === selectedFilter);
   });
   readonly visibleVehicles = computed(() => this.filteredVehicles().slice(0, this.visibleCount()));
   readonly hasMore = computed(() => this.visibleVehicles().length < this.filteredVehicles().length);
@@ -138,15 +138,7 @@ export class ShowroomPageComponent {
   showMore(): void {
     this.visibleCount.update((count) => count + 6);
   }
-
-  private categoryFor(vehicle: Vehicle): ShowroomFilter {
-    return SHOWROOM_MOCK_CATEGORIES[vehicle.slug] ?? 'all';
-  }
 }
-
-const SHOWROOM_MOCK_CATEGORIES: Readonly<Record<string, Exclude<ShowroomFilter, 'all'>>> = {
-  'range-rover-autobiography-2022': 'suv',
-};
 
 const SHOWROOM_FALLBACK_IMAGE =
   'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1600&q=85';

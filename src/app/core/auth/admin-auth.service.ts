@@ -1,6 +1,7 @@
 import { Injectable, PLATFORM_ID, computed, inject, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { createClient, type Session, type SupabaseClient } from '@supabase/supabase-js';
+import { type VehicleCategory } from '../../shared/models/vehicle.model';
 
 export interface AdminVehicleListItem {
   readonly id: string;
@@ -78,6 +79,7 @@ export interface VehicleDraft {
   price: number | null;
   transmission: string;
   fuel: string;
+  category: VehicleCategory;
   steering: string;
   color: string;
   location: string;
