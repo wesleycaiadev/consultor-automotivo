@@ -22,6 +22,27 @@ body {
   line-height: var(--leading-body);
 }
 
+.mf-skip-link {
+  position: fixed;
+  z-index: calc(var(--layer-overlay) + 1);
+  inset-block-start: var(--space-3);
+  inset-inline-start: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--mf-ink);
+  color: var(--mf-paper);
+  font: 600 var(--type-label) / var(--leading-ui) var(--font-ui);
+  letter-spacing: var(--tracking-label);
+  text-decoration: none;
+  text-transform: uppercase;
+  transform: translateY(-150%);
+}
+
+.mf-skip-link:focus-visible {
+  outline: 2px solid var(--mf-oxide);
+  outline-offset: 0.25rem;
+  transform: translateY(0);
+}
+
 button,
 input,
 select,

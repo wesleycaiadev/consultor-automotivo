@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  PLATFORM_ID,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import {
   type FinderWhatsappInput,
   WhatsappComposerService,
@@ -101,7 +110,9 @@ interface FinderSummaryItem {
 
         @if (state.currentStep() === 'category') {
           <p class="mf-finder__progress">Etapa 1 de 10</p>
-          <h1 id="finder-title">Qual tipo de veículo faz sentido para você?</h1>
+          <h1 #stepHeading id="finder-title" tabindex="-1">
+            Qual tipo de veículo faz sentido para você?
+          </h1>
           <p class="mf-finder__intro">
             Começamos por uma decisão simples. Você pode ajustar depois.
           </p>
@@ -132,7 +143,9 @@ interface FinderSummaryItem {
           }
         } @else if (state.currentStep() === 'budget') {
           <p class="mf-finder__progress">Etapa 2 de 10</p>
-          <h1 id="finder-title">Qual faixa de investimento você considera?</h1>
+          <h1 #stepHeading id="finder-title" tabindex="-1">
+            Qual faixa de investimento você considera?
+          </h1>
           <p class="mf-finder__intro">
             Escolha a faixa mais próxima. Felipe refina os detalhes com você.
           </p>
@@ -167,7 +180,9 @@ interface FinderSummaryItem {
           </div>
         } @else if (state.currentStep() === 'condition') {
           <p class="mf-finder__progress">Etapa 3 de 10</p>
-          <h1 id="finder-title">Você prefere um veículo novo ou seminovo?</h1>
+          <h1 #stepHeading id="finder-title" tabindex="-1">
+            Você prefere um veículo novo ou seminovo?
+          </h1>
           <p class="mf-finder__intro">
             Se as duas opções funcionam para você, deixe Felipe avaliar.
           </p>
@@ -202,7 +217,9 @@ interface FinderSummaryItem {
           </div>
         } @else if (state.currentStep() === 'usage') {
           <p class="mf-finder__progress">Etapa 4 de 10</p>
-          <h1 id="finder-title">Como este veículo precisa acompanhar sua rotina?</h1>
+          <h1 #stepHeading id="finder-title" tabindex="-1">
+            Como este veículo precisa acompanhar sua rotina?
+          </h1>
           <p class="mf-finder__intro">
             Essa escolha ajuda Felipe a equilibrar espaço, conforto, consumo e desempenho.
           </p>
@@ -232,7 +249,9 @@ interface FinderSummaryItem {
           </div>
         } @else if (state.currentStep() === 'powertrain') {
           <p class="mf-finder__progress">Etapa 5 de 10</p>
-          <h1 id="finder-title">Há preferência de motorização ou combustível?</h1>
+          <h1 #stepHeading id="finder-title" tabindex="-1">
+            Há preferência de motorização ou combustível?
+          </h1>
           <p class="mf-finder__intro">
             Não precisa ser técnico: informe o que faz sentido para seu uso e Felipe refina a
             escolha.
@@ -263,7 +282,7 @@ interface FinderSummaryItem {
           </div>
         } @else if (state.currentStep() === 'brand') {
           <p class="mf-finder__progress">Etapa 6 de 10</p>
-          <h1 id="finder-title">Tem alguma marca em mente?</h1>
+          <h1 #stepHeading id="finder-title" tabindex="-1">Tem alguma marca em mente?</h1>
           <p class="mf-finder__intro">Esta resposta é opcional. Uma preferência já é suficiente.</p>
 
           <div class="mf-finder__field">
@@ -291,7 +310,7 @@ interface FinderSummaryItem {
           </div>
         } @else if (state.currentStep() === 'model') {
           <p class="mf-finder__progress">Etapa 7 de 10</p>
-          <h1 id="finder-title">E algum modelo específico?</h1>
+          <h1 #stepHeading id="finder-title" tabindex="-1">E algum modelo específico?</h1>
           <p class="mf-finder__intro">
             Você pode deixar em branco se ainda estiver explorando opções.
           </p>
@@ -323,7 +342,9 @@ interface FinderSummaryItem {
           </div>
         } @else if (state.currentStep() === 'notes') {
           <p class="mf-finder__progress">Etapa 8 de 10</p>
-          <h1 id="finder-title">Há algo importante para Felipe saber?</h1>
+          <h1 #stepHeading id="finder-title" tabindex="-1">
+            Há algo importante para Felipe saber?
+          </h1>
           <p class="mf-finder__intro">
             Conte o que pode ajudar na curadoria: uso, prioridades ou detalhes desejados.
           </p>
@@ -355,7 +376,7 @@ interface FinderSummaryItem {
           </div>
         } @else if (state.currentStep() === 'summary') {
           <p class="mf-finder__progress">Etapa 9 de 10</p>
-          <h1 id="finder-title">Confira sua busca antes de enviar.</h1>
+          <h1 #stepHeading id="finder-title" tabindex="-1">Confira sua busca antes de enviar.</h1>
           <p class="mf-finder__intro">
             Felipe receberá exatamente as preferências abaixo. Você pode ajustar qualquer uma.
           </p>
@@ -385,7 +406,7 @@ interface FinderSummaryItem {
           </div>
         } @else if (state.currentStep() === 'whatsapp') {
           <p class="mf-finder__progress">Etapa 10 de 10</p>
-          <h1 id="finder-title">Entendi o que você procura.</h1>
+          <h1 #stepHeading id="finder-title" tabindex="-1">Entendi o que você procura.</h1>
           <p class="mf-finder__intro">
             Envie sua busca para Felipe e ele seguirá a conversa pelo WhatsApp.
           </p>
@@ -416,6 +437,9 @@ export class CarFinderPageComponent {
   readonly powertrainOptions = POWERTRAIN_OPTIONS;
   readonly usageOptions = USAGE_OPTIONS;
   readonly notesMaxLength = NOTES_MAX_LENGTH;
+
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly stepHeading = viewChild<ElementRef<HTMLHeadingElement>>('stepHeading');
 
   selectCategory(category: FinderCategory): void {
     this.state.selectCategory(category);
@@ -462,6 +486,7 @@ export class CarFinderPageComponent {
     this.feedback.set('Sem preferência de marca registrada.');
     this.errorMessage.set(null);
     this.state.goNext();
+    this.focusStepHeading();
   }
 
   skipModel(): void {
@@ -469,6 +494,7 @@ export class CarFinderPageComponent {
     this.feedback.set('Sem preferência de modelo registrada.');
     this.errorMessage.set(null);
     this.state.goNext();
+    this.focusStepHeading();
   }
 
   skipUsage(): void {
@@ -476,6 +502,7 @@ export class CarFinderPageComponent {
     this.feedback.set('Sem preferência de uso registrada.');
     this.errorMessage.set(null);
     this.state.goNext();
+    this.focusStepHeading();
   }
 
   skipPowertrain(): void {
@@ -483,15 +510,18 @@ export class CarFinderPageComponent {
     this.feedback.set('Sem preferência de motorização registrada.');
     this.errorMessage.set(null);
     this.state.goNext();
+    this.focusStepHeading();
   }
 
   edit(step: FinderStep): void {
     this.state.goTo(step);
+    this.focusStepHeading();
   }
 
   goNext(): void {
     if (this.state.goNext()) {
       this.clearMessages();
+      this.focusStepHeading();
       return;
     }
 
@@ -502,8 +532,11 @@ export class CarFinderPageComponent {
   }
 
   goBack(): void {
-    this.state.goBack();
+    const moved = this.state.goBack();
     this.clearMessages();
+    if (moved) {
+      this.focusStepHeading();
+    }
   }
 
   categoryLabel(category: FinderCategory | null): string {
@@ -570,5 +603,13 @@ export class CarFinderPageComponent {
   private clearMessages(): void {
     this.errorMessage.set(null);
     this.feedback.set(null);
+  }
+
+  private focusStepHeading(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    queueMicrotask(() => this.stepHeading()?.nativeElement.focus());
   }
 }

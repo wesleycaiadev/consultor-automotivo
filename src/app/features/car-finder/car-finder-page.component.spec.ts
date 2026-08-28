@@ -22,7 +22,7 @@ describe('CarFinderPageComponent', () => {
     );
   });
 
-  it('moves to budget and preserves the category when returning', () => {
+  it('moves focus to the new step and preserves the category when returning', async () => {
     const fixture = TestBed.createComponent(CarFinderPageComponent);
     fixture.detectChanges();
 
@@ -34,9 +34,11 @@ describe('CarFinderPageComponent', () => {
 
     (fixture.nativeElement.querySelector('app-mf-button button') as HTMLButtonElement).click();
     fixture.detectChanges();
+    await Promise.resolve();
 
     expect(fixture.componentInstance.state.currentStep()).toBe('budget');
     expect(fixture.nativeElement.textContent).toContain('Qual faixa de investimento');
+    expect(document.activeElement).toBe(fixture.nativeElement.querySelector('#finder-title'));
 
     const budgetOptions = fixture.nativeElement.querySelectorAll(
       '.mf-finder__choices input',

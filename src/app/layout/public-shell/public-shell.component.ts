@@ -6,8 +6,9 @@ import { MfNavbarComponent } from './mf-navbar.component';
   selector: 'app-public-shell',
   imports: [MfNavbarComponent, RouterOutlet],
   template: `
+    <a class="mf-skip-link" href="#conteudo-principal">Pular para o conteúdo</a>
     <app-mf-navbar />
-    <main>
+    <main id="conteudo-principal" tabindex="-1">
       <router-outlet />
     </main>
   `,

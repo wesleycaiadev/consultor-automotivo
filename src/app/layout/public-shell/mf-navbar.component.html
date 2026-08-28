@@ -34,7 +34,7 @@
     type="button"
     [attr.aria-expanded]="menuOpen()"
     aria-controls="mf-mobile-menu"
-    aria-label="Abrir menu"
+    [attr.aria-label]="menuOpen() ? 'Fechar menu' : 'Abrir menu'"
     (click)="toggleMenu()"
   >
     <span></span>
@@ -45,6 +45,7 @@
 @if (menuOpen()) {
   <section
     id="mf-mobile-menu"
+    #mobileMenu
     class="mf-mobile-menu"
     role="dialog"
     aria-modal="true"
