@@ -4,6 +4,7 @@ import {
   type VehicleRepository,
   VEHICLE_REPOSITORY,
 } from '../../core/services/vehicle-repository.service';
+import { SeoService } from '../../core/seo/seo.service';
 import { WhatsappComposerService } from '../../core/services/whatsapp-composer.service';
 import { type Vehicle } from '../../shared/models/vehicle.model';
 import { type VehicleGalleryImage, VehicleGalleryComponent } from './vehicle-gallery.component';
@@ -118,6 +119,7 @@ import { type VehicleGalleryImage, VehicleGalleryComponent } from './vehicle-gal
 export class VehicleDetailPageComponent {
   readonly #repository = inject<VehicleRepository>(VEHICLE_REPOSITORY);
   readonly #route = inject(ActivatedRoute);
+  readonly #seo = inject(SeoService);
   readonly whatsapp = inject(WhatsappComposerService);
   readonly state = signal<'loading' | 'ready'>('loading');
   readonly vehicle = signal<Vehicle | undefined>(undefined);
@@ -157,7 +159,18 @@ export class VehicleDetailPageComponent {
 
   private async loadVehicle(): Promise<void> {
     const slug = this.#route.snapshot.paramMap.get('slug');
-    this.vehicle.set(slug === null ? undefined : await this.#repository.findPublishedBySlug(slug));
+    const vehicle = slug === null ? undefined : await this.#repository.findPublishedBySlug(slug);
+    this.vehicle.set(vehicle);
+    if (vehicle) {
+      this.#seo.setVehicle(vehicle, this.imagesFor(vehicle)[0]?.src ?? DETAIL_FALLBACK_IMAGE);
+    } else if (slug) {
+      this.#seo.setPage({
+        title: 'Veículo indisponível — Marques Felipe',
+        description: 'Este veículo não está mais disponível no showroom da Marques Felipe.',
+        path: `/showroom/${slug}`,
+        noindex: true,
+      });
+    }
     this.state.set('ready');
   }
 }
