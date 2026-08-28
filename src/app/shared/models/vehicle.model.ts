@@ -9,6 +9,7 @@ export interface VehicleImage {
   readonly altText: string;
   readonly sortOrder: number;
   readonly isCover: boolean;
+  readonly signedUrl?: string;
 }
 
 export interface Vehicle {
@@ -40,6 +41,7 @@ export interface VehicleImageRecord {
   readonly alt_text: string;
   readonly sort_order: number;
   readonly is_cover: boolean;
+  readonly signed_url?: string;
 }
 
 export interface VehicleRecord {

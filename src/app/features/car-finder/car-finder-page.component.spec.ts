@@ -9,7 +9,7 @@ describe('CarFinderPageComponent', () => {
     const options = fixture.nativeElement.querySelectorAll(
       '.mf-finder__choices input',
     ) as NodeListOf<HTMLInputElement>;
-    expect(options).toHaveLength(5);
+    expect(options).toHaveLength(8);
     expect(options[0].type).toBe('radio');
 
     options[1].dispatchEvent(new Event('change'));
@@ -102,29 +102,11 @@ describe('CarFinderPageComponent', () => {
 
   it('lets the user skip brand and return without losing previous answers', () => {
     const fixture = TestBed.createComponent(CarFinderPageComponent);
+    fixture.componentInstance.state.selectCategory('suv');
+    fixture.componentInstance.state.selectBudget('Até R$ 50 mil');
+    fixture.componentInstance.state.selectCondition('either');
+    fixture.componentInstance.state.goTo('brand');
     fixture.detectChanges();
-
-    const select = (index: number): void => {
-      const options = fixture.nativeElement.querySelectorAll(
-        '.mf-finder__choices input',
-      ) as NodeListOf<HTMLInputElement>;
-      options[index].dispatchEvent(new Event('change'));
-      fixture.detectChanges();
-    };
-    const continueFlow = (): void => {
-      const buttons = fixture.nativeElement.querySelectorAll(
-        'app-mf-button button',
-      ) as NodeListOf<HTMLButtonElement>;
-      buttons[buttons.length - 1].click();
-      fixture.detectChanges();
-    };
-
-    select(0);
-    continueFlow();
-    select(0);
-    continueFlow();
-    select(2);
-    continueFlow();
 
     expect(fixture.componentInstance.state.currentStep()).toBe('brand');
     expect(fixture.nativeElement.querySelector('#finder-brand')).not.toBeNull();
@@ -174,6 +156,8 @@ describe('CarFinderPageComponent', () => {
     state.selectCategory('suv');
     state.selectBudget('Até R$ 100 mil');
     state.selectCondition('either');
+    state.selectUsage('family');
+    state.selectPowertrain('balanced');
     state.setNotes('Uso familiar e viagens longas.');
     state.goTo('summary');
     fixture.detectChanges();
@@ -182,6 +166,8 @@ describe('CarFinderPageComponent', () => {
     expect(summary.textContent).toContain('SUV');
     expect(summary.textContent).toContain('Até R$ 100 mil');
     expect(summary.textContent).toContain('Tanto faz');
+    expect(summary.textContent).toContain('Família');
+    expect(summary.textContent).toContain('Equilibrada (1.4 a 2.0)');
     expect(summary.textContent).toContain('Não informado');
     expect(summary.textContent).toContain('Uso familiar e viagens longas.');
 
@@ -238,13 +224,13 @@ describe('CarFinderPageComponent', () => {
       '.mf-finder__progress-meter',
     ) as HTMLDivElement;
     expect(progress.getAttribute('role')).toBe('progressbar');
-    expect(progress.getAttribute('aria-valuetext')).toBe('Etapa 7 de 8');
-    expect(progress.querySelector('span')?.style.width).toBe('87.5%');
+    expect(progress.getAttribute('aria-valuetext')).toBe('Etapa 9 de 10');
+    expect(progress.querySelector('span')?.style.width).toBe('90%');
 
     state.goTo('whatsapp');
     fixture.detectChanges();
 
-    expect(progress.getAttribute('aria-valuetext')).toBe('Etapa 8 de 8');
+    expect(progress.getAttribute('aria-valuetext')).toBe('Etapa 10 de 10');
     expect(progress.querySelector('span')?.style.width).toBe('100%');
   });
 

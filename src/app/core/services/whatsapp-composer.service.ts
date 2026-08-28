@@ -10,6 +10,8 @@ export interface FinderWhatsappInput {
   readonly condition: string;
   readonly model: string;
   readonly notes: string;
+  readonly powertrain: string;
+  readonly usage: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -29,6 +31,8 @@ export class WhatsappComposerService {
     const optionalLines = [
       this.optionalLine('Marca', input.brand),
       this.optionalLine('Modelo', input.model),
+      this.optionalLine('Uso principal', input.usage),
+      this.optionalLine('Motorização', input.powertrain),
       this.optionalLine('Observações', input.notes),
     ].filter((line): line is string => line !== null);
     const message = [

@@ -279,20 +279,50 @@
   gap: var(--space-8);
 }
 .mf-vehicle-preview {
+  position: relative;
+}
+
+.mf-vehicle-preview__link {
   display: grid;
   gap: var(--space-3);
+  color: inherit;
+  text-decoration: none;
 }
+
+.mf-vehicle-preview__media {
+  position: relative;
+  block-size: clamp(16rem, 32vw, 30rem);
+  margin: 0;
+}
+
 .mf-vehicle-preview img {
   display: block;
   inline-size: 100%;
-  aspect-ratio: 1.25;
-  object-fit: cover;
-  background: var(--mf-porcelain);
+  block-size: 100%;
+  object-fit: contain;
+  transition:
+    transform var(--motion-editorial) var(--ease-editorial),
+    filter var(--motion-editorial) var(--ease-editorial);
 }
+
+.mf-vehicle-preview figcaption {
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block-end: 0;
+  padding: var(--space-2) var(--space-3);
+  background: var(--mf-ink);
+  color: var(--mf-paper);
+  font: 600 var(--type-label) / var(--leading-ui) var(--font-ui);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
 .mf-vehicle-preview__meta {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: var(--space-1) var(--space-4);
+  border-block-start: 1px solid var(--mf-ink);
+  padding-block-start: var(--space-3);
 }
 .mf-vehicle-preview h3,
 .mf-vehicle-preview p,
@@ -300,9 +330,8 @@
   margin: 0;
 }
 .mf-vehicle-preview h3 {
-  font-family: var(--font-ui);
-  font-size: var(--type-ui);
-  font-weight: 600;
+  font: 400 var(--type-heading-md) / var(--leading-heading) var(--font-display);
+  letter-spacing: var(--tracking-display);
 }
 .mf-vehicle-preview p,
 .mf-vehicle-preview span {
@@ -316,6 +345,35 @@
 .mf-vehicle-preview span {
   grid-column: 2;
   grid-row: 1;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .mf-vehicle-preview__link:hover img {
+    filter: brightness(1.025);
+    transform: scale(1.012);
+  }
+
+  .mf-vehicle-preview__link:hover figcaption {
+    background: var(--mf-oxide);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .mf-vehicle-preview {
+    animation: mf-vehicle-preview-enter 720ms var(--ease-editorial) both;
+  }
+
+  .mf-vehicle-preview:nth-child(2) {
+    animation-delay: 120ms;
+  }
+
+  .mf-vehicle-preview:nth-child(3) {
+    animation-delay: 240ms;
+  }
+
+  .mf-vehicle-preview img {
+    animation: mf-vehicle-preview-image-settle 900ms var(--ease-editorial) both;
+  }
 }
 
 .mf-finder-cta {
@@ -356,6 +414,15 @@
   margin: var(--space-5) 0 0;
   color: var(--mf-graphite);
   line-height: var(--leading-body);
+}
+
+.mf-finder-cta__content p::after {
+  display: block;
+  margin-block-start: var(--space-4);
+  color: var(--mf-ink);
+  font: 600 var(--type-label) / var(--leading-ui) var(--font-ui);
+  letter-spacing: var(--tracking-label);
+  content: 'TIPO · USO · FAIXA · CONDIÇÃO · MOTORIZAÇÃO';
 }
 
 .mf-finder-cta__action {
@@ -403,6 +470,29 @@
 .mf-deliveries-preview__list {
   display: grid;
   gap: var(--space-10);
+}
+
+.mf-deliveries-preview__empty {
+  display: grid;
+  gap: var(--space-3);
+  max-inline-size: 34rem;
+  border-block: 1px solid var(--mf-silver);
+  padding-block: var(--space-7);
+}
+
+.mf-deliveries-preview__empty p,
+.mf-deliveries-preview__empty span {
+  margin: 0;
+}
+
+.mf-deliveries-preview__empty p {
+  font: 400 var(--type-heading-md) / var(--leading-heading) var(--font-display);
+  letter-spacing: var(--tracking-display);
+}
+
+.mf-deliveries-preview__empty span {
+  color: var(--mf-graphite);
+  line-height: var(--leading-body);
 }
 
 .mf-delivery-preview {
@@ -469,15 +559,29 @@
 }
 
 .mf-about-preview__media {
+  aspect-ratio: 5 / 6;
   margin: 0;
+  overflow: hidden;
 }
 
 .mf-about-preview__media img {
   display: block;
   inline-size: 100%;
-  aspect-ratio: 0.82;
+  block-size: 100%;
   object-fit: cover;
   object-position: center 42%;
+}
+
+@media (max-width: calc(tokens.$mf-breakpoint-tablet - 0.0625rem)) {
+  .mf-about-preview__media {
+    aspect-ratio: 4 / 5;
+    max-inline-size: 18rem;
+    margin-inline: auto;
+  }
+
+  .mf-about-preview__media img {
+    object-position: center 35%;
+  }
 }
 
 .mf-about-preview__content {
@@ -968,5 +1072,29 @@
   to {
     opacity: 1;
     transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes mf-vehicle-preview-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 1.25rem, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes mf-vehicle-preview-image-settle {
+  from {
+    filter: saturate(0.82);
+    transform: scale(1.035);
+  }
+
+  to {
+    filter: saturate(1);
+    transform: scale(1);
   }
 }

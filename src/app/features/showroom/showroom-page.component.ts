@@ -71,7 +71,7 @@ type ShowroomPageState = 'loading' | 'ready' | 'error';
           <aside class="mf-showroom-page__finder" aria-labelledby="showroom-finder-title">
             <p>Não encontrou o seu?</p>
             <h2 id="showroom-finder-title">A curadoria pode começar pelo que você precisa.</h2>
-            <a class="mf-frame" href="https://wa.me/557998709362">Iniciar minha busca</a>
+            <a class="mf-frame" href="/encontrar-meu-carro">Definir minha busca</a>
           </aside>
         }
       </div>
@@ -132,7 +132,7 @@ export class ShowroomPageComponent {
   }
 
   imageUrlFor(vehicle: Vehicle): string {
-    return SHOWROOM_IMAGE_URLS[vehicle.slug] ?? SHOWROOM_FALLBACK_IMAGE;
+    return vehicle.images.find((image) => image.isCover)?.signedUrl ?? SHOWROOM_FALLBACK_IMAGE;
   }
 
   showMore(): void {
@@ -146,13 +146,6 @@ export class ShowroomPageComponent {
 
 const SHOWROOM_MOCK_CATEGORIES: Readonly<Record<string, Exclude<ShowroomFilter, 'all'>>> = {
   'range-rover-autobiography-2022': 'suv',
-};
-
-const SHOWROOM_IMAGE_URLS: Readonly<Record<string, string>> = {
-  'porsche-911-carrera-2023':
-    'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1600&q=85',
-  'range-rover-autobiography-2022':
-    'https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=1600&q=85',
 };
 
 const SHOWROOM_FALLBACK_IMAGE =

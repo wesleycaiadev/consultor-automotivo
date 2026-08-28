@@ -1,6 +1,11 @@
 import { Injectable, InjectionToken } from '@angular/core';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { mapVehicleRecord } from '../../shared/models/vehicle.mapper';
-import { type Vehicle, type VehicleRecord } from '../../shared/models/vehicle.model';
+import {
+  type Vehicle,
+  type VehicleImageRecord,
+  type VehicleRecord,
+} from '../../shared/models/vehicle.model';
 
 export interface VehicleRepository {
   listPublished(): Promise<readonly Vehicle[]>;
@@ -19,6 +24,60 @@ export class MockVehicleRepository implements VehicleRepository {
 
   async findPublishedBySlug(slug: string): Promise<Vehicle | undefined> {
     return (await this.listPublished()).find((vehicle) => vehicle.slug === slug);
+  }
+}
+
+type SupabaseVehicleRecord = Omit<VehicleRecord, 'images'> & {
+  readonly vehicle_images: readonly VehicleImageRecord[] | null;
+};
+
+const supabaseUrl = 'https://urjcjtwveunzixxkdikf.supabase.co';
+const supabasePublishableKey = 'sb_publishable_cpqdy12viM8aHIrkRqAuww_PL4nH8yx';
+
+/** Public catalogue: only rows allowed by the published-only RLS policies are requested. */
+@Injectable({ providedIn: 'root' })
+export class SupabaseVehicleRepository implements VehicleRepository {
+  readonly #client: SupabaseClient = createClient(supabaseUrl, supabasePublishableKey, {
+    auth: { autoRefreshToken: false, detectSessionInUrl: false, persistSession: false },
+  });
+
+  async listPublished(): Promise<readonly Vehicle[]> {
+    const { data, error } = await this.#client
+      .from('vehicles')
+      .select('*, vehicle_images(*)')
+      .eq('status', 'published')
+      .order('featured', { ascending: false })
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    return Promise.all(
+      ((data ?? []) as unknown as readonly SupabaseVehicleRecord[]).map((record) =>
+        this.mapPublicRecord(record),
+      ),
+    );
+  }
+
+  async findPublishedBySlug(slug: string): Promise<Vehicle | undefined> {
+    return (await this.listPublished()).find((vehicle) => vehicle.slug === slug);
+  }
+
+  private async mapPublicRecord(record: SupabaseVehicleRecord): Promise<Vehicle> {
+    const images = await Promise.all(
+      [...(record.vehicle_images ?? [])]
+        .sort((first, second) => first.sort_order - second.sort_order)
+        .map(async (image) => {
+          const { data, error } = await this.#client.storage
+            .from('vehicles')
+            .createSignedUrl(image.storage_path, 60 * 60);
+
+          if (error) throw error;
+
+          return { ...image, signed_url: data.signedUrl };
+        }),
+    );
+
+    return mapVehicleRecord({ ...record, images });
   }
 }
 

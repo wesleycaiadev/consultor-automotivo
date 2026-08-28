@@ -129,12 +129,16 @@ export class VehicleDetailPageComponent {
   }
 
   imagesFor(vehicle: Vehicle): readonly VehicleGalleryImage[] {
-    const images = DETAIL_IMAGE_URLS[vehicle.slug] ?? [DETAIL_FALLBACK_IMAGE];
+    const images = vehicle.images
+      .filter((image) => image.signedUrl)
+      .map((image) => ({
+        alt: image.altText || `${vehicle.brand} ${vehicle.model}`,
+        src: image.signedUrl!,
+      }));
 
-    return images.map((src, index) => ({
-      alt: vehicle.images[index]?.altText ?? `${vehicle.brand} ${vehicle.model}`,
-      src,
-    }));
+    return images.length
+      ? images
+      : [{ alt: `${vehicle.brand} ${vehicle.model}`, src: DETAIL_FALLBACK_IMAGE }];
   }
 
   detailFor(vehicle: Vehicle): VehicleDetailContent {
@@ -174,15 +178,6 @@ export class VehicleDetailPageComponent {
     this.state.set('ready');
   }
 }
-
-const DETAIL_IMAGE_URLS: Readonly<Record<string, readonly string[]>> = {
-  'porsche-911-carrera-2023': [
-    'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1800&q=85',
-  ],
-  'range-rover-autobiography-2022': [
-    'https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=1800&q=85',
-  ],
-};
 
 const DETAIL_FALLBACK_IMAGE =
   'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1800&q=85';

@@ -30,6 +30,8 @@ const finderInput: FinderWhatsappInput = {
   condition: 'Seminovo',
   model: 'Macan',
   notes: 'Uso familiar e viagens longas.',
+  powertrain: 'Equilibrada (1.4 a 2.0)',
+  usage: 'Família',
 };
 
 describe('WhatsappComposerService', () => {
@@ -56,6 +58,8 @@ describe('WhatsappComposerService', () => {
         'Condição: Seminovo',
         'Marca: Porsche',
         'Modelo: Macan',
+        'Uso principal: Família',
+        'Motorização: Equilibrada (1.4 a 2.0)',
         'Observações: Uso familiar e viagens longas.',
         '',
         'Podemos conversar?',
@@ -70,6 +74,8 @@ describe('WhatsappComposerService', () => {
         brand: ' ',
         model: '',
         notes: '   ',
+        powertrain: ' ',
+        usage: '',
       }),
     );
 

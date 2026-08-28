@@ -4,6 +4,8 @@ export const FINDER_STEPS = [
   'category',
   'budget',
   'condition',
+  'usage',
+  'powertrain',
   'brand',
   'model',
   'notes',
@@ -11,12 +13,33 @@ export const FINDER_STEPS = [
   'whatsapp',
 ] as const;
 
-export const FINDER_CATEGORIES = ['suv', 'sedan', 'hatch', 'pickup', 'other'] as const;
+export const FINDER_CATEGORIES = [
+  'suv',
+  'sedan',
+  'hatch',
+  'pickup',
+  'coupe',
+  'minivan',
+  'wagon',
+  'other',
+] as const;
 export const FINDER_CONDITIONS = ['new', 'used', 'either'] as const;
+export const FINDER_USAGES = ['city', 'family', 'travel', 'work', 'performance'] as const;
+export const FINDER_POWERTRAINS = [
+  'economy',
+  'balanced',
+  'performance',
+  'diesel',
+  'hybrid',
+  'electric',
+  'either',
+] as const;
 
 export type FinderStep = (typeof FINDER_STEPS)[number];
 export type FinderCategory = (typeof FINDER_CATEGORIES)[number];
 export type FinderCondition = (typeof FINDER_CONDITIONS)[number];
+export type FinderUsage = (typeof FINDER_USAGES)[number];
+export type FinderPowertrain = (typeof FINDER_POWERTRAINS)[number];
 
 export interface FinderDraft {
   readonly brand: string;
@@ -25,6 +48,8 @@ export interface FinderDraft {
   readonly condition: FinderCondition | null;
   readonly model: string;
   readonly notes: string;
+  readonly powertrain: FinderPowertrain | null;
+  readonly usage: FinderUsage | null;
 }
 
 const EMPTY_DRAFT: FinderDraft = {
@@ -34,6 +59,8 @@ const EMPTY_DRAFT: FinderDraft = {
   condition: null,
   model: '',
   notes: '',
+  powertrain: null,
+  usage: null,
 };
 
 @Injectable({ providedIn: 'root' })
@@ -55,6 +82,14 @@ export class FinderStateService {
 
   selectCondition(condition: FinderCondition): void {
     this.updateDraft({ condition });
+  }
+
+  selectUsage(usage: FinderUsage | null): void {
+    this.updateDraft({ usage });
+  }
+
+  selectPowertrain(powertrain: FinderPowertrain | null): void {
+    this.updateDraft({ powertrain });
   }
 
   setBrand(brand: string): void {

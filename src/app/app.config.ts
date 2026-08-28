@@ -3,7 +3,7 @@ import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
 import { provideClientHydration } from '@angular/platform-browser';
 import {
-  MockVehicleRepository,
+  SupabaseVehicleRepository,
   VEHICLE_REPOSITORY,
 } from './core/services/vehicle-repository.service';
 
@@ -12,6 +12,6 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
     provideClientHydration(),
-    { provide: VEHICLE_REPOSITORY, useExisting: MockVehicleRepository },
+    { provide: VEHICLE_REPOSITORY, useExisting: SupabaseVehicleRepository },
   ],
 };

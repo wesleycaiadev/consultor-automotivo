@@ -27,6 +27,10 @@ describe('FinderStateService', () => {
     state.goNext();
     state.selectCondition('either');
     state.goNext();
+    state.selectUsage('family');
+    state.goNext();
+    state.selectPowertrain('balanced');
+    state.goNext();
     state.setBrand('Porsche');
     state.goNext();
     state.setModel('Macan');
@@ -56,6 +60,8 @@ describe('FinderStateService', () => {
       condition: null,
       model: '',
       notes: '',
+      powertrain: null,
+      usage: null,
     });
   });
 });

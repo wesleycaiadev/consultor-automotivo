@@ -13,6 +13,7 @@ export function mapVehicleImageRecord(record: VehicleImageRecord): VehicleImage 
     altText: record.alt_text,
     sortOrder: record.sort_order,
     isCover: record.is_cover,
+    signedUrl: record.signed_url,
   };
 }
 

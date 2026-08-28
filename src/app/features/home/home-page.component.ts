@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import {
+  type VehicleRepository,
+  VEHICLE_REPOSITORY,
+} from '../../core/services/vehicle-repository.service';
+import {
+  type PublicDelivery,
+  PublicContentRepository,
+} from '../../core/services/public-content-repository.service';
+import { type Vehicle } from '../../shared/models/vehicle.model';
 import { MfAccordionItemComponent } from '../../shared/ui/accordion/mf-accordion-item.component';
 import { MfSectionMarkerComponent } from '../../shared/ui/section-marker/mf-section-marker.component';
 
@@ -97,20 +106,32 @@ import { MfSectionMarkerComponent } from '../../shared/ui/section-marker/mf-sect
         </div>
 
         <div class="mf-showroom-preview__grid">
-          @for (vehicle of vehicles; track vehicle.model) {
+          @for (vehicle of vehicles(); track vehicle.id) {
             <article class="mf-vehicle-preview">
-              <img
-                [src]="vehicle.image"
-                [alt]="vehicle.model"
-                width="1200"
-                height="800"
-                loading="lazy"
-              />
-              <div class="mf-vehicle-preview__meta">
-                <h3>{{ vehicle.model }}</h3>
-                <p>{{ vehicle.details }}</p>
-                <span>{{ vehicle.price }}</span>
-              </div>
+              <a
+                class="mf-vehicle-preview__link"
+                [href]="'/showroom/' + vehicle.slug"
+                [attr.aria-label]="'Ver ' + vehicle.brand + ' ' + vehicle.model + ' no showroom'"
+              >
+                <figure class="mf-vehicle-preview__media">
+                  <img
+                    [src]="imageUrlFor(vehicle)"
+                    [alt]="imageAltFor(vehicle)"
+                    width="1200"
+                    height="800"
+                    loading="lazy"
+                  />
+                  <figcaption>Disponível no showroom</figcaption>
+                </figure>
+                <div class="mf-vehicle-preview__meta">
+                  <h3>{{ vehicle.brand }} {{ vehicle.model }}</h3>
+                  <p>
+                    {{ vehicle.modelYear }} · {{ formatMileage(vehicle.mileage) }} ·
+                    {{ vehicle.transmission }}
+                  </p>
+                  <span>{{ formatPrice(vehicle.price) }}</span>
+                </div>
+              </a>
             </article>
           }
         </div>
@@ -127,8 +148,8 @@ import { MfSectionMarkerComponent } from '../../shared/ui/section-marker/mf-sect
             busca conduzida com critério.
           </p>
         </div>
-        <a class="mf-finder-cta__action mf-frame" href="https://wa.me/557998709362">
-          Iniciar minha busca
+        <a class="mf-finder-cta__action mf-frame" href="/encontrar-meu-carro">
+          Definir minha busca
         </a>
       </div>
     </section>
@@ -147,27 +168,36 @@ import { MfSectionMarkerComponent } from '../../shared/ui/section-marker/mf-sect
           <a class="mf-editorial-link" href="/#entregas">Ver todas as entregas</a>
         </div>
 
-        <div class="mf-deliveries-preview__list">
-          @for (delivery of deliveries; track delivery.customer) {
-            <article class="mf-delivery-preview">
-              <img
-                [src]="delivery.image"
-                [alt]="delivery.alt"
-                width="1200"
-                height="900"
-                loading="lazy"
-              />
-              <div class="mf-delivery-preview__content">
-                <p class="mf-delivery-preview__location">{{ delivery.city }}</p>
-                <blockquote>{{ delivery.testimonial }}</blockquote>
-                <footer>
-                  <strong>{{ delivery.customer }}</strong>
-                  <span>{{ delivery.vehicle }}</span>
-                </footer>
-              </div>
-            </article>
-          }
-        </div>
+        @if (deliveries().length) {
+          <div class="mf-deliveries-preview__list">
+            @for (delivery of deliveries(); track delivery.customer + delivery.vehicle) {
+              <article class="mf-delivery-preview">
+                @if (delivery.imageUrl) {
+                  <img
+                    [src]="delivery.imageUrl"
+                    [alt]="delivery.imageAlt"
+                    width="1200"
+                    height="900"
+                    loading="lazy"
+                  />
+                }
+                <div class="mf-delivery-preview__content">
+                  <p class="mf-delivery-preview__location">{{ delivery.city }}</p>
+                  <blockquote>{{ delivery.testimonial }}</blockquote>
+                  <footer>
+                    <strong>{{ delivery.customer }}</strong>
+                    <span>{{ delivery.vehicle }}</span>
+                  </footer>
+                </div>
+              </article>
+            }
+          </div>
+        } @else {
+          <div class="mf-deliveries-preview__empty">
+            <p>Ainda não há entregas publicadas.</p>
+            <span>As próximas histórias de compra bem conduzida aparecerão aqui.</span>
+          </div>
+        }
       </div>
     </section>
 
@@ -191,15 +221,17 @@ import { MfSectionMarkerComponent } from '../../shared/ui/section-marker/mf-sect
             Felipe conduz cada busca com atenção ao contexto de quem vai dirigir, à história do
             veículo e ao que precisa fazer sentido depois da entrega.
           </p>
-          <a class="mf-editorial-link" href="/#sobre">Conhecer a forma de trabalhar</a>
+          <a class="mf-editorial-link" href="#curadoria">Conhecer a forma de trabalhar</a>
         </div>
       </div>
     </section>
 
     <section id="fale-com-felipe" class="mf-final-cta mf-section" aria-labelledby="final-cta-title">
       <div class="mf-container mf-final-cta__inner">
-        <p class="mf-final-cta__eyebrow">Próxima escolha</p>
-        <h2 id="final-cta-title">Uma boa conversa pode ser o começo do carro certo.</h2>
+        <p class="mf-final-cta__eyebrow">Seu próximo carro, com critério</p>
+        <h2 id="final-cta-title">
+          Vamos começar pela sua rotina — antes de procurar qualquer anúncio.
+        </h2>
         <a class="mf-final-cta__action mf-frame" href="https://wa.me/557998709362"
           >Falar com Felipe</a
         >
@@ -227,58 +259,20 @@ import { MfSectionMarkerComponent } from '../../shared/ui/section-marker/mf-sect
 
         <div class="mf-footer__bottom">
           <small>© 2026 Marques Felipe</small>
+          <a class="mf-footer__admin" href="/admin/login">
+            <span class="mf-footer__admin-lock" aria-hidden="true"></span>
+            Administração
+          </a>
         </div>
       </div>
     </footer>
   `,
 })
 export class HomePageComponent {
-  readonly deliveries = [
-    {
-      customer: 'Eduardo',
-      vehicle: 'Porsche Macan GTS',
-      city: 'Aracaju — SE',
-      testimonial:
-        '“A decisão ficou clara quando cada detalhe do carro e da compra passou a fazer sentido.”',
-      alt: 'Cliente ao lado de um Porsche durante a entrega do veículo',
-      image:
-        'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1400&q=85',
-    },
-    {
-      customer: 'Marina',
-      vehicle: 'Range Rover Velar',
-      city: 'Maceió — AL',
-      testimonial:
-        '“Encontramos um carro que conversa com a minha rotina, sem abrir mão da tranquilidade.”',
-      alt: 'Range Rover estacionado em frente a uma residência',
-      image:
-        'https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=1400&q=85',
-    },
-  ] as const;
-
-  readonly vehicles = [
-    {
-      model: 'Porsche 911 Carrera',
-      details: '2023 · 3.000 km · PDK',
-      price: 'Consulte',
-      image:
-        'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1400&q=85',
-    },
-    {
-      model: 'Range Rover Autobiography',
-      details: '2022 · 18.500 km · Automático',
-      price: 'R$ 1.450.000',
-      image:
-        'https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=1400&q=85',
-    },
-    {
-      model: 'BMW M3 Competition',
-      details: '2023 · 12.000 km · Automático',
-      price: 'Consulte',
-      image:
-        'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1400&q=85',
-    },
-  ] as const;
+  readonly #repository = inject<VehicleRepository>(VEHICLE_REPOSITORY);
+  readonly #contentRepository = inject(PublicContentRepository);
+  readonly vehicles = signal<readonly Vehicle[]>([]);
+  readonly deliveries = signal<readonly PublicDelivery[]>([]);
 
   readonly steps = [
     {
@@ -340,4 +334,52 @@ export class HomePageComponent {
       copy: 'Liquidez e aceitação futura também fazem parte de uma escolha segura hoje.',
     },
   ] as const;
+
+  constructor() {
+    void this.loadVehicles();
+    void this.loadDeliveries();
+  }
+
+  imageAltFor(vehicle: Vehicle): string {
+    return (
+      vehicle.images.find((image) => image.isCover)?.altText ?? `${vehicle.brand} ${vehicle.model}`
+    );
+  }
+
+  imageUrlFor(vehicle: Vehicle): string {
+    return vehicle.images.find((image) => image.isCover)?.signedUrl ?? HOME_FALLBACK_IMAGE;
+  }
+
+  formatMileage(mileage: number): string {
+    return `${mileage.toLocaleString('pt-BR')} km`;
+  }
+
+  formatPrice(price: number | null): string {
+    return price === null
+      ? 'Consulte'
+      : new Intl.NumberFormat('pt-BR', {
+          currency: 'BRL',
+          maximumFractionDigits: 0,
+          style: 'currency',
+        }).format(price);
+  }
+
+  private async loadVehicles(): Promise<void> {
+    try {
+      this.vehicles.set((await this.#repository.listPublished()).slice(0, 3));
+    } catch {
+      this.vehicles.set([]);
+    }
+  }
+
+  private async loadDeliveries(): Promise<void> {
+    try {
+      this.deliveries.set(await this.#contentRepository.listPublishedDeliveries());
+    } catch {
+      this.deliveries.set([]);
+    }
+  }
 }
+
+const HOME_FALLBACK_IMAGE =
+  'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1400&q=85';
