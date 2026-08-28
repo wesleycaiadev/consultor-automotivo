@@ -148,6 +148,25 @@
   letter-spacing: var(--tracking-label);
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  .mf-hero__photo {
+    animation: mf-hero-photo-reveal var(--motion-cinematic) var(--ease-editorial) both;
+  }
+
+  .mf-hero__content {
+    animation: mf-hero-content-reveal 900ms var(--ease-editorial) 180ms both;
+  }
+
+  .mf-hero__description,
+  .mf-hero__actions {
+    animation: mf-hero-detail-reveal var(--motion-editorial) var(--ease-editorial) 520ms both;
+  }
+
+  .mf-hero__media figcaption {
+    animation: mf-hero-caption-reveal var(--motion-ui) var(--ease-editorial) 800ms both;
+  }
+}
+
 .mf-problem {
   background: var(--mf-paper);
 }
@@ -355,6 +374,66 @@
 
   .mf-vehicle-preview__link:hover figcaption {
     background: var(--mf-oxide);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mf-hero__photo,
+  .mf-hero__content,
+  .mf-hero__description,
+  .mf-hero__actions,
+  .mf-hero__media figcaption {
+    animation: none;
+  }
+}
+
+@keyframes mf-hero-photo-reveal {
+  from {
+    clip-path: inset(0 0 0 100%);
+    transform: scale(1.035);
+  }
+
+  to {
+    clip-path: inset(0);
+    transform: scale(1);
+  }
+}
+
+@keyframes mf-hero-content-reveal {
+  from {
+    clip-path: inset(0 0 0 100%);
+    opacity: 0;
+    transform: translateX(-1rem);
+  }
+
+  to {
+    clip-path: inset(0);
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes mf-hero-detail-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes mf-hero-caption-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
