@@ -11,6 +11,7 @@
     "format": "prettier --write \"src/**/*.{ts,html,scss}\" \"*.{json,js}\"",
     "format:check": "prettier --check \"src/**/*.{ts,html,scss}\" \"*.{json,js}\"",
     "serve:ssr:mf-v3": "node dist/mf-v3/server/server.mjs",
+    "security:check": "node scripts/security-check.mjs",
     "test:e2e": "npm run build && playwright test"
   },
   "private": true,
