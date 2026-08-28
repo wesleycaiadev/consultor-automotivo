@@ -1,1 +1,69 @@
+@if (introState() !== 'hidden') {
+  <div class="mf-intro" [class.mf-intro--leaving]="introState() === 'leaving'" aria-hidden="true">
+    <span class="mf-intro__panel mf-intro__panel--top"></span>
+    <span class="mf-intro__panel mf-intro__panel--bottom"></span>
+
+    <div class="mf-intro__stage">
+      <svg class="mf-intro__car" viewBox="0 0 960 320" focusable="false">
+        <path
+          class="mf-intro__car-line mf-intro__car-line--body"
+          pathLength="1"
+          d="M69 208l19-50c7-18 23-31 43-34l103-18 81-70c17-15 37-22 60-22h151c34 0 64 11 90 33l84 70 125 14c31 4 52 21 62 51l7 26"
+        />
+        <path
+          class="mf-intro__car-line mf-intro__car-line--base"
+          pathLength="1"
+          d="M69 208h91c4-41 35-70 76-70s72 29 76 70h337c4-41 35-70 76-70s72 29 76 70h93"
+        />
+        <path
+          class="mf-intro__car-line mf-intro__car-line--glass"
+          pathLength="1"
+          d="M287 105l70-61c10-9 23-14 37-14h111l1 81H280zm240-75c28 1 50 9 71 27l63 54H527z"
+        />
+        <path
+          class="mf-intro__detail mf-intro__detail--door"
+          pathLength="1"
+          d="M506 112v82m19-59h109m-86-12h34"
+        />
+        <path
+          class="mf-intro__detail mf-intro__detail--mirror"
+          pathLength="1"
+          d="M647 113l29-10 19 17-39 9z"
+        />
+        <path
+          class="mf-intro__detail mf-intro__detail--lights"
+          pathLength="1"
+          d="M102 148l43-8 20 22-58 8m704-29 56 8 15 28-62-8"
+        />
+        <path class="mf-intro__detail mf-intro__detail--sill" pathLength="1" d="M315 199h330" />
+
+        <g class="mf-intro__wheel mf-intro__wheel--rear">
+          <circle class="mf-intro__tire" cx="236" cy="208" r="54" />
+          <circle class="mf-intro__rim" cx="236" cy="208" r="34" />
+          <path class="mf-intro__spokes" d="M236 174v68m-34-34h68m-58-24 48 48m0-48-48 48" />
+          <circle class="mf-intro__hub" cx="236" cy="208" r="7" />
+        </g>
+        <g class="mf-intro__wheel mf-intro__wheel--front">
+          <circle class="mf-intro__tire" cx="725" cy="208" r="54" />
+          <circle class="mf-intro__rim" cx="725" cy="208" r="34" />
+          <path class="mf-intro__spokes" d="M725 174v68m-34-34h68m-58-24 48 48m0-48-48 48" />
+          <circle class="mf-intro__hub" cx="725" cy="208" r="7" />
+        </g>
+        <path class="mf-intro__road" pathLength="1" d="M28 276h904" />
+      </svg>
+
+      <div class="mf-intro__brand">
+        <img class="mf-intro__mark" src="/images/mf-mark.png" width="320" height="192" alt="" />
+        <p class="mf-intro__descriptor">CURADORIA AUTOMOTIVA</p>
+      </div>
+
+      <div class="mf-intro__loading">
+        <span>PREPARANDO A EXPERIÊNCIA</span>
+        <strong>{{ introProgress() }}%</strong>
+        <span class="mf-intro__track"><i [style.width.%]="introProgress()"></i></span>
+      </div>
+    </div>
+  </div>
+}
+
 <router-outlet />

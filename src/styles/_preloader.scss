@@ -1,0 +1,327 @@
+.mf-intro {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--layer-toast) + 10);
+  display: grid;
+  overflow: hidden;
+  place-items: center;
+  color: var(--mf-ink);
+  cursor: progress;
+  pointer-events: auto;
+}
+
+body:has(.mf-intro) {
+  overflow: hidden;
+}
+
+.mf-intro__panel {
+  position: absolute;
+  z-index: 0;
+  inset-inline: 0;
+  block-size: calc(50% + 1px);
+  background: var(--mf-paper);
+  will-change: transform;
+}
+
+.mf-intro__panel--top {
+  inset-block-start: 0;
+  border-block-end: 1px solid color-mix(in srgb, var(--mf-oxide) 34%, transparent);
+}
+
+.mf-intro__panel--bottom {
+  inset-block-end: 0;
+}
+
+.mf-intro__stage {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  inline-size: min(92vw, 68rem);
+  min-block-size: 31rem;
+  place-items: center;
+}
+
+.mf-intro__stage::before,
+.mf-intro__stage::after {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 5.5rem;
+  background: var(--mf-oxide);
+  content: '';
+  opacity: 0;
+  transform: rotate(45deg) scaleY(0);
+  animation: mf-intro-calibration var(--motion-ui) var(--ease-editorial) 180ms forwards;
+}
+
+.mf-intro__stage::before {
+  inset-block-start: 0;
+  inset-inline-start: 4%;
+}
+
+.mf-intro__stage::after {
+  inset-block-end: 0;
+  inset-inline-end: 4%;
+  animation-delay: 300ms;
+}
+
+.mf-intro__car {
+  position: absolute;
+  inline-size: min(92vw, 60rem);
+  overflow: visible;
+  fill: none;
+  animation: mf-intro-car-depart 700ms var(--ease-editorial) 1250ms forwards;
+}
+
+.mf-intro__car-line,
+.mf-intro__detail,
+.mf-intro__tire,
+.mf-intro__rim,
+.mf-intro__spokes,
+.mf-intro__hub,
+.mf-intro__road {
+  vector-effect: non-scaling-stroke;
+  stroke-linecap: square;
+  stroke-linejoin: bevel;
+}
+
+.mf-intro__car-line,
+.mf-intro__detail {
+  stroke: var(--mf-ink);
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  stroke-width: 1.5;
+  animation: mf-intro-draw 900ms var(--ease-editorial) forwards;
+}
+
+.mf-intro__car-line--base {
+  animation-delay: 80ms;
+}
+
+.mf-intro__car-line--glass {
+  stroke: var(--mf-graphite);
+  animation-delay: 220ms;
+}
+
+.mf-intro__detail {
+  stroke: color-mix(in srgb, var(--mf-ink) 70%, transparent);
+  stroke-width: 1;
+  animation-duration: 620ms;
+}
+
+.mf-intro__detail--door {
+  animation-delay: 360ms;
+}
+
+.mf-intro__detail--mirror {
+  animation-delay: 430ms;
+}
+
+.mf-intro__detail--lights {
+  stroke: var(--mf-oxide);
+  animation-delay: 500ms;
+}
+
+.mf-intro__detail--sill {
+  animation-delay: 560ms;
+}
+
+.mf-intro__wheel {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: mf-intro-wheel-spin 760ms linear 520ms 2;
+}
+
+.mf-intro__tire,
+.mf-intro__rim,
+.mf-intro__spokes,
+.mf-intro__hub {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: mf-intro-draw 560ms var(--ease-editorial) 280ms forwards;
+}
+
+.mf-intro__tire {
+  stroke: var(--mf-ink);
+  stroke-width: 3;
+}
+
+.mf-intro__rim,
+.mf-intro__spokes,
+.mf-intro__hub {
+  stroke: var(--mf-oxide);
+  stroke-width: 1.5;
+}
+
+.mf-intro__road {
+  stroke: var(--mf-silver);
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  stroke-width: 1;
+  animation: mf-intro-draw 720ms var(--ease-editorial) 380ms forwards;
+}
+
+.mf-intro__brand {
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  transform: scale(0.86);
+  animation: mf-intro-brand-lock 560ms var(--ease-editorial) 1500ms forwards;
+}
+
+.mf-intro__mark {
+  display: block;
+  inline-size: clamp(7rem, 14vw, 10rem);
+  block-size: auto;
+}
+
+.mf-intro__descriptor {
+  margin: var(--space-2) 0 0;
+  color: var(--mf-graphite);
+  font: 650 0.68rem/1.4 var(--font-ui);
+  letter-spacing: 0.3em;
+  text-align: center;
+}
+
+.mf-intro__loading {
+  position: absolute;
+  inset-block-end: 0;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-2) var(--space-4);
+  inline-size: min(80vw, 28rem);
+  color: var(--mf-graphite);
+  font: 600 0.6rem/1 var(--font-ui);
+  letter-spacing: 0.18em;
+}
+
+.mf-intro__loading strong {
+  color: var(--mf-ink);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+}
+
+.mf-intro__track {
+  grid-column: 1 / -1;
+  block-size: 1px;
+  overflow: hidden;
+  background: var(--mf-silver);
+}
+
+.mf-intro__track i {
+  display: block;
+  block-size: 100%;
+  background: var(--mf-oxide);
+  transition: width 420ms var(--ease-editorial);
+}
+
+.mf-intro--leaving .mf-intro__stage {
+  animation: mf-intro-stage-out 240ms var(--ease-standard) forwards;
+}
+
+.mf-intro--leaving .mf-intro__panel--top {
+  animation: mf-intro-panel-top 620ms var(--ease-editorial) forwards;
+}
+
+.mf-intro--leaving .mf-intro__panel--bottom {
+  animation: mf-intro-panel-bottom 620ms var(--ease-editorial) forwards;
+}
+
+@keyframes mf-intro-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes mf-intro-wheel-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes mf-intro-car-depart {
+  35% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateX(22vw) scale(0.76);
+  }
+}
+
+@keyframes mf-intro-brand-lock {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes mf-intro-calibration {
+  to {
+    opacity: 0.8;
+    transform: rotate(45deg) scaleY(1);
+  }
+}
+
+@keyframes mf-intro-stage-out {
+  to {
+    opacity: 0;
+    transform: scale(1.018);
+  }
+}
+
+@keyframes mf-intro-panel-top {
+  to {
+    transform: translateY(-102%);
+  }
+}
+
+@keyframes mf-intro-panel-bottom {
+  to {
+    transform: translateY(102%);
+  }
+}
+
+@media (max-width: 35rem) {
+  .mf-intro__stage {
+    min-block-size: 27rem;
+  }
+
+  .mf-intro__car {
+    inline-size: 108vw;
+    max-inline-size: none;
+  }
+
+  .mf-intro__descriptor {
+    font-size: 0.6rem;
+    letter-spacing: 0.23em;
+  }
+
+  .mf-intro__loading {
+    inline-size: 82vw;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mf-intro__car,
+  .mf-intro__stage::before,
+  .mf-intro__stage::after {
+    display: none;
+  }
+
+  .mf-intro__brand {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+
+  .mf-intro__track i {
+    transition: none;
+  }
+
+  .mf-intro--leaving .mf-intro__stage,
+  .mf-intro--leaving .mf-intro__panel {
+    animation-duration: 80ms;
+  }
+}

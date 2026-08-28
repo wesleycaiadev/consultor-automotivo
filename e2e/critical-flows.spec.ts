@@ -173,9 +173,14 @@ async function signIn(page: Page): Promise<void> {
   await expect(page).toHaveURL(/\/admin$/);
 }
 
+async function waitForPublicIntro(page: Page): Promise<void> {
+  await page.locator('.mf-intro').waitFor({ state: 'detached', timeout: 7000 });
+}
+
 test('percorre showroom até o detalhe do veículo', async ({ page }) => {
   await mockApi(page);
   await page.goto('/showroom');
+  await waitForPublicIntro(page);
 
   await expect(
     page.getByRole('heading', {
@@ -198,6 +203,7 @@ test('percorre showroom até o detalhe do veículo', async ({ page }) => {
 
 test('conclui a busca guiada e prepara o WhatsApp', async ({ page }) => {
   await page.goto('/encontrar-meu-carro');
+  await waitForPublicIntro(page);
 
   await page.getByLabel('SUV').check({ force: true });
   await page.getByRole('button', { name: 'Continuar' }).click();
