@@ -10,7 +10,8 @@
     "lint": "ng lint",
     "format": "prettier --write \"src/**/*.{ts,html,scss}\" \"*.{json,js}\"",
     "format:check": "prettier --check \"src/**/*.{ts,html,scss}\" \"*.{json,js}\"",
-    "serve:ssr:mf-v3": "node dist/mf-v3/server/server.mjs"
+    "serve:ssr:mf-v3": "node dist/mf-v3/server/server.mjs",
+    "test:e2e": "npm run build && playwright test"
   },
   "private": true,
   "engines": {
@@ -36,6 +37,7 @@
     "@angular/cli": "^22.1.5",
     "@angular/compiler-cli": "^22.1.0",
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.62.1",
     "@types/express": "^5.0.1",
     "@types/node": "^20.17.19",
     "angular-eslint": "22.1.0",

@@ -1,3 +1,4 @@
+import { EnvironmentInjector, inject, runInInjectionContext } from '@angular/core';
 import { Routes } from '@angular/router';
 import { PublicShellComponent } from './layout/public-shell/public-shell.component';
 
@@ -95,10 +96,12 @@ export const routes: Routes = [
         (component) => component.AdminShellComponent,
       ),
     canActivate: [
-      (route, state) =>
-        import('./core/guards/admin-auth.guard').then(({ adminAuthGuard }) =>
-          adminAuthGuard(route, state),
-        ),
+      (route, state) => {
+        const injector = inject(EnvironmentInjector);
+        return import('./core/guards/admin-auth.guard').then(({ adminAuthGuard }) =>
+          runInInjectionContext(injector, () => adminAuthGuard(route, state)),
+        );
+      },
     ],
     data: {
       seo: {

@@ -5,5 +5,9 @@ import { AdminAuthService } from '../auth/admin-auth.service';
 export const adminAuthGuard: CanActivateFn = () => {
   const auth = inject(AdminAuthService);
   const router = inject(Router);
-  return auth.isAuthenticated() || router.createUrlTree(['/admin/login']);
+  if (auth.isAuthenticated()) return true;
+
+  return auth
+    .waitForSessionRestore()
+    .then((session) => session !== null || router.createUrlTree(['/admin/login']));
 };

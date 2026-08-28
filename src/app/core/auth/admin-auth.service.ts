@@ -127,6 +127,7 @@ const maxDeliveryImageCount = 8;
 export class AdminAuthService {
   readonly #platformId = inject(PLATFORM_ID);
   readonly #client: SupabaseClient | null;
+  readonly #sessionRestored: Promise<void>;
 
   readonly session = signal<Session | null>(null);
   readonly error = signal<string | null>(null);
@@ -135,13 +136,14 @@ export class AdminAuthService {
   constructor() {
     if (!isPlatformBrowser(this.#platformId)) {
       this.#client = null;
+      this.#sessionRestored = Promise.resolve();
       return;
     }
 
     this.#client = createClient(supabaseUrl, supabasePublishableKey, {
       auth: { autoRefreshToken: true, persistSession: true },
     });
-    void this.restoreSession();
+    this.#sessionRestored = this.restoreSession();
     this.#client.auth.onAuthStateChange((_event, session) => this.session.set(session));
   }
 
@@ -170,6 +172,11 @@ export class AdminAuthService {
       return;
     }
     this.session.set(data.session);
+  }
+
+  async waitForSessionRestore(): Promise<Session | null> {
+    await this.#sessionRestored;
+    return this.session();
   }
 
   async listVehicles(): Promise<readonly AdminVehicleListItem[]> {
