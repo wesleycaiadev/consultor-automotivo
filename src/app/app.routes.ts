@@ -1,17 +1,5 @@
 import { Routes } from '@angular/router';
-import { CarFinderPageComponent } from './features/car-finder/car-finder-page.component';
-import { HomePageComponent } from './features/home/home-page.component';
-import { ShowroomPageComponent } from './features/showroom/showroom-page.component';
-import { VehicleDetailPageComponent } from './features/vehicle-detail/vehicle-detail-page.component';
 import { PublicShellComponent } from './layout/public-shell/public-shell.component';
-import { AdminShellComponent } from './layout/admin-shell/admin-shell.component';
-import { adminAuthGuard } from './core/guards/admin-auth.guard';
-import { AdminLoginPageComponent } from './features/admin-login/admin-login-page.component';
-import { AdminDashboardPageComponent } from './features/admin-dashboard/admin-dashboard-page.component';
-import { AdminDeliveryListPageComponent } from './features/admin-deliveries/admin-delivery-list-page.component';
-import { AdminFeedbackListPageComponent } from './features/admin-feedbacks/admin-feedback-list-page.component';
-import { AdminVehicleListPageComponent } from './features/admin-vehicles/admin-vehicle-list-page.component';
-import { AdminVehicleEditorPageComponent } from './features/admin-vehicles/admin-vehicle-editor-page.component';
 
 export const routes: Routes = [
   {
@@ -20,7 +8,10 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        component: HomePageComponent,
+        loadComponent: () =>
+          import('./features/home/home-page.component').then(
+            (component) => component.HomePageComponent,
+          ),
         title: 'Marques Felipe — Curadoria Automotiva',
         data: {
           seo: {
@@ -33,7 +24,10 @@ export const routes: Routes = [
       },
       {
         path: 'showroom',
-        component: ShowroomPageComponent,
+        loadComponent: () =>
+          import('./features/showroom/showroom-page.component').then(
+            (component) => component.ShowroomPageComponent,
+          ),
         title: 'Showroom — Marques Felipe Curadoria Automotiva',
         data: {
           seo: {
@@ -46,7 +40,10 @@ export const routes: Routes = [
       },
       {
         path: 'showroom/:slug',
-        component: VehicleDetailPageComponent,
+        loadComponent: () =>
+          import('./features/vehicle-detail/vehicle-detail-page.component').then(
+            (component) => component.VehicleDetailPageComponent,
+          ),
         title: 'Veículo — Marques Felipe Curadoria Automotiva',
         data: {
           seo: {
@@ -59,7 +56,10 @@ export const routes: Routes = [
       },
       {
         path: 'encontrar-meu-carro',
-        component: CarFinderPageComponent,
+        loadComponent: () =>
+          import('./features/car-finder/car-finder-page.component').then(
+            (component) => component.CarFinderPageComponent,
+          ),
         title: 'Encontrar meu carro — Marques Felipe Curadoria Automotiva',
         data: {
           seo: {
@@ -74,7 +74,10 @@ export const routes: Routes = [
   },
   {
     path: 'admin/login',
-    component: AdminLoginPageComponent,
+    loadComponent: () =>
+      import('./features/admin-login/admin-login-page.component').then(
+        (component) => component.AdminLoginPageComponent,
+      ),
     title: 'Acesso administrativo — Marques Felipe',
     data: {
       seo: {
@@ -87,8 +90,16 @@ export const routes: Routes = [
   },
   {
     path: 'admin',
-    component: AdminShellComponent,
-    canActivate: [adminAuthGuard],
+    loadComponent: () =>
+      import('./layout/admin-shell/admin-shell.component').then(
+        (component) => component.AdminShellComponent,
+      ),
+    canActivate: [
+      (route, state) =>
+        import('./core/guards/admin-auth.guard').then(({ adminAuthGuard }) =>
+          adminAuthGuard(route, state),
+        ),
+    ],
     data: {
       seo: {
         title: 'Administração — Marques Felipe',
@@ -98,12 +109,48 @@ export const routes: Routes = [
       },
     },
     children: [
-      { path: '', component: AdminDashboardPageComponent },
-      { path: 'veiculos', component: AdminVehicleListPageComponent },
-      { path: 'veiculos/novo', component: AdminVehicleEditorPageComponent },
-      { path: 'entregas', component: AdminDeliveryListPageComponent },
-      { path: 'feedbacks', component: AdminFeedbackListPageComponent },
-      { path: 'configuracoes', component: AdminDashboardPageComponent },
+      {
+        path: '',
+        loadComponent: () =>
+          import('./features/admin-dashboard/admin-dashboard-page.component').then(
+            (component) => component.AdminDashboardPageComponent,
+          ),
+      },
+      {
+        path: 'veiculos',
+        loadComponent: () =>
+          import('./features/admin-vehicles/admin-vehicle-list-page.component').then(
+            (component) => component.AdminVehicleListPageComponent,
+          ),
+      },
+      {
+        path: 'veiculos/novo',
+        loadComponent: () =>
+          import('./features/admin-vehicles/admin-vehicle-editor-page.component').then(
+            (component) => component.AdminVehicleEditorPageComponent,
+          ),
+      },
+      {
+        path: 'entregas',
+        loadComponent: () =>
+          import('./features/admin-deliveries/admin-delivery-list-page.component').then(
+            (component) => component.AdminDeliveryListPageComponent,
+          ),
+      },
+      {
+        path: 'feedbacks',
+        loadComponent: () =>
+          import('./features/admin-feedbacks/admin-feedback-list-page.component').then(
+            (component) => component.AdminFeedbackListPageComponent,
+          ),
+      },
+      {
+        path: 'configuracoes',
+        loadComponent: () =>
+          import('./features/admin-dashboard/admin-dashboard-page.component').then(
+            (component) => component.AdminDashboardPageComponent,
+          ),
+      },
     ],
   },
 ];

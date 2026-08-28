@@ -1,5 +1,5 @@
 import { Injectable, InjectionToken } from '@angular/core';
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { mapVehicleRecord } from '../../shared/models/vehicle.mapper';
 import {
   type Vehicle,
@@ -37,12 +37,11 @@ const supabasePublishableKey = 'sb_publishable_cpqdy12viM8aHIrkRqAuww_PL4nH8yx';
 /** Public catalogue: only rows allowed by the published-only RLS policies are requested. */
 @Injectable({ providedIn: 'root' })
 export class SupabaseVehicleRepository implements VehicleRepository {
-  readonly #client: SupabaseClient = createClient(supabaseUrl, supabasePublishableKey, {
-    auth: { autoRefreshToken: false, detectSessionInUrl: false, persistSession: false },
-  });
+  #client: Promise<SupabaseClient> | null = null;
 
   async listPublished(): Promise<readonly Vehicle[]> {
-    const { data, error } = await this.#client
+    const client = await this.client();
+    const { data, error } = await client
       .from('vehicles')
       .select('*, vehicle_images(*)')
       .eq('status', 'published')
@@ -53,7 +52,7 @@ export class SupabaseVehicleRepository implements VehicleRepository {
 
     return Promise.all(
       ((data ?? []) as unknown as readonly SupabaseVehicleRecord[]).map((record) =>
-        this.mapPublicRecord(record),
+        this.mapPublicRecord(record, client),
       ),
     );
   }
@@ -62,12 +61,15 @@ export class SupabaseVehicleRepository implements VehicleRepository {
     return (await this.listPublished()).find((vehicle) => vehicle.slug === slug);
   }
 
-  private async mapPublicRecord(record: SupabaseVehicleRecord): Promise<Vehicle> {
+  private async mapPublicRecord(
+    record: SupabaseVehicleRecord,
+    client: SupabaseClient,
+  ): Promise<Vehicle> {
     const images = await Promise.all(
       [...(record.vehicle_images ?? [])]
         .sort((first, second) => first.sort_order - second.sort_order)
         .map(async (image) => {
-          const { data, error } = await this.#client.storage
+          const { data, error } = await client.storage
             .from('vehicles')
             .createSignedUrl(image.storage_path, 60 * 60);
 
@@ -78,6 +80,16 @@ export class SupabaseVehicleRepository implements VehicleRepository {
     );
 
     return mapVehicleRecord({ ...record, images });
+  }
+
+  private client(): Promise<SupabaseClient> {
+    this.#client ??= import('@supabase/supabase-js').then(({ createClient }) =>
+      createClient(supabaseUrl, supabasePublishableKey, {
+        auth: { autoRefreshToken: false, detectSessionInUrl: false, persistSession: false },
+      }),
+    );
+
+    return this.#client;
   }
 }
 

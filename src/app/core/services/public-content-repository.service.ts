@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 export interface PublicDelivery {
   readonly customer: string;
@@ -15,12 +15,11 @@ const supabasePublishableKey = 'sb_publishable_cpqdy12viM8aHIrkRqAuww_PL4nH8yx';
 
 @Injectable({ providedIn: 'root' })
 export class PublicContentRepository {
-  readonly #client: SupabaseClient = createClient(supabaseUrl, supabasePublishableKey, {
-    auth: { autoRefreshToken: false, detectSessionInUrl: false, persistSession: false },
-  });
+  #client: Promise<SupabaseClient> | null = null;
 
   async listPublishedDeliveries(): Promise<readonly PublicDelivery[]> {
-    const { data, error } = await this.#client
+    const client = await this.client();
+    const { data, error } = await client
       .from('deliveries')
       .select(
         'customer_name,vehicle_name,city,testimonial,delivery_images(storage_path,is_cover,sort_order)',
@@ -36,7 +35,7 @@ export class PublicContentRepository {
           [...(delivery.delivery_images ?? [])]
             .sort((first, second) => first.sort_order - second.sort_order)
             .find((image) => image.is_cover) ?? delivery.delivery_images?.[0];
-        const imageUrl = cover ? await this.signedDeliveryImage(cover.storage_path) : null;
+        const imageUrl = cover ? await this.signedDeliveryImage(client, cover.storage_path) : null;
 
         return {
           customer: delivery.customer_name,
@@ -50,13 +49,26 @@ export class PublicContentRepository {
     );
   }
 
-  private async signedDeliveryImage(storagePath: string): Promise<string | null> {
-    const { data, error } = await this.#client.storage
+  private async signedDeliveryImage(
+    client: SupabaseClient,
+    storagePath: string,
+  ): Promise<string | null> {
+    const { data, error } = await client.storage
       .from('deliveries')
       .createSignedUrl(storagePath, 60 * 60);
 
     if (error) throw error;
     return data.signedUrl;
+  }
+
+  private client(): Promise<SupabaseClient> {
+    this.#client ??= import('@supabase/supabase-js').then(({ createClient }) =>
+      createClient(supabaseUrl, supabasePublishableKey, {
+        auth: { autoRefreshToken: false, detectSessionInUrl: false, persistSession: false },
+      }),
+    );
+
+    return this.#client;
   }
 }
 
