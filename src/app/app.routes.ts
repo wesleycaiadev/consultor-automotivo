@@ -134,6 +134,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'veiculos/:id/editar',
+        loadComponent: () =>
+          import('./features/admin-vehicles/admin-vehicle-editor-page.component').then(
+            (component) => component.AdminVehicleEditorPageComponent,
+          ),
+      },
+      {
         path: 'entregas',
         loadComponent: () =>
           import('./features/admin-deliveries/admin-delivery-list-page.component').then(

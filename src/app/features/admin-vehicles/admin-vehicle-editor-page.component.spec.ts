@@ -29,6 +29,13 @@ describe('AdminVehicleEditorPageComponent', () => {
         modelYear: 2026,
       }),
       createVehicle: vi.fn().mockResolvedValue(undefined),
+      getVehicleForEdit: vi.fn(),
+      listVehicleImages: vi.fn().mockResolvedValue([]),
+      updateVehicle: vi.fn().mockResolvedValue(undefined),
+      deleteVehicle: vi.fn().mockResolvedValue(undefined),
+      setVehicleCover: vi.fn().mockResolvedValue(undefined),
+      reorderVehicleImages: vi.fn().mockResolvedValue(undefined),
+      removeVehicleImage: vi.fn().mockResolvedValue(undefined),
     };
     await TestBed.configureTestingModule({
       imports: [AdminVehicleEditorPageComponent],
@@ -145,7 +152,7 @@ describe('AdminVehicleEditorPageComponent', () => {
 
     expect(component.draft).toMatchObject({ status: 'draft', featured: false });
     expect(fixture.nativeElement.textContent).toContain('Guardar em preparação');
-    expect(fixture.nativeElement.textContent).toContain('“Vendido” não é uma escolha de cadastro');
+    expect(fixture.nativeElement.textContent).toContain('“Vendido” poderá ser marcado depois');
 
     const publishControl = fixture.nativeElement.querySelectorAll(
       'input[name="status"]',
@@ -155,5 +162,85 @@ describe('AdminVehicleEditorPageComponent', () => {
 
     expect(component.draft.status).toBe('published');
     expect(fixture.nativeElement.textContent).toContain('Destacar no showroom');
+  });
+
+  it('updates every editable field, including the vehicle years, without creating a new row', async () => {
+    const { auth, fixture } = await setup();
+    const component = fixture.componentInstance;
+    component.editingVehicleId.set('vehicle-1');
+    component.draft = {
+      ...component.draft,
+      brand: 'Toyota',
+      model: 'Corolla',
+      version: 'Corolla',
+      manufacturing_year: 2020,
+      model_year: 2021,
+      color: 'Prata',
+      description: 'Revisado e pronto para avaliação.',
+    };
+
+    await component.save();
+
+    expect(auth.updateVehicle).toHaveBeenCalledWith(
+      'vehicle-1',
+      expect.objectContaining({
+        manufacturing_year: 2020,
+        model_year: 2021,
+        slug: 'toyota-corolla-2021',
+      }),
+      [],
+      expect.any(Function),
+    );
+    expect(auth.createVehicle).not.toHaveBeenCalled();
+  });
+
+  it('requires confirmation before permanently deleting an existing vehicle', async () => {
+    const { auth, fixture } = await setup();
+    const component = fixture.componentInstance;
+    component.editingVehicleId.set('vehicle-1');
+    component.draft.brand = 'Toyota';
+    component.draft.model = 'Corolla';
+    const confirm = vi.spyOn(globalThis, 'confirm').mockReturnValue(true);
+
+    await component.deleteVehicle();
+
+    expect(confirm).toHaveBeenCalledOnce();
+    expect(auth.deleteVehicle).toHaveBeenCalledWith('vehicle-1');
+  });
+
+  it('manages already saved photos directly from the complete editor', async () => {
+    const { auth, fixture } = await setup();
+    const component = fixture.componentInstance;
+    component.editingVehicleId.set('vehicle-1');
+    component.existingPhotos.set([
+      {
+        id: 'image-1',
+        storagePath: 'vehicle-1/cover.jpg',
+        isCover: true,
+        sortOrder: 0,
+        signedUrl: 'https://example.com/cover.jpg',
+      },
+      {
+        id: 'image-2',
+        storagePath: 'vehicle-1/second.jpg',
+        isCover: false,
+        sortOrder: 1,
+        signedUrl: 'https://example.com/second.jpg',
+      },
+    ]);
+    component.existingPhotoCount.set(2);
+
+    await component.setExistingCover('image-2');
+    await component.moveExistingPhoto('image-2', -1);
+    await component.removeExistingPhoto(component.existingPhotos()[0]);
+
+    expect(auth.setVehicleCover).toHaveBeenCalledWith('vehicle-1', 'image-2');
+    expect(auth.reorderVehicleImages).toHaveBeenCalledWith('vehicle-1', ['image-2', 'image-1']);
+    expect(auth.removeVehicleImage).toHaveBeenCalledWith(
+      'vehicle-1',
+      expect.objectContaining({ id: 'image-2' }),
+    );
+    expect(component.existingPhotos()).toHaveLength(1);
+    expect(component.photoCount()).toBe(1);
   });
 });

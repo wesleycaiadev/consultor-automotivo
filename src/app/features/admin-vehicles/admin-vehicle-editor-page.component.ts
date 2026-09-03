@@ -1,8 +1,9 @@
 import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
   AdminAuthService,
+  type AdminVehicleImage,
   type CatalogBrand,
   type CatalogFipeYear,
   type CatalogModel,
@@ -29,7 +30,11 @@ interface SelectedPhoto {
 export class AdminVehicleEditorPageComponent implements OnInit, OnDestroy {
   readonly auth = inject(AdminAuthService);
   readonly router = inject(Router);
+  readonly route = inject(ActivatedRoute);
   readonly saving = signal(false);
+  readonly deleting = signal(false);
+  readonly loadingVehicle = signal(false);
+  readonly editingVehicleId = signal<string | null>(null);
   readonly error = signal<string | null>(null);
   readonly catalogError = signal<string | null>(null);
   readonly brands = signal<readonly CatalogBrand[]>([]);
@@ -47,8 +52,11 @@ export class AdminVehicleEditorPageComponent implements OnInit, OnDestroy {
   readonly selectedFipeYearCode = signal<string | null>(null);
   readonly manualFipeEntry = signal(false);
   readonly selectedPhotos = signal<readonly SelectedPhoto[]>([]);
+  readonly existingPhotos = signal<readonly AdminVehicleImage[]>([]);
+  readonly existingPhotoCount = signal(0);
   readonly photoError = signal<string | null>(null);
   readonly uploadedPhotos = signal(0);
+  readonly managingPhotoId = signal<string | null>(null);
   readonly customEquipment = signal('');
   readonly years = Array.from({ length: 81 }, (_, index) => new Date().getFullYear() + 1 - index);
   readonly equipmentOptions = [
@@ -74,7 +82,8 @@ export class AdminVehicleEditorPageComponent implements OnInit, OnDestroy {
     const query = this.normalize(this.modelQuery());
     return this.filterAndRank(this.models(), query);
   });
-  readonly photoCount = computed(() => this.selectedPhotos().length);
+  readonly photoCount = computed(() => this.existingPhotoCount() + this.selectedPhotos().length);
+  readonly isEditing = computed(() => this.editingVehicleId() !== null);
   private readonly selectedBrandFipeCode = signal<string | null>(null);
   private readonly selectedModelFipeCode = signal<string | null>(null);
 
@@ -113,6 +122,9 @@ export class AdminVehicleEditorPageComponent implements OnInit, OnDestroy {
     } finally {
       this.loadingBrands.set(false);
     }
+
+    const vehicleId = this.route.snapshot.paramMap.get('id');
+    if (vehicleId) await this.loadVehicleForEdit(vehicleId);
   }
 
   ngOnDestroy(): void {
@@ -285,9 +297,9 @@ export class AdminVehicleEditorPageComponent implements OnInit, OnDestroy {
     this.customEquipment.set('');
   }
 
-  setPublication(status: 'draft' | 'published'): void {
+  setPublication(status: VehicleDraft['status']): void {
     this.draft.status = status;
-    if (status === 'draft') this.draft.featured = false;
+    if (status !== 'published') this.draft.featured = false;
   }
 
   async save(): Promise<void> {
@@ -306,14 +318,20 @@ export class AdminVehicleEditorPageComponent implements OnInit, OnDestroy {
         .replace(/[\u0300-\u036f]/g, '')
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/(^-|-$)/g, '');
-      await this.auth.createVehicle(
-        this.draft,
-        this.selectedPhotos().map((photo) => photo.file),
-        (completed) => this.uploadedPhotos.set(completed),
-      );
+      const vehicleId = this.editingVehicleId();
+      const photos = this.selectedPhotos().map((photo) => photo.file);
+      if (vehicleId) {
+        await this.auth.updateVehicle(this.editingVehicleId()!, this.draft, photos, (completed) =>
+          this.uploadedPhotos.set(completed),
+        );
+      } else {
+        await this.auth.createVehicle(this.draft, photos, (completed) =>
+          this.uploadedPhotos.set(completed),
+        );
+      }
       await this.router.navigateByUrl('/admin/veiculos');
     } catch (saveError) {
-      console.error('Falha ao cadastrar veículo:', saveError);
+      console.error('Falha ao salvar veículo:', saveError);
       this.error.set(this.saveErrorMessage(saveError));
     } finally {
       this.saving.set(false);
@@ -400,6 +418,146 @@ export class AdminVehicleEditorPageComponent implements OnInit, OnDestroy {
     if (!this.draft.location.trim()) missing.push('localização');
     if (!this.draft.description.trim()) missing.push('descrição');
     return missing;
+  }
+
+  async deleteVehicle(): Promise<void> {
+    const vehicleId = this.editingVehicleId();
+    if (!vehicleId || this.deleting() || this.saving()) return;
+    const label = `${this.draft.brand} ${this.draft.model}`.trim();
+    if (!globalThis.confirm(`Excluir permanentemente ${label || 'este veículo'} e suas fotos?`))
+      return;
+
+    this.deleting.set(true);
+    this.error.set(null);
+    try {
+      await this.auth.deleteVehicle(vehicleId);
+      await this.router.navigateByUrl('/admin/veiculos');
+    } catch (deleteError) {
+      console.error('Falha ao excluir veículo:', deleteError);
+      this.error.set(
+        'Não foi possível concluir a exclusão. Atualize a lista antes de tentar novamente.',
+      );
+    } finally {
+      this.deleting.set(false);
+    }
+  }
+
+  private async loadVehicleForEdit(vehicleId: string): Promise<void> {
+    this.editingVehicleId.set(vehicleId);
+    this.loadingVehicle.set(true);
+    this.error.set(null);
+    try {
+      const [draft, images] = await Promise.all([
+        this.auth.getVehicleForEdit(vehicleId),
+        this.auth.listVehicleImages(vehicleId),
+      ]);
+      this.draft = { ...draft, equipment: [...draft.equipment] };
+      this.brandQuery.set(this.draft.brand);
+      this.modelQuery.set(this.draft.model);
+      this.existingPhotos.set(images);
+      this.existingPhotoCount.set(images.length);
+      await this.restoreCatalogSelection();
+    } catch (loadError) {
+      console.error('Falha ao carregar veículo para edição:', loadError);
+      this.error.set('Não foi possível carregar este veículo para edição. Tente novamente.');
+    } finally {
+      this.loadingVehicle.set(false);
+    }
+  }
+
+  async setExistingCover(imageId: string): Promise<void> {
+    const vehicleId = this.editingVehicleId();
+    if (!vehicleId || this.managingPhotoId()) return;
+    this.managingPhotoId.set(imageId);
+    this.photoError.set(null);
+    try {
+      await this.auth.setVehicleCover(vehicleId, imageId);
+      this.existingPhotos.update((images) =>
+        images.map((image) => ({ ...image, isCover: image.id === imageId })),
+      );
+    } catch (error) {
+      console.error('Falha ao definir capa do veículo:', error);
+      this.photoError.set('Não foi possível definir a capa. Tente novamente.');
+    } finally {
+      this.managingPhotoId.set(null);
+    }
+  }
+
+  async moveExistingPhoto(imageId: string, direction: -1 | 1): Promise<void> {
+    const vehicleId = this.editingVehicleId();
+    const images = this.existingPhotos();
+    const index = images.findIndex((image) => image.id === imageId);
+    const destination = index + direction;
+    if (!vehicleId || index < 0 || destination < 0 || destination >= images.length) return;
+
+    this.managingPhotoId.set(imageId);
+    this.photoError.set(null);
+    const reordered = [...images];
+    [reordered[index], reordered[destination]] = [reordered[destination], reordered[index]];
+    try {
+      await this.auth.reorderVehicleImages(
+        vehicleId,
+        reordered.map((image) => image.id),
+      );
+      this.existingPhotos.set(reordered.map((image, sortOrder) => ({ ...image, sortOrder })));
+    } catch (error) {
+      console.error('Falha ao ordenar fotos do veículo:', error);
+      this.photoError.set('Não foi possível alterar a ordem das fotos. Tente novamente.');
+    } finally {
+      this.managingPhotoId.set(null);
+    }
+  }
+
+  async removeExistingPhoto(image: AdminVehicleImage): Promise<void> {
+    const vehicleId = this.editingVehicleId();
+    if (!vehicleId || this.managingPhotoId()) return;
+    this.managingPhotoId.set(image.id);
+    this.photoError.set(null);
+    try {
+      await this.auth.removeVehicleImage(vehicleId, image);
+      const remaining = this.existingPhotos().filter((current) => current.id !== image.id);
+      const coverId = image.isCover
+        ? (remaining[0]?.id ?? null)
+        : (remaining.find((current) => current.isCover)?.id ?? null);
+      this.existingPhotos.set(
+        remaining.map((current, sortOrder) => ({
+          ...current,
+          isCover: current.id === coverId,
+          sortOrder,
+        })),
+      );
+      this.existingPhotoCount.set(remaining.length);
+    } catch (error) {
+      console.error('Falha ao remover foto do veículo:', error);
+      this.photoError.set('Não foi possível remover a foto. Tente novamente.');
+    } finally {
+      this.managingPhotoId.set(null);
+    }
+  }
+
+  private async restoreCatalogSelection(): Promise<void> {
+    const brand = this.brands().find(
+      (item) => this.normalize(item.name) === this.normalize(this.draft.brand),
+    );
+    if (!brand) return;
+
+    this.selectedBrandFipeCode.set(brand.fipeCode);
+    this.loadingModels.set(true);
+    try {
+      const models = await this.auth.listCatalogModels(brand.id);
+      this.models.set(models);
+      const model = models.find(
+        (item) => this.normalize(item.name) === this.normalize(this.draft.model),
+      );
+      this.selectedModelFipeCode.set(model?.fipeModelCode ?? null);
+    } catch (error) {
+      console.error('Falha ao restaurar catálogo do veículo:', error);
+      this.catalogError.set(
+        'Os dados do veículo foram carregados, mas o catálogo não está disponível para trocar modelo agora.',
+      );
+    } finally {
+      this.loadingModels.set(false);
+    }
   }
 
   private createPreview(file: File): string | null {

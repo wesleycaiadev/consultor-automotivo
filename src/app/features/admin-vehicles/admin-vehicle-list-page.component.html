@@ -35,16 +35,21 @@
           ><span class="status" [attr.data-status]="vehicle.status">{{
             statusLabel(vehicle.status)
           }}</span>
-          <button
-            class="quick-edit-trigger"
-            type="button"
-            [attr.aria-expanded]="editingVehicle()?.id === vehicle.id"
-            (click)="
-              editingVehicle()?.id === vehicle.id ? closeQuickEdit() : openQuickEdit(vehicle)
-            "
-          >
-            {{ editingVehicle()?.id === vehicle.id ? 'Fechar' : 'Edição rápida' }}
-          </button>
+          <span>
+            <a class="quick-edit-trigger" [routerLink]="['/admin/veiculos', vehicle.id, 'editar']">
+              Editar veículo
+            </a>
+            <button
+              class="quick-edit-trigger"
+              type="button"
+              [attr.aria-expanded]="editingVehicle()?.id === vehicle.id"
+              (click)="
+                editingVehicle()?.id === vehicle.id ? closeQuickEdit() : openQuickEdit(vehicle)
+              "
+            >
+              {{ editingVehicle()?.id === vehicle.id ? 'Fechar' : 'Edição rápida' }}
+            </button>
+          </span>
 
           @if (editingVehicle()?.id === vehicle.id) {
             <section

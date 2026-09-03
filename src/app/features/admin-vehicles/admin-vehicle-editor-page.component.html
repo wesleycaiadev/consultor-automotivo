@@ -1,532 +1,648 @@
 <section class="editor">
   <header class="editor__header">
     <a class="back-link" routerLink="/admin/veiculos">← Voltar aos veículos</a>
-    <p class="eyebrow">SHOWROOM · CADASTRO</p>
-    <h1>Novo veículo</h1>
+    <p class="eyebrow">SHOWROOM · {{ isEditing() ? 'EDIÇÃO' : 'CADASTRO' }}</p>
+    <h1>{{ isEditing() ? 'Editar veículo' : 'Novo veículo' }}</h1>
     <p class="intro">
-      Organize os dados em blocos claros. Os campos essenciais estão sempre visíveis e o veículo
-      pode começar como rascunho.
+      {{
+        isEditing()
+          ? 'Atualize todos os dados do anúncio. As alterações ficam salvas no mesmo veículo.'
+          : 'Organize os dados em blocos claros. Os campos essenciais estão sempre visíveis e o veículo pode começar como rascunho.'
+      }}
     </p>
   </header>
 
-  <form #vehicleForm="ngForm" (ngSubmit)="save()">
-    @if (catalogError()) {
-      <div class="notice notice--error" role="alert">{{ catalogError() }}</div>
-    }
-
-    <fieldset class="form-section">
-      <legend>
-        <span>01</span><strong>Identificação</strong><small>Marca, modelo e versão comercial</small>
-      </legend>
-      <div class="form-grid">
-        <div class="field picker">
-          <span id="vehicle-brand-label">Marca</span>
-          <button
-            class="picker-trigger"
-            type="button"
-            aria-haspopup="listbox"
-            aria-controls="brand-options"
-            [attr.aria-expanded]="brandOpen()"
-            aria-labelledby="vehicle-brand-label vehicle-brand-value"
-            (click)="brandOpen() ? brandOpen.set(false) : openBrandPicker()"
-          >
-            <span id="vehicle-brand-value" [class.is-placeholder]="!draft.brand">
-              {{ draft.brand || 'Selecionar marca' }}
-            </span>
-            <b aria-hidden="true">⌄</b>
-          </button>
-          @if (brandOpen()) {
-            <div class="picker-panel" id="brand-options">
-              <div class="picker-search">
-                <label for="brand-search">Buscar marca</label>
-                <input
-                  id="brand-search"
-                  name="brandSearch"
-                  [ngModel]="brandQuery()"
-                  (ngModelChange)="onBrandInput($event)"
-                  (keydown.enter)="selectFirstBrand($event)"
-                  type="search"
-                  autocomplete="off"
-                  placeholder="Ex.: Toyota, BMW, Volvo"
-                />
-              </div>
-              <div class="picker-results" role="listbox" aria-label="Marcas disponíveis">
-                @if (loadingBrands()) {
-                  <p class="option-state">Carregando marcas…</p>
-                } @else if (filteredBrands().length) {
-                  @for (brand of filteredBrands(); track brand.id) {
-                    <button
-                      type="button"
-                      role="option"
-                      [attr.aria-selected]="draft.brand === brand.name"
-                      (click)="selectBrand(brand)"
-                    >
-                      <span>{{ brand.name }}</span
-                      ><small>Selecionar</small>
-                    </button>
-                  }
-                } @else {
-                  <p class="option-state">Nenhuma marca encontrada para “{{ brandQuery() }}”.</p>
-                }
-              </div>
-            </div>
-          }
-          <small class="helper">{{ brands().length }} marcas; pesquise dentro da lista.</small>
-        </div>
-
-        <div class="field picker">
-          <span id="vehicle-model-label">Modelo / versão (FIPE)</span>
-          <button
-            class="picker-trigger"
-            type="button"
-            aria-haspopup="listbox"
-            aria-controls="model-options"
-            [attr.aria-expanded]="modelOpen()"
-            aria-labelledby="vehicle-model-label vehicle-model-value"
-            [disabled]="!draft.brand || loadingModels()"
-            (click)="modelOpen() ? modelOpen.set(false) : openModelPicker()"
-          >
-            <span id="vehicle-model-value" [class.is-placeholder]="!draft.model">
-              {{
-                loadingModels()
-                  ? 'Carregando opções…'
-                  : draft.model ||
-                    (draft.brand ? 'Selecionar modelo / versão' : 'Escolha a marca primeiro')
-              }}
-            </span>
-            <b aria-hidden="true">⌄</b>
-          </button>
-          @if (modelOpen() && draft.brand) {
-            <div class="picker-panel" id="model-options">
-              <div class="picker-search">
-                <label for="model-search">Buscar modelo ou versão</label>
-                <input
-                  id="model-search"
-                  name="modelSearch"
-                  [ngModel]="modelQuery()"
-                  (ngModelChange)="onModelInput($event)"
-                  (keydown.enter)="selectFirstModel($event)"
-                  type="search"
-                  autocomplete="off"
-                  placeholder="Ex.: Corolla, XEi, 2.0, híbrido"
-                />
-              </div>
-              <div class="picker-results" role="listbox" aria-label="Modelos e versões disponíveis">
-                @if (loadingModels()) {
-                  <p class="option-state">Carregando modelos de {{ draft.brand }}…</p>
-                } @else if (filteredModels().length) {
-                  @for (model of filteredModels(); track model.id) {
-                    <button
-                      type="button"
-                      role="option"
-                      [attr.aria-selected]="draft.model === model.name"
-                      (click)="selectModel(model)"
-                    >
-                      <span>{{ model.name }}</span
-                      ><small>FIPE {{ model.fipeModelCode }}</small>
-                    </button>
-                  }
-                } @else {
-                  <p class="option-state">Nenhuma opção encontrada para “{{ modelQuery() }}”.</p>
-                }
-              </div>
-            </div>
-          }
-          <small class="helper">
-            {{
-              draft.brand
-                ? models().length + ' opções FIPE disponíveis para ' + draft.brand + '.'
-                : 'A lista é liberada depois que a marca é escolhida.'
-            }}
-          </small>
-        </div>
-      </div>
-    </fieldset>
-
-    <fieldset class="form-section">
-      <legend>
-        <span>02</span><strong>Especificações</strong
-        ><small>Informações técnicas e comerciais</small>
-      </legend>
-      <div class="form-grid form-grid--three">
-        <div class="field">
-          <label for="manufacturing-year">Ano de fabricação</label
-          ><select
-            id="manufacturing-year"
-            name="manufacturing_year"
-            [(ngModel)]="draft.manufacturing_year"
-            required
-          >
-            @for (year of years; track year) {
-              <option [ngValue]="year">{{ year }}</option>
-            }
-          </select>
-        </div>
-        <div class="field">
-          <label for="model-year">Ano do modelo</label
-          ><select
-            id="model-year"
-            name="model_year"
-            [ngModel]="draft.model_year"
-            (ngModelChange)="setModelYear($event)"
-            required
-          >
-            @for (year of years; track year) {
-              <option [ngValue]="year">{{ year }}</option>
-            }
-          </select>
-        </div>
-        <div class="field">
-          <label for="mileage">Quilometragem</label>
-          <div class="input-suffix">
-            <input
-              id="mileage"
-              name="mileage"
-              [(ngModel)]="draft.mileage"
-              type="number"
-              min="0"
-              required
-            /><span>km</span>
-          </div>
-        </div>
-        <div class="field">
-          <label for="price">Preço anunciado</label>
-          <div class="input-prefix">
-            <span>R$</span
-            ><input
-              id="price"
-              name="price"
-              [(ngModel)]="draft.price"
-              type="number"
-              min="0"
-              placeholder="Consulte"
-            />
-          </div>
-        </div>
-        <div class="field">
-          <label for="transmission">Câmbio</label
-          ><select id="transmission" name="transmission" [(ngModel)]="draft.transmission" required>
-            <option>Automático</option>
-            <option>Manual</option>
-            <option>Automatizado</option>
-            <option>CVT</option>
-            <option>Automático sequencial</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="steering">Direção</label
-          ><select id="steering" name="steering" [(ngModel)]="draft.steering" required>
-            <option>Elétrica</option>
-            <option>Hidráulica</option>
-            <option>Eletro-hidráulica</option>
-            <option>Mecânica</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="fuel">Combustível</label
-          ><select
-            id="fuel"
-            name="fuel"
-            [ngModel]="draft.fuel"
-            (ngModelChange)="setFuel($event)"
-            required
-          >
-            <option>Gasolina</option>
-            <option>Etanol</option>
-            <option>Flex</option>
-            <option>Diesel</option>
-            <option>Híbrido</option>
-            <option>Elétrico</option>
-            <option>GNV</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="category">Tipo de carro</label
-          ><select id="category" name="category" [(ngModel)]="draft.category" required>
-            <option value="suv">SUV</option>
-            <option value="sedan">Sedã</option>
-            <option value="hatch">Hatch</option>
-            <option value="pickup">Picape</option>
-            <option value="other">Outro</option>
-          </select>
-          <small class="helper">Usado para organizar a vitrine pública.</small>
-        </div>
-        <div class="field">
-          <label for="color">Cor</label
-          ><input
-            id="color"
-            name="color"
-            [(ngModel)]="draft.color"
-            placeholder="Ex.: Branco Pérola"
-            required
-          />
-        </div>
-        <div class="field">
-          <label for="location">Localização</label
-          ><input id="location" name="location" [(ngModel)]="draft.location" required />
-        </div>
-      </div>
-    </fieldset>
-
-    <fieldset class="form-section">
-      <legend>
-        <span>03</span><strong>Equipamentos</strong
-        ><small>Selecione os destaques que ajudam na decisão</small>
-      </legend>
-      <div class="equipment-grid">
-        @for (item of equipmentOptions; track item) {
-          <label class="equipment-option" [class.is-selected]="draft.equipment.includes(item)">
-            <input
-              type="checkbox"
-              [checked]="draft.equipment.includes(item)"
-              (change)="toggleEquipment(item)"
-            />
-            <span>{{ item }}</span
-            ><b aria-hidden="true">{{ draft.equipment.includes(item) ? '✓' : '+' }}</b>
-          </label>
-        }
-      </div>
-      <div class="custom-equipment">
-        <label for="custom-equipment">Outro equipamento</label>
-        <div>
-          <input
-            id="custom-equipment"
-            name="customEquipment"
-            [ngModel]="customEquipment()"
-            (ngModelChange)="customEquipment.set($event)"
-            (keydown.enter)="$event.preventDefault(); addCustomEquipment()"
-            placeholder="Digite e adicione"
-          /><button type="button" (click)="addCustomEquipment()">Adicionar</button>
-        </div>
-      </div>
-      @if (draft.equipment.length) {
-        <p class="selection-count">{{ draft.equipment.length }} equipamento(s) selecionado(s).</p>
+  @if (loadingVehicle()) {
+    <p class="notice" aria-live="polite">Carregando dados do veículo…</p>
+  } @else {
+    <form #vehicleForm="ngForm" (ngSubmit)="save()">
+      @if (catalogError()) {
+        <div class="notice notice--error" role="alert">{{ catalogError() }}</div>
       }
-    </fieldset>
 
-    <fieldset class="form-section">
-      <legend>
-        <span>04</span><strong>Descrição e referência FIPE</strong
-        ><small>Contexto do anúncio e dados de comparação</small>
-      </legend>
-      <div class="form-grid form-grid--three">
-        <div class="field field--full">
-          <label for="description">Descrição</label
-          ><textarea
-            id="description"
-            name="description"
-            [(ngModel)]="draft.description"
-            maxlength="1800"
-            placeholder="Histórico, conservação, diferenciais e observações relevantes."
-            required
-          ></textarea>
-          <small class="helper">{{ draft.description.length }} de 1.800 caracteres</small>
-        </div>
-        <div class="field">
-          <label for="fipe-year">Referência FIPE</label>
-          <select
-            id="fipe-year"
-            name="fipe_year"
-            [ngModel]="selectedFipeYearCode()"
-            (ngModelChange)="selectFipeYear($event)"
-            [disabled]="loadingFipeYears() || !fipeYears().length"
-          >
-            <option [ngValue]="null">
-              {{ loadingFipeYears() ? 'Carregando referências…' : 'Escolha modelo e ano primeiro' }}
-            </option>
-            @for (year of fipeYears(); track year.code) {
-              <option [value]="year.code">{{ year.name }}</option>
+      <fieldset class="form-section">
+        <legend>
+          <span>01</span><strong>Identificação</strong
+          ><small>Marca, modelo e versão comercial</small>
+        </legend>
+        <div class="form-grid">
+          <div class="field picker">
+            <span id="vehicle-brand-label">Marca</span>
+            <button
+              class="picker-trigger"
+              type="button"
+              aria-haspopup="listbox"
+              aria-controls="brand-options"
+              [attr.aria-expanded]="brandOpen()"
+              aria-labelledby="vehicle-brand-label vehicle-brand-value"
+              (click)="brandOpen() ? brandOpen.set(false) : openBrandPicker()"
+            >
+              <span id="vehicle-brand-value" [class.is-placeholder]="!draft.brand">
+                {{ draft.brand || 'Selecionar marca' }}
+              </span>
+              <b aria-hidden="true">⌄</b>
+            </button>
+            @if (brandOpen()) {
+              <div class="picker-panel" id="brand-options">
+                <div class="picker-search">
+                  <label for="brand-search">Buscar marca</label>
+                  <input
+                    id="brand-search"
+                    name="brandSearch"
+                    [ngModel]="brandQuery()"
+                    (ngModelChange)="onBrandInput($event)"
+                    (keydown.enter)="selectFirstBrand($event)"
+                    type="search"
+                    autocomplete="off"
+                    placeholder="Ex.: Toyota, BMW, Volvo"
+                  />
+                </div>
+                <div class="picker-results" role="listbox" aria-label="Marcas disponíveis">
+                  @if (loadingBrands()) {
+                    <p class="option-state">Carregando marcas…</p>
+                  } @else if (filteredBrands().length) {
+                    @for (brand of filteredBrands(); track brand.id) {
+                      <button
+                        type="button"
+                        role="option"
+                        [attr.aria-selected]="draft.brand === brand.name"
+                        (click)="selectBrand(brand)"
+                      >
+                        <span>{{ brand.name }}</span
+                        ><small>Selecionar</small>
+                      </button>
+                    }
+                  } @else {
+                    <p class="option-state">Nenhuma marca encontrada para “{{ brandQuery() }}”.</p>
+                  }
+                </div>
+              </div>
             }
-          </select>
-          <small class="helper">
-            @if (fipeYears().length) {
-              {{ fipeYears().length }} referência(s) disponível(is) para este modelo.
-            } @else {
-              A referência é carregada automaticamente após selecionar o modelo.
+            <small class="helper">{{ brands().length }} marcas; pesquise dentro da lista.</small>
+          </div>
+
+          <div class="field picker">
+            <span id="vehicle-model-label">Modelo / versão (FIPE)</span>
+            <button
+              class="picker-trigger"
+              type="button"
+              aria-haspopup="listbox"
+              aria-controls="model-options"
+              [attr.aria-expanded]="modelOpen()"
+              aria-labelledby="vehicle-model-label vehicle-model-value"
+              [disabled]="!draft.brand || loadingModels()"
+              (click)="modelOpen() ? modelOpen.set(false) : openModelPicker()"
+            >
+              <span id="vehicle-model-value" [class.is-placeholder]="!draft.model">
+                {{
+                  loadingModels()
+                    ? 'Carregando opções…'
+                    : draft.model ||
+                      (draft.brand ? 'Selecionar modelo / versão' : 'Escolha a marca primeiro')
+                }}
+              </span>
+              <b aria-hidden="true">⌄</b>
+            </button>
+            @if (modelOpen() && draft.brand) {
+              <div class="picker-panel" id="model-options">
+                <div class="picker-search">
+                  <label for="model-search">Buscar modelo ou versão</label>
+                  <input
+                    id="model-search"
+                    name="modelSearch"
+                    [ngModel]="modelQuery()"
+                    (ngModelChange)="onModelInput($event)"
+                    (keydown.enter)="selectFirstModel($event)"
+                    type="search"
+                    autocomplete="off"
+                    placeholder="Ex.: Corolla, XEi, 2.0, híbrido"
+                  />
+                </div>
+                <div
+                  class="picker-results"
+                  role="listbox"
+                  aria-label="Modelos e versões disponíveis"
+                >
+                  @if (loadingModels()) {
+                    <p class="option-state">Carregando modelos de {{ draft.brand }}…</p>
+                  } @else if (filteredModels().length) {
+                    @for (model of filteredModels(); track model.id) {
+                      <button
+                        type="button"
+                        role="option"
+                        [attr.aria-selected]="draft.model === model.name"
+                        (click)="selectModel(model)"
+                      >
+                        <span>{{ model.name }}</span
+                        ><small>FIPE {{ model.fipeModelCode }}</small>
+                      </button>
+                    }
+                  } @else {
+                    <p class="option-state">Nenhuma opção encontrada para “{{ modelQuery() }}”.</p>
+                  }
+                </div>
+              </div>
             }
-          </small>
+            <small class="helper">
+              {{
+                draft.brand
+                  ? models().length + ' opções FIPE disponíveis para ' + draft.brand + '.'
+                  : 'A lista é liberada depois que a marca é escolhida.'
+              }}
+            </small>
+          </div>
         </div>
-        <div class="field">
-          <label for="fipe-code">Código FIPE</label
-          ><input
-            id="fipe-code"
-            name="fipe_code"
-            [(ngModel)]="draft.fipe_code"
-            placeholder="Ex.: 001004-9"
-            [readonly]="!manualFipeEntry()"
-          /><small class="helper">Preenchido pela FIPE; não é o código interno do modelo.</small>
-        </div>
-        <div class="field">
-          <label for="fipe-price">Valor FIPE</label>
-          <div class="input-prefix">
-            <span>R$</span
+      </fieldset>
+
+      <fieldset class="form-section">
+        <legend>
+          <span>02</span><strong>Especificações</strong
+          ><small>Informações técnicas e comerciais</small>
+        </legend>
+        <div class="form-grid form-grid--three">
+          <div class="field">
+            <label for="manufacturing-year">Ano de fabricação</label
+            ><select
+              id="manufacturing-year"
+              name="manufacturing_year"
+              [(ngModel)]="draft.manufacturing_year"
+              required
+            >
+              @for (year of years; track year) {
+                <option [ngValue]="year">{{ year }}</option>
+              }
+            </select>
+          </div>
+          <div class="field">
+            <label for="model-year">Ano do modelo</label
+            ><select
+              id="model-year"
+              name="model_year"
+              [ngModel]="draft.model_year"
+              (ngModelChange)="setModelYear($event)"
+              required
+            >
+              @for (year of years; track year) {
+                <option [ngValue]="year">{{ year }}</option>
+              }
+            </select>
+          </div>
+          <div class="field">
+            <label for="mileage">Quilometragem</label>
+            <div class="input-suffix">
+              <input
+                id="mileage"
+                name="mileage"
+                [(ngModel)]="draft.mileage"
+                type="number"
+                min="0"
+                required
+              /><span>km</span>
+            </div>
+          </div>
+          <div class="field">
+            <label for="price">Preço anunciado</label>
+            <div class="input-prefix">
+              <span>R$</span
+              ><input
+                id="price"
+                name="price"
+                [(ngModel)]="draft.price"
+                type="number"
+                min="0"
+                placeholder="Consulte"
+              />
+            </div>
+          </div>
+          <div class="field">
+            <label for="transmission">Câmbio</label
+            ><select
+              id="transmission"
+              name="transmission"
+              [(ngModel)]="draft.transmission"
+              required
+            >
+              <option>Automático</option>
+              <option>Manual</option>
+              <option>Automatizado</option>
+              <option>CVT</option>
+              <option>Automático sequencial</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="steering">Direção</label
+            ><select id="steering" name="steering" [(ngModel)]="draft.steering" required>
+              <option>Elétrica</option>
+              <option>Hidráulica</option>
+              <option>Eletro-hidráulica</option>
+              <option>Mecânica</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="fuel">Combustível</label
+            ><select
+              id="fuel"
+              name="fuel"
+              [ngModel]="draft.fuel"
+              (ngModelChange)="setFuel($event)"
+              required
+            >
+              <option>Gasolina</option>
+              <option>Etanol</option>
+              <option>Flex</option>
+              <option>Diesel</option>
+              <option>Híbrido</option>
+              <option>Elétrico</option>
+              <option>GNV</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="category">Tipo de carro</label
+            ><select id="category" name="category" [(ngModel)]="draft.category" required>
+              <option value="suv">SUV</option>
+              <option value="sedan">Sedã</option>
+              <option value="hatch">Hatch</option>
+              <option value="pickup">Picape</option>
+              <option value="other">Outro</option>
+            </select>
+            <small class="helper">Usado para organizar a vitrine pública.</small>
+          </div>
+          <div class="field">
+            <label for="color">Cor</label
             ><input
-              id="fipe-price"
-              name="fipe_price"
-              [(ngModel)]="draft.fipe_price"
-              type="number"
-              min="0"
+              id="color"
+              name="color"
+              [(ngModel)]="draft.color"
+              placeholder="Ex.: Branco Pérola"
+              required
+            />
+          </div>
+          <div class="field">
+            <label for="location">Localização</label
+            ><input id="location" name="location" [(ngModel)]="draft.location" required />
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="form-section">
+        <legend>
+          <span>03</span><strong>Equipamentos</strong
+          ><small>Selecione os destaques que ajudam na decisão</small>
+        </legend>
+        <div class="equipment-grid">
+          @for (item of equipmentOptions; track item) {
+            <label class="equipment-option" [class.is-selected]="draft.equipment.includes(item)">
+              <input
+                type="checkbox"
+                [checked]="draft.equipment.includes(item)"
+                (change)="toggleEquipment(item)"
+              />
+              <span>{{ item }}</span
+              ><b aria-hidden="true">{{ draft.equipment.includes(item) ? '✓' : '+' }}</b>
+            </label>
+          }
+        </div>
+        <div class="custom-equipment">
+          <label for="custom-equipment">Outro equipamento</label>
+          <div>
+            <input
+              id="custom-equipment"
+              name="customEquipment"
+              [ngModel]="customEquipment()"
+              (ngModelChange)="customEquipment.set($event)"
+              (keydown.enter)="$event.preventDefault(); addCustomEquipment()"
+              placeholder="Digite e adicione"
+            /><button type="button" (click)="addCustomEquipment()">Adicionar</button>
+          </div>
+        </div>
+        @if (draft.equipment.length) {
+          <p class="selection-count">{{ draft.equipment.length }} equipamento(s) selecionado(s).</p>
+        }
+      </fieldset>
+
+      <fieldset class="form-section">
+        <legend>
+          <span>04</span><strong>Descrição e referência FIPE</strong
+          ><small>Contexto do anúncio e dados de comparação</small>
+        </legend>
+        <div class="form-grid form-grid--three">
+          <div class="field field--full">
+            <label for="description">Descrição</label
+            ><textarea
+              id="description"
+              name="description"
+              [(ngModel)]="draft.description"
+              maxlength="1800"
+              placeholder="Histórico, conservação, diferenciais e observações relevantes."
+              required
+            ></textarea>
+            <small class="helper">{{ draft.description.length }} de 1.800 caracteres</small>
+          </div>
+          <div class="field">
+            <label for="fipe-year">Referência FIPE</label>
+            <select
+              id="fipe-year"
+              name="fipe_year"
+              [ngModel]="selectedFipeYearCode()"
+              (ngModelChange)="selectFipeYear($event)"
+              [disabled]="loadingFipeYears() || !fipeYears().length"
+            >
+              <option [ngValue]="null">
+                {{
+                  loadingFipeYears() ? 'Carregando referências…' : 'Escolha modelo e ano primeiro'
+                }}
+              </option>
+              @for (year of fipeYears(); track year.code) {
+                <option [value]="year.code">{{ year.name }}</option>
+              }
+            </select>
+            <small class="helper">
+              @if (fipeYears().length) {
+                {{ fipeYears().length }} referência(s) disponível(is) para este modelo.
+              } @else {
+                A referência é carregada automaticamente após selecionar o modelo.
+              }
+            </small>
+          </div>
+          <div class="field">
+            <label for="fipe-code">Código FIPE</label
+            ><input
+              id="fipe-code"
+              name="fipe_code"
+              [(ngModel)]="draft.fipe_code"
+              placeholder="Ex.: 001004-9"
+              [readonly]="!manualFipeEntry()"
+            /><small class="helper">Preenchido pela FIPE; não é o código interno do modelo.</small>
+          </div>
+          <div class="field">
+            <label for="fipe-price">Valor FIPE</label>
+            <div class="input-prefix">
+              <span>R$</span
+              ><input
+                id="fipe-price"
+                name="fipe_price"
+                [(ngModel)]="draft.fipe_price"
+                type="number"
+                min="0"
+                [readonly]="!manualFipeEntry()"
+              />
+            </div>
+          </div>
+          <div class="field">
+            <label for="fipe-reference">Mês de referência</label
+            ><input
+              id="fipe-reference"
+              name="fipe_reference_month"
+              [(ngModel)]="draft.fipe_reference_month"
+              placeholder="Ex.: agosto de 2026"
               [readonly]="!manualFipeEntry()"
             />
           </div>
         </div>
-        <div class="field">
-          <label for="fipe-reference">Mês de referência</label
-          ><input
-            id="fipe-reference"
-            name="fipe_reference_month"
-            [(ngModel)]="draft.fipe_reference_month"
-            placeholder="Ex.: agosto de 2026"
-            [readonly]="!manualFipeEntry()"
-          />
-        </div>
-      </div>
-      @if (loadingFipeReference()) {
-        <p class="fipe-state" aria-live="polite">Consultando código e valor FIPE…</p>
-      }
-      @if (fipeError()) {
-        <div class="fipe-state fipe-state--warning" role="status">
-          <span>{{ fipeError() }}</span>
-          <button type="button" (click)="enableManualFipeEntry()">Preencher manualmente</button>
-        </div>
-      } @else if (!manualFipeEntry() && draft.fipe_code) {
-        <p class="fipe-state" aria-live="polite">
-          Referência FIPE atualizada automaticamente. O preço anunciado continua independente.
-        </p>
-      } @else if (!manualFipeEntry()) {
-        <button class="manual-fipe-button" type="button" (click)="enableManualFipeEntry()">
-          Inserir referência FIPE manualmente
-        </button>
-      }
-    </fieldset>
-
-    <fieldset class="form-section form-section--photos">
-      <legend>
-        <span>05</span><strong>Fotos</strong><small>Até 15 imagens; a primeira será a capa</small>
-      </legend>
-      <label
-        class="photo-dropzone"
-        for="vehicle-photos"
-        (dragover)="$event.preventDefault()"
-        (drop)="dropPhotos($event)"
-      >
-        <input
-          id="vehicle-photos"
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          multiple
-          (change)="selectPhotos($event)"
-        />
-        <span class="photo-icon" aria-hidden="true">＋</span
-        ><strong>Arraste as fotos ou clique para escolher</strong
-        ><small>JPEG, PNG ou WebP · máximo de 10 MB por imagem</small><b>{{ photoCount() }}/15</b>
-      </label>
-      @if (photoError()) {
-        <p class="field-error" role="alert">{{ photoError() }}</p>
-      }
-      @if (selectedPhotos().length) {
-        <div class="photo-preview-heading">
-          <div>
-            <strong>Prévia das fotos</strong><small>A primeira foto será usada como capa.</small>
+        @if (loadingFipeReference()) {
+          <p class="fipe-state" aria-live="polite">Consultando código e valor FIPE…</p>
+        }
+        @if (fipeError()) {
+          <div class="fipe-state fipe-state--warning" role="status">
+            <span>{{ fipeError() }}</span>
+            <button type="button" (click)="enableManualFipeEntry()">Preencher manualmente</button>
           </div>
-          <span>{{ photoCount() }} selecionada(s)</span>
-        </div>
-        <div class="photo-grid" aria-label="Prévia das fotos selecionadas">
-          @for (photo of selectedPhotos(); track photo.id; let index = $index) {
-            <figure [class.is-cover]="index === 0">
-              @if (photo.previewUrl) {
-                <img
-                  [src]="photo.previewUrl"
-                  [alt]="'Prévia da foto ' + (index + 1) + ': ' + photo.file.name"
-                />
-              } @else {
-                <div class="photo-placeholder">Prévia indisponível</div>
-              }
-              <figcaption>
-                <span>{{ index === 0 ? 'CAPA' : 'FOTO ' + (index + 1) }}</span
-                ><small>{{ photo.file.name }}</small
-                ><button
-                  type="button"
-                  (click)="removePhoto(photo.id)"
-                  [attr.aria-label]="'Remover foto ' + (index + 1)"
-                >
-                  Remover
-                </button>
-              </figcaption>
-            </figure>
+        } @else if (!manualFipeEntry() && draft.fipe_code) {
+          <p class="fipe-state" aria-live="polite">
+            Referência FIPE atualizada automaticamente. O preço anunciado continua independente.
+          </p>
+          <button class="manual-fipe-button" type="button" (click)="enableManualFipeEntry()">
+            Editar referência FIPE
+          </button>
+        } @else if (!manualFipeEntry()) {
+          <button class="manual-fipe-button" type="button" (click)="enableManualFipeEntry()">
+            Inserir referência FIPE manualmente
+          </button>
+        }
+      </fieldset>
+
+      <fieldset class="form-section form-section--photos">
+        <legend>
+          <span>05</span><strong>Fotos</strong><small>Até 15 imagens; a primeira será a capa</small>
+        </legend>
+        @if (isEditing() && existingPhotos().length) {
+          <div class="photo-preview-heading">
+            <div>
+              <strong>Fotos já publicadas</strong
+              ><small>Defina a capa, ordene ou remova fotos sem sair desta edição.</small>
+            </div>
+            <span>{{ existingPhotos().length }} atual(is)</span>
+          </div>
+          <div class="photo-grid" aria-label="Fotos já vinculadas ao veículo">
+            @for (photo of existingPhotos(); track photo.id; let index = $index) {
+              <figure [class.is-cover]="photo.isCover">
+                @if (photo.signedUrl) {
+                  <img [src]="photo.signedUrl" [alt]="'Foto ' + (index + 1) + ' do veículo'" />
+                } @else {
+                  <div class="photo-placeholder">Prévia indisponível</div>
+                }
+                <figcaption>
+                  <span>{{ photo.isCover ? 'CAPA' : 'FOTO ' + (index + 1) }}</span>
+                  <div class="photo-actions">
+                    @if (!photo.isCover) {
+                      <button
+                        type="button"
+                        [disabled]="managingPhotoId() !== null"
+                        (click)="setExistingCover(photo.id)"
+                      >
+                        Capa
+                      </button>
+                    }
+                    <button
+                      type="button"
+                      [disabled]="index === 0 || managingPhotoId() !== null"
+                      (click)="moveExistingPhoto(photo.id, -1)"
+                      [attr.aria-label]="'Mover foto ' + (index + 1) + ' para trás'"
+                    >
+                      ←
+                    </button>
+                    <button
+                      type="button"
+                      [disabled]="
+                        index === existingPhotos().length - 1 || managingPhotoId() !== null
+                      "
+                      (click)="moveExistingPhoto(photo.id, 1)"
+                      [attr.aria-label]="'Mover foto ' + (index + 1) + ' para frente'"
+                    >
+                      →
+                    </button>
+                    <button
+                      type="button"
+                      [disabled]="managingPhotoId() !== null"
+                      (click)="removeExistingPhoto(photo)"
+                    >
+                      {{ managingPhotoId() === photo.id ? 'Aguarde…' : 'Remover' }}
+                    </button>
+                  </div>
+                </figcaption>
+              </figure>
+            }
+          </div>
+        }
+        <label
+          class="photo-dropzone"
+          for="vehicle-photos"
+          (dragover)="$event.preventDefault()"
+          (drop)="dropPhotos($event)"
+        >
+          <input
+            id="vehicle-photos"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            multiple
+            (change)="selectPhotos($event)"
+          />
+          <span class="photo-icon" aria-hidden="true">＋</span
+          ><strong>Arraste as fotos ou clique para escolher</strong
+          ><small>JPEG, PNG ou WebP · máximo de 10 MB por imagem</small><b>{{ photoCount() }}/15</b>
+        </label>
+        @if (photoError()) {
+          <p class="field-error" role="alert">{{ photoError() }}</p>
+        }
+        @if (selectedPhotos().length) {
+          <div class="photo-preview-heading">
+            <div>
+              <strong>Prévia das fotos</strong><small>A primeira foto será usada como capa.</small>
+            </div>
+            <span>{{ selectedPhotos().length }} nova(s)</span>
+          </div>
+          <div class="photo-grid" aria-label="Prévia das fotos selecionadas">
+            @for (photo of selectedPhotos(); track photo.id; let index = $index) {
+              <figure [class.is-cover]="index === 0">
+                @if (photo.previewUrl) {
+                  <img
+                    [src]="photo.previewUrl"
+                    [alt]="'Prévia da foto ' + (index + 1) + ': ' + photo.file.name"
+                  />
+                } @else {
+                  <div class="photo-placeholder">Prévia indisponível</div>
+                }
+                <figcaption>
+                  <span>{{ index === 0 ? 'CAPA' : 'FOTO ' + (index + 1) }}</span
+                  ><small>{{ photo.file.name }}</small
+                  ><button
+                    type="button"
+                    (click)="removePhoto(photo.id)"
+                    [attr.aria-label]="'Remover foto ' + (index + 1)"
+                  >
+                    Remover
+                  </button>
+                </figcaption>
+              </figure>
+            }
+          </div>
+        }
+      </fieldset>
+
+      <fieldset class="form-section publication">
+        <legend>
+          <span>06</span><strong>Visibilidade no showroom</strong
+          ><small>Escolha se o veículo já pode ser visto por clientes</small>
+        </legend>
+        <div class="publication-options" role="radiogroup" aria-label="Visibilidade do veículo">
+          <label class="publication-option" [class.is-selected]="draft.status === 'draft'">
+            <input
+              name="status"
+              type="radio"
+              [checked]="draft.status === 'draft'"
+              (change)="setPublication('draft')"
+            />
+            <span
+              ><strong>Guardar em preparação</strong
+              ><small>Salva o cadastro, mas não mostra o veículo no showroom.</small></span
+            ><b aria-hidden="true"></b>
+          </label>
+          <label class="publication-option" [class.is-selected]="draft.status === 'published'">
+            <input
+              name="status"
+              type="radio"
+              [checked]="draft.status === 'published'"
+              (change)="setPublication('published')"
+            />
+            <span
+              ><strong>Exibir no showroom</strong
+              ><small>Publica o veículo para os clientes verem na vitrine.</small></span
+            ><b aria-hidden="true"></b>
+          </label>
+          @if (isEditing()) {
+            <label class="publication-option" [class.is-selected]="draft.status === 'sold'">
+              <input
+                name="status"
+                type="radio"
+                [checked]="draft.status === 'sold'"
+                (change)="setPublication('sold')"
+              />
+              <span
+                ><strong>Marcar como vendido</strong
+                ><small>Remove do showroom, mas preserva o cadastro no histórico.</small></span
+              ><b aria-hidden="true"></b>
+            </label>
           }
         </div>
-      }
-    </fieldset>
-
-    <fieldset class="form-section publication">
-      <legend>
-        <span>06</span><strong>Visibilidade no showroom</strong
-        ><small>Escolha se o veículo já pode ser visto por clientes</small>
-      </legend>
-      <div class="publication-options" role="radiogroup" aria-label="Visibilidade do veículo">
-        <label class="publication-option" [class.is-selected]="draft.status === 'draft'">
-          <input
-            name="status"
-            type="radio"
-            [checked]="draft.status === 'draft'"
-            (change)="setPublication('draft')"
-          />
-          <span
-            ><strong>Guardar em preparação</strong
-            ><small>Salva o cadastro, mas não mostra o veículo no showroom.</small></span
-          ><b aria-hidden="true"></b>
-        </label>
-        <label class="publication-option" [class.is-selected]="draft.status === 'published'">
-          <input
-            name="status"
-            type="radio"
-            [checked]="draft.status === 'published'"
-            (change)="setPublication('published')"
-          />
-          <span
-            ><strong>Exibir no showroom</strong
-            ><small>Publica o veículo para os clientes verem na vitrine.</small></span
-          ><b aria-hidden="true"></b>
-        </label>
-      </div>
-      <p class="publication-note">
-        “Vendido” não é uma escolha de cadastro: ele será marcado depois, quando o veículo sair do
-        showroom.
-      </p>
-      @if (draft.status === 'published') {
-        <label class="feature-toggle" [class.is-selected]="draft.featured">
-          <input name="featured" [(ngModel)]="draft.featured" type="checkbox" />
-          <span
-            ><strong>Destacar no showroom</strong
-            ><small>O veículo ganha prioridade na vitrine pública.</small></span
-          ><b aria-hidden="true"></b>
-        </label>
-      }
-    </fieldset>
-
-    @if (error()) {
-      <div class="notice notice--error" role="alert">{{ error() }}</div>
-    }
-    <footer class="form-actions">
-      <div>
-        <strong>{{ draft.brand || 'Novo veículo' }} {{ draft.model }}</strong
-        ><small
-          >{{ photoCount() }} foto(s) · {{ draft.equipment.length }} equipamento(s) ·
-          {{ draft.status === 'draft' ? 'Em preparação' : 'No showroom' }}</small
-        >
-        @if (saveReadiness().length) {
-          <small class="save-hint">Para salvar: {{ saveReadiness().join(', ') }}.</small>
+        <p class="publication-note">
+          {{
+            isEditing()
+              ? 'Um veículo vendido pode permanecer no histórico ou voltar ao showroom quando necessário.'
+              : '“Vendido” poderá ser marcado depois, quando o veículo sair do showroom.'
+          }}
+        </p>
+        @if (draft.status === 'published') {
+          <label class="feature-toggle" [class.is-selected]="draft.featured">
+            <input name="featured" [(ngModel)]="draft.featured" type="checkbox" />
+            <span
+              ><strong>Destacar no showroom</strong
+              ><small>O veículo ganha prioridade na vitrine pública.</small></span
+            ><b aria-hidden="true"></b>
+          </label>
         }
-      </div>
-      <a routerLink="/admin/veiculos">Cancelar</a>
-      <button type="submit" [disabled]="saving()">
-        @if (saving() && photoCount()) {
-          Enviando fotos {{ uploadedPhotos() }}/{{ photoCount() }}…
-        } @else {
-          {{ saving() ? 'Salvando…' : 'Salvar veículo' }}
+      </fieldset>
+
+      @if (error()) {
+        <div class="notice notice--error" role="alert">{{ error() }}</div>
+      }
+      <footer class="form-actions">
+        <div>
+          <strong
+            >{{ draft.brand || (isEditing() ? 'Veículo' : 'Novo veículo') }}
+            {{ draft.model }}</strong
+          ><small
+            >{{ photoCount() }} foto(s) · {{ draft.equipment.length }} equipamento(s) ·
+            {{
+              draft.status === 'draft'
+                ? 'Em preparação'
+                : draft.status === 'sold'
+                  ? 'Vendido'
+                  : 'No showroom'
+            }}</small
+          >
+          @if (saveReadiness().length) {
+            <small class="save-hint">Para salvar: {{ saveReadiness().join(', ') }}.</small>
+          }
+        </div>
+        <a routerLink="/admin/veiculos">Cancelar</a>
+        @if (isEditing()) {
+          <button
+            type="button"
+            class="delete-vehicle"
+            [disabled]="saving() || deleting()"
+            (click)="deleteVehicle()"
+          >
+            {{ deleting() ? 'Excluindo…' : 'Excluir veículo' }}
+          </button>
         }
-      </button>
-    </footer>
-  </form>
+        <button type="submit" [disabled]="saving()">
+          @if (saving() && photoCount()) {
+            Enviando fotos {{ uploadedPhotos() }}/{{ selectedPhotos().length }}…
+          } @else {
+            {{ saving() ? 'Salvando…' : isEditing() ? 'Salvar alterações' : 'Salvar veículo' }}
+          }
+        </button>
+      </footer>
+    </form>
+  }
 </section>

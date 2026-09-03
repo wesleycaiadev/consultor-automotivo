@@ -210,6 +210,45 @@ export class AdminAuthService {
     return data as AdminVehicleListItem;
   }
 
+  async getVehicleForEdit(vehicleId: string): Promise<VehicleDraft> {
+    if (!this.#client) throw new Error('Sessão administrativa indisponível.');
+    const { data, error } = await this.#client
+      .from('vehicles')
+      .select(
+        'slug,brand,model,version,manufacturing_year,model_year,mileage,price,transmission,fuel,category,steering,color,location,description,equipment,status,featured,fipe_code,fipe_price,fipe_reference_month,fipe_last_sync',
+      )
+      .eq('id', vehicleId)
+      .single();
+    if (error) throw error;
+    return data as VehicleDraft;
+  }
+
+  async updateVehicle(
+    vehicleId: string,
+    draft: VehicleDraft,
+    photos: readonly File[] = [],
+    onPhotoUploaded?: (completed: number, total: number) => void,
+  ): Promise<void> {
+    if (!this.#client) throw new Error('Sessão administrativa indisponível.');
+    this.assertVehicleImages(photos);
+    const { error } = await this.#client.from('vehicles').update(draft).eq('id', vehicleId);
+    if (error) throw error;
+    if (photos.length)
+      await this.uploadVehicleImages(vehicleId, draft.brand, draft.model, photos, onPhotoUploaded);
+  }
+
+  async deleteVehicle(vehicleId: string): Promise<void> {
+    if (!this.#client) throw new Error('Sessão administrativa indisponível.');
+    const images = await this.listVehicleImages(vehicleId);
+    const { error } = await this.#client.from('vehicles').delete().eq('id', vehicleId);
+    if (error) throw error;
+    const paths = images.map((image) => image.storagePath);
+    if (paths.length) {
+      const { error: storageError } = await this.#client.storage.from('vehicles').remove(paths);
+      if (storageError) throw storageError;
+    }
+  }
+
   async listVehicleImages(vehicleId: string): Promise<readonly AdminVehicleImage[]> {
     if (!this.#client) throw new Error('Sessão administrativa indisponível.');
     const { data, error } = await this.#client

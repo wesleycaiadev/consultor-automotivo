@@ -131,6 +131,18 @@
   cursor: pointer;
 }
 
+.photo-grid figcaption button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.photo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: end;
+  gap: var(--space-1);
+}
+
 @media (max-width: 64rem) {
   .photo-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));

@@ -389,7 +389,7 @@ textarea {
   inset-block-end: 0;
   z-index: var(--layer-header);
   display: grid;
-  grid-template-columns: 1fr auto auto;
+  grid-template-columns: 1fr auto auto auto;
   align-items: center;
   gap: var(--space-4);
   padding: var(--space-4);
@@ -433,6 +433,13 @@ textarea {
   opacity: 0.45;
 }
 
+.form-actions .delete-vehicle {
+  border: 1px solid var(--mf-oxide);
+  background: transparent;
+  color: var(--mf-oxide);
+  clip-path: none;
+}
+
 @media (max-width: 64rem) {
   .form-grid--three,
   .equipment-grid {
@@ -460,7 +467,7 @@ textarea {
   }
 
   .form-actions {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .form-actions > div {

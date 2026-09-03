@@ -81,6 +81,14 @@ describe('AdminVehicleListPageComponent', () => {
     });
   });
 
+  it('links each vehicle to the complete editor', async () => {
+    const { fixture } = await setup();
+
+    expect(
+      fixture.nativeElement.querySelectorAll('.quick-edit-trigger')[0]?.getAttribute('href'),
+    ).toBe('/admin/veiculos/vehicle-1/editar');
+  });
+
   it('switches the cover only when another existing image is selected', async () => {
     const { auth, fixture } = await setup();
     auth.listVehicleImages.mockResolvedValue([
