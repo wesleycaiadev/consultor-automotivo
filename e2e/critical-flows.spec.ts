@@ -19,9 +19,14 @@ interface MockVehicle {
   price: number | null;
   slug: string;
   status: 'draft' | 'published' | 'sold';
+  steering: string;
   transmission: string;
   updated_at: string;
   version: string;
+  equipment?: readonly string[];
+  fipe_code?: string | null;
+  fipe_price?: number | null;
+  fipe_reference_month?: string | null;
   vehicle_images?: readonly unknown[];
 }
 
@@ -37,7 +42,11 @@ function vehicleFixture(): MockVehicle {
     color: 'Prata',
     created_at: '2026-08-28T12:00:00.000Z',
     description: 'Veículo de teste para validar o fluxo essencial da vitrine.',
+    equipment: ['Ar-condicionado', 'Direção assistida'],
     featured: false,
+    fipe_code: '001234-5',
+    fipe_price: 25500,
+    fipe_reference_month: 'agosto de 2026',
     fuel: 'Flex',
     category: 'sedan',
     manufacturing_year: 2010,
@@ -47,6 +56,7 @@ function vehicleFixture(): MockVehicle {
     price: 26000,
     slug: 'fiat-siena-2010',
     status: 'draft',
+    steering: 'Hidráulica',
     transmission: 'Manual',
     updated_at: '2026-08-28T12:00:00.000Z',
     version: 'EL 1.0 mpi Fire Flex 8V 4p',
@@ -191,10 +201,17 @@ test('percorre showroom até o detalhe do veículo', async ({ page }) => {
   await page.getByRole('button', { name: 'Sedã' }).click();
   await expect(page.getByRole('button', { name: 'Sedã' })).toHaveAttribute('aria-pressed', 'true');
   await expect(page.getByRole('link', { name: /fiat siena/i })).toBeVisible();
+  const timeOrigin = await page.evaluate(() => performance.timeOrigin);
   await page.getByRole('link', { name: /fiat siena/i }).click();
 
   await expect(page).toHaveURL(/\/showroom\/fiat-siena-2010$/);
+  await expect(page.locator('.mf-intro')).toHaveCount(0);
+  await expect.poll(() => page.evaluate(() => performance.timeOrigin)).toBe(timeOrigin);
   await expect(page.getByRole('heading', { name: /fiat siena/i })).toBeVisible();
+  await expect(page.getByText('Direção', { exact: true })).toBeVisible();
+  await expect(page.getByText('Direção assistida', { exact: true })).toBeVisible();
+  await expect(page.getByText('Referência FIPE', { exact: true })).toBeVisible();
+  await expect(page.getByText('Itens a confirmar na avaliação')).toHaveCount(0);
   await expect(page.getByRole('link', { name: /tenho interesse neste veículo/i })).toHaveAttribute(
     'href',
     /wa\.me/,

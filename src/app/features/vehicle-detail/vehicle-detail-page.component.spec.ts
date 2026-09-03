@@ -20,9 +20,14 @@ const vehicle: Vehicle = {
   transmission: 'Automático',
   fuel: 'Gasolina',
   category: 'other',
+  steering: 'Elétrica',
   color: 'Cinza Ágata',
   location: 'Aracaju — SE',
   description: 'Descrição de teste.',
+  equipment: ['Ar-condicionado', 'Central multimídia'],
+  fipeCode: '001234-5',
+  fipePrice: 1450000,
+  fipeReferenceMonth: 'agosto de 2026',
   status: 'published',
   featured: true,
   createdAt: '2026-08-01T12:00:00.000Z',
@@ -68,8 +73,19 @@ describe('VehicleDetailPageComponent', () => {
     expect(fixture.nativeElement.querySelector('.mf-vehicle-detail__specs')?.textContent).toContain(
       '3.000 km',
     );
-    expect(fixture.nativeElement.querySelector('#vehicle-equipment-title')).toBeTruthy();
-    expect(fixture.nativeElement.querySelector('#vehicle-observations-title')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.mf-vehicle-detail__specs')?.textContent).toContain(
+      'Elétrica',
+    );
+    expect(fixture.nativeElement.querySelector('#vehicle-equipment-title')?.textContent).toContain(
+      'Itens deste veículo',
+    );
+    expect(
+      fixture.nativeElement.querySelector('.mf-vehicle-detail__sections')?.textContent,
+    ).toContain('Central multimídia');
+    expect(fixture.nativeElement.querySelector('#vehicle-fipe-title')?.textContent).toContain(
+      '1.450.000',
+    );
+    expect(fixture.nativeElement.textContent).not.toContain('Itens a confirmar na avaliação');
     expect(fixture.componentInstance.formatPrice(1450000)).toContain('1.450.000');
     expect(
       fixture.nativeElement.querySelector('.mf-vehicle-detail__interest a')?.getAttribute('href'),

@@ -1,13 +1,15 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { type Vehicle } from '../../models/vehicle.model';
 
 @Component({
   selector: 'app-mf-vehicle-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [RouterLink],
   styleUrl: './mf-vehicle-card.component.scss',
   template: `
     <article class="mf-vehicle-card">
-      <a class="mf-vehicle-card__link" [href]="'/showroom/' + vehicle().slug">
+      <a class="mf-vehicle-card__link" [routerLink]="['/showroom', vehicle().slug]">
         <figure class="mf-vehicle-card__media">
           <img [src]="imageUrl()" [alt]="imageAlt()" width="1200" height="900" loading="lazy" />
         </figure>

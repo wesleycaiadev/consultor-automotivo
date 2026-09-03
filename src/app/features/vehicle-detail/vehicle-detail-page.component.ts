@@ -57,47 +57,53 @@ import { type VehicleGalleryImage, VehicleGalleryComponent } from './vehicle-gal
                 <dt>Localização</dt>
                 <dd>{{ currentVehicle.location }}</dd>
               </div>
+              @if (currentVehicle.steering) {
+                <div>
+                  <dt>Direção</dt>
+                  <dd>{{ currentVehicle.steering }}</dd>
+                </div>
+              }
             </dl>
           </div>
 
           <div class="mf-vehicle-detail__sections">
-            <section aria-labelledby="vehicle-overview-title">
-              <p>Visão geral</p>
-              <h2 id="vehicle-overview-title">Uma escolha que merece contexto.</h2>
-              <p>{{ currentVehicle.description }}</p>
-            </section>
+            @if (hasDescription(currentVehicle)) {
+              <section aria-labelledby="vehicle-overview-title">
+                <p>Sobre o veículo</p>
+                <h2 id="vehicle-overview-title">Informações do anúncio.</h2>
+                <p>{{ currentVehicle.description }}</p>
+              </section>
+            }
 
-            <section aria-labelledby="vehicle-equipment-title">
-              <p>Equipamentos</p>
-              <h2 id="vehicle-equipment-title">O que já está mapeado.</h2>
-              <ul>
-                @for (item of detailFor(currentVehicle).equipment; track item) {
-                  <li>{{ item }}</li>
-                }
-              </ul>
-            </section>
+            @if (currentVehicle.equipment.length) {
+              <section aria-labelledby="vehicle-equipment-title">
+                <p>Equipamentos</p>
+                <h2 id="vehicle-equipment-title">Itens deste veículo.</h2>
+                <ul>
+                  @for (item of currentVehicle.equipment; track item) {
+                    <li>{{ item }}</li>
+                  }
+                </ul>
+              </section>
+            }
 
-            <section aria-labelledby="vehicle-options-title">
-              <p>Opcionais</p>
-              <h2 id="vehicle-options-title">Itens a confirmar na avaliação.</h2>
-              <ul>
-                @for (item of detailFor(currentVehicle).options; track item) {
-                  <li>{{ item }}</li>
-                }
-              </ul>
-            </section>
-
-            <section aria-labelledby="vehicle-history-title">
-              <p>Histórico</p>
-              <h2 id="vehicle-history-title">Procedência antes da decisão.</h2>
-              <p>{{ detailFor(currentVehicle).history }}</p>
-            </section>
-
-            <section aria-labelledby="vehicle-observations-title">
-              <p>Observações</p>
-              <h2 id="vehicle-observations-title">O que vale olhar de perto.</h2>
-              <p>{{ detailFor(currentVehicle).observations }}</p>
-            </section>
+            @if (currentVehicle.fipePrice !== null) {
+              <section aria-labelledby="vehicle-fipe-title">
+                <p>Referência FIPE</p>
+                <h2 id="vehicle-fipe-title">{{ formatPrice(currentVehicle.fipePrice) }}</h2>
+                <p>
+                  @if (currentVehicle.fipeReferenceMonth) {
+                    {{ currentVehicle.fipeReferenceMonth }}
+                  }
+                  @if (currentVehicle.fipeReferenceMonth && currentVehicle.fipeCode) {
+                    ·
+                  }
+                  @if (currentVehicle.fipeCode) {
+                    Código {{ currentVehicle.fipeCode }}
+                  }
+                </p>
+              </section>
+            }
           </div>
 
           <aside class="mf-vehicle-detail__interest" aria-label="Tenho interesse neste veículo">
@@ -141,8 +147,8 @@ export class VehicleDetailPageComponent {
       : [{ alt: `${vehicle.brand} ${vehicle.model}`, src: DETAIL_FALLBACK_IMAGE }];
   }
 
-  detailFor(vehicle: Vehicle): VehicleDetailContent {
-    return DETAIL_CONTENT[vehicle.slug] ?? DEFAULT_DETAIL_CONTENT;
+  hasDescription(vehicle: Vehicle): boolean {
+    return vehicle.description.trim().length > 0;
   }
 
   formatMileage(mileage: number): string {
@@ -181,42 +187,3 @@ export class VehicleDetailPageComponent {
 
 const DETAIL_FALLBACK_IMAGE =
   'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1800&q=85';
-
-interface VehicleDetailContent {
-  readonly equipment: readonly string[];
-  readonly history: string;
-  readonly observations: string;
-  readonly options: readonly string[];
-}
-
-const DETAIL_CONTENT: Readonly<Record<string, VehicleDetailContent>> = {
-  'porsche-911-carrera-2023': {
-    equipment: ['Câmbio automático PDK', 'Motorização a gasolina', 'Acabamento em Cinza Ágata'],
-    options: [
-      'Relação completa de opcionais confirmada durante a curadoria.',
-      'Itens de acabamento avaliados conforme disponibilidade do veículo.',
-    ],
-    history:
-      'A curadoria organiza a checagem de documentação, histórico de manutenção e sinais de uso antes de uma recomendação.',
-    observations:
-      'Esta apresentação é inicial. A avaliação técnica e o histórico documental definem o contexto final da negociação.',
-  },
-  'range-rover-autobiography-2022': {
-    equipment: ['Câmbio automático', 'Motorização a gasolina', 'Acabamento em Branco Fuji'],
-    options: [
-      'Relação completa de opcionais confirmada durante a curadoria.',
-      'Itens de acabamento avaliados conforme disponibilidade do veículo.',
-    ],
-    history:
-      'A curadoria organiza a checagem de documentação, histórico de manutenção e sinais de uso antes de uma recomendação.',
-    observations:
-      'Esta apresentação é inicial. A avaliação técnica e o histórico documental definem o contexto final da negociação.',
-  },
-};
-
-const DEFAULT_DETAIL_CONTENT: VehicleDetailContent = {
-  equipment: ['Ficha técnica disponível durante a curadoria.'],
-  options: ['Opcionais confirmados na avaliação do veículo.'],
-  history: 'Documentação, procedência e manutenção são avaliadas antes de qualquer recomendação.',
-  observations: 'As informações completas são atualizadas conforme a disponibilidade do veículo.',
-};

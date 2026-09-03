@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { type Vehicle } from '../../models/vehicle.model';
 import { MfVehicleCardComponent } from './mf-vehicle-card.component';
 
@@ -15,9 +16,14 @@ const vehicle: Vehicle = {
   transmission: 'Automático',
   fuel: 'Gasolina',
   category: 'other',
+  steering: 'Elétrica',
   color: 'Cinza Ágata',
   location: 'Aracaju — SE',
   description: 'Descrição de teste.',
+  equipment: [],
+  fipeCode: null,
+  fipePrice: null,
+  fipeReferenceMonth: null,
   status: 'published',
   featured: true,
   createdAt: '2026-08-01T12:00:00.000Z',
@@ -27,6 +33,7 @@ const vehicle: Vehicle = {
 
 describe('MfVehicleCardComponent', () => {
   it('presents an accessible vehicle summary and optional technical metadata', () => {
+    TestBed.configureTestingModule({ providers: [provideRouter([])] });
     const fixture = TestBed.createComponent(MfVehicleCardComponent);
     fixture.componentRef.setInput('vehicle', vehicle);
     fixture.componentRef.setInput('imageAlt', 'Porsche 911 Carrera cinza em ambiente interno');
