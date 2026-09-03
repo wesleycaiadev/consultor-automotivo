@@ -57,6 +57,29 @@ describe('SeoService', () => {
     );
   });
 
+  it('publishes the configured Instagram profile in organization data', () => {
+    const structuredData = (
+      service as unknown as { structuredDataFor(path: string): Record<string, unknown> | null }
+    ).structuredDataFor('/');
+
+    service.setPage(
+      {
+        title: 'Marques Felipe — Curadoria Automotiva',
+        description: 'Curadoria automotiva.',
+        path: '/',
+      },
+      structuredData,
+    );
+
+    const jsonLd = JSON.parse(
+      documentRef.querySelector('script[type="application/ld+json"]')?.textContent ?? '{}',
+    ) as { '@graph'?: { sameAs?: string[] }[] };
+
+    expect(jsonLd['@graph']?.[0]?.sameAs).toEqual([
+      'https://www.instagram.com/marques_felipe96?igsi=bDNzYjdpcHh6amZh',
+    ]);
+  });
+
   it('writes vehicle metadata and structured data only from a loaded vehicle', () => {
     const vehicle: Vehicle = {
       id: 'vehicle-1',

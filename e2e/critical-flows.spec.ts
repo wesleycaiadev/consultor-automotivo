@@ -201,6 +201,19 @@ test('percorre showroom até o detalhe do veículo', async ({ page }) => {
   );
 });
 
+test('navega da Home para o Showroom sem repetir a abertura', async ({ page }) => {
+  await mockApi(page);
+  await page.goto('/');
+  await waitForPublicIntro(page);
+
+  const timeOrigin = await page.evaluate(() => performance.timeOrigin);
+  await page.getByRole('link', { name: 'Ver showroom' }).click();
+
+  await expect(page).toHaveURL(/\/showroom$/);
+  await expect(page.locator('.mf-intro')).toHaveCount(0);
+  await expect.poll(() => page.evaluate(() => performance.timeOrigin)).toBe(timeOrigin);
+});
+
 test('conclui a busca guiada e prepara o WhatsApp', async ({ page }) => {
   await page.goto('/encontrar-meu-carro');
   await waitForPublicIntro(page);

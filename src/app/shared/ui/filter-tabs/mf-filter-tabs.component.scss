@@ -1,9 +1,8 @@
 .mf-filter-tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-4);
-  overflow-x: auto;
   border-block-end: 1px solid var(--mf-silver);
-  scrollbar-width: thin;
 }
 
 .mf-filter-tabs__button {
@@ -30,4 +29,12 @@
 .mf-filter-tabs__button:focus-visible {
   outline: 2px solid var(--mf-oxide);
   outline-offset: -2px;
+}
+
+@media (min-width: 48rem) {
+  .mf-filter-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
 }

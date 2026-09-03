@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import {
   type VehicleRepository,
   VEHICLE_REPOSITORY,
@@ -38,6 +39,7 @@ describe('HomePageComponent', () => {
   it('communicates the MF value proposition with both primary actions', async () => {
     await TestBed.configureTestingModule({
       providers: [
+        provideRouter([]),
         { provide: VEHICLE_REPOSITORY, useValue: repository },
         { provide: PublicContentRepository, useValue: { listPublishedDeliveries: async () => [] } },
       ],
@@ -100,5 +102,10 @@ describe('HomePageComponent', () => {
     expect(firstRisk.getAttribute('aria-expanded')).toBe('true');
     expect(actions[0].getAttribute('href')).toBe('https://wa.me/557998709362');
     expect(actions[1].getAttribute('href')).toBe('/showroom');
+    expect(
+      fixture.nativeElement
+        .querySelector('.mf-footer__contact a[href*="instagram"]')
+        ?.getAttribute('href'),
+    ).toBe('https://www.instagram.com/marques_felipe96?igsi=bDNzYjdpcHh6amZh');
   });
 });

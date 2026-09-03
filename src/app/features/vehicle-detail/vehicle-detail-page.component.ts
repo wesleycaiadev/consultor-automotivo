@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import {
   type VehicleRepository,
   VEHICLE_REPOSITORY,
@@ -12,12 +12,12 @@ import { type VehicleGalleryImage, VehicleGalleryComponent } from './vehicle-gal
 @Component({
   selector: 'app-vehicle-detail-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [VehicleGalleryComponent],
+  imports: [RouterLink, VehicleGalleryComponent],
   styleUrl: './vehicle-detail-page.component.scss',
   template: `
     <section class="mf-vehicle-detail" aria-labelledby="vehicle-detail-title">
       <div class="mf-container">
-        <a class="mf-vehicle-detail__back" href="/showroom">← Voltar ao showroom</a>
+        <a class="mf-vehicle-detail__back" routerLink="/showroom">← Voltar ao showroom</a>
 
         @if (state() === 'loading') {
           <p class="mf-vehicle-detail__status" aria-live="polite">Carregando veículo.</p>

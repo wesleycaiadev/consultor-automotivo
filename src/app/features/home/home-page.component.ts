@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import {
   type VehicleRepository,
   VEHICLE_REPOSITORY,
@@ -14,7 +15,7 @@ import { MfSectionMarkerComponent } from '../../shared/ui/section-marker/mf-sect
 @Component({
   selector: 'app-home-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MfAccordionItemComponent, MfSectionMarkerComponent],
+  imports: [MfAccordionItemComponent, MfSectionMarkerComponent, RouterLink],
   template: `
     <section class="mf-hero" aria-labelledby="hero-title">
       <div class="mf-container mf-hero__inner">
@@ -33,7 +34,7 @@ import { MfSectionMarkerComponent } from '../../shared/ui/section-marker/mf-sect
             <a class="mf-hero__primary mf-frame" href="https://wa.me/557998709362"
               >Encontrar meu carro</a
             >
-            <a class="mf-hero__secondary" href="/showroom">Ver showroom</a>
+            <a class="mf-hero__secondary" routerLink="/showroom">Ver showroom</a>
           </div>
         </div>
 
@@ -102,7 +103,7 @@ import { MfSectionMarkerComponent } from '../../shared/ui/section-marker/mf-sect
             <app-mf-section-marker label="Showroom" />
             <h2 id="showroom-preview-title">Veículos selecionados.</h2>
           </div>
-          <a class="mf-editorial-link" href="/showroom">Explorar showroom</a>
+          <a class="mf-editorial-link" routerLink="/showroom">Explorar showroom</a>
         </div>
 
         <div class="mf-showroom-preview__grid">
@@ -110,7 +111,7 @@ import { MfSectionMarkerComponent } from '../../shared/ui/section-marker/mf-sect
             <article class="mf-vehicle-preview">
               <a
                 class="mf-vehicle-preview__link"
-                [href]="'/showroom/' + vehicle.slug"
+                [routerLink]="['/showroom', vehicle.slug]"
                 [attr.aria-label]="'Ver ' + vehicle.brand + ' ' + vehicle.model + ' no showroom'"
               >
                 <figure class="mf-vehicle-preview__media">
@@ -148,7 +149,7 @@ import { MfSectionMarkerComponent } from '../../shared/ui/section-marker/mf-sect
             busca conduzida com critério.
           </p>
         </div>
-        <a class="mf-finder-cta__action mf-frame" href="/encontrar-meu-carro">
+        <a class="mf-finder-cta__action mf-frame" routerLink="/encontrar-meu-carro">
           Definir minha busca
         </a>
       </div>
@@ -165,7 +166,7 @@ import { MfSectionMarkerComponent } from '../../shared/ui/section-marker/mf-sect
             <app-mf-section-marker label="Entregas" />
             <h2 id="deliveries-preview-title">A escolha certa continua na estrada.</h2>
           </div>
-          <a class="mf-editorial-link" href="/#entregas">Ver todas as entregas</a>
+          <a class="mf-editorial-link" routerLink="/" fragment="entregas">Ver todas as entregas</a>
         </div>
 
         @if (deliveries().length) {
@@ -221,7 +222,9 @@ import { MfSectionMarkerComponent } from '../../shared/ui/section-marker/mf-sect
             Felipe conduz cada busca com atenção ao contexto de quem vai dirigir, à história do
             veículo e ao que precisa fazer sentido depois da entrega.
           </p>
-          <a class="mf-editorial-link" href="#curadoria">Conhecer a forma de trabalhar</a>
+          <a class="mf-editorial-link" routerLink="/" fragment="curadoria"
+            >Conhecer a forma de trabalhar</a
+          >
         </div>
       </div>
     </section>
@@ -246,20 +249,20 @@ import { MfSectionMarkerComponent } from '../../shared/ui/section-marker/mf-sect
         </div>
 
         <nav class="mf-footer__links" aria-label="Navegação do rodapé">
-          <a href="/#curadoria">Curadoria</a>
-          <a href="/showroom">Showroom</a>
-          <a href="/#entregas">Entregas</a>
+          <a routerLink="/" fragment="curadoria">Curadoria</a>
+          <a routerLink="/showroom">Showroom</a>
+          <a routerLink="/" fragment="entregas">Entregas</a>
         </nav>
 
         <address class="mf-footer__contact">
           <a href="https://wa.me/557998709362">WhatsApp</a>
-          <a href="https://www.instagram.com/">Instagram</a>
+          <a href="https://www.instagram.com/marques_felipe96?igsi=bDNzYjdpcHh6amZh">Instagram</a>
           <span>Aracaju — SE</span>
         </address>
 
         <div class="mf-footer__bottom">
           <small>© 2026 Marques Felipe</small>
-          <a class="mf-footer__admin" href="/admin/login">
+          <a class="mf-footer__admin" routerLink="/admin/login">
             <span class="mf-footer__admin-lock" aria-hidden="true"></span>
             Administração
           </a>

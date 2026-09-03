@@ -117,7 +117,7 @@ export class SeoService {
           name: 'Marques Felipe Curadoria Automotiva',
           url: PUBLIC_SITE_URL,
           logo: DEFAULT_OG_IMAGE,
-          sameAs: ['https://www.instagram.com/'],
+          sameAs: ['https://www.instagram.com/marques_felipe96?igsi=bDNzYjdpcHh6amZh'],
           contactPoint: {
             '@type': 'ContactPoint',
             contactType: 'customer service',

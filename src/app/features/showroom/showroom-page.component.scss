@@ -5,6 +5,7 @@
 }
 
 .mf-showroom-page {
+  min-inline-size: 0;
   padding-block: var(--space-10) var(--space-15);
   background: var(--mf-paper);
 }
@@ -51,6 +52,7 @@ app-showroom-filters {
 .mf-showroom-page__grid {
   display: grid;
   gap: var(--space-8);
+  min-inline-size: 0;
 }
 
 .mf-showroom-page__load-more {

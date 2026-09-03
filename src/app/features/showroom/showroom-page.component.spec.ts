@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import {
   type VehicleRepository,
   VEHICLE_REPOSITORY,
@@ -79,7 +80,7 @@ const repository: VehicleRepository = {
 describe('ShowroomPageComponent', () => {
   it('loads vehicles, filters the collection and shows the Finder interruption', async () => {
     await TestBed.configureTestingModule({
-      providers: [{ provide: VEHICLE_REPOSITORY, useValue: repository }],
+      providers: [provideRouter([]), { provide: VEHICLE_REPOSITORY, useValue: repository }],
     }).compileComponents();
     const fixture = TestBed.createComponent(ShowroomPageComponent);
     await fixture.whenStable();

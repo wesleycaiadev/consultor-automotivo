@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import {
   type VehicleRepository,
   VEHICLE_REPOSITORY,
@@ -18,6 +19,7 @@ type ShowroomPageState = 'loading' | 'ready' | 'error';
   imports: [
     MfSectionMarkerComponent,
     MfVehicleCardComponent,
+    RouterLink,
     ShowroomFiltersComponent,
     ShowroomStateComponent,
   ],
@@ -71,7 +73,7 @@ type ShowroomPageState = 'loading' | 'ready' | 'error';
           <aside class="mf-showroom-page__finder" aria-labelledby="showroom-finder-title">
             <p>Não encontrou o seu?</p>
             <h2 id="showroom-finder-title">A curadoria pode começar pelo que você precisa.</h2>
-            <a class="mf-frame" href="/encontrar-meu-carro">Definir minha busca</a>
+            <a class="mf-frame" routerLink="/encontrar-meu-carro">Definir minha busca</a>
           </aside>
         }
       </div>

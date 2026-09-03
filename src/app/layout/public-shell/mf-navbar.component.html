@@ -13,7 +13,7 @@
       [attr.aria-current]="desktopHome.isActive ? 'page' : null"
       >Início</a
     >
-    <a href="/#curadoria">Curadoria</a>
+    <a routerLink="/" fragment="curadoria">Curadoria</a>
     <a
       routerLink="/showroom"
       routerLinkActive="is-active"
@@ -22,8 +22,8 @@
       [attr.aria-current]="desktopShowroom.isActive ? 'page' : null"
       >Showroom</a
     >
-    <a href="/#entregas">Entregas</a>
-    <a href="/#sobre">Sobre</a>
+    <a routerLink="/" fragment="entregas">Entregas</a>
+    <a routerLink="/" fragment="sobre">Sobre</a>
   </nav>
 
   <a class="mf-navbar__cta mf-frame" href="https://wa.me/557998709362">Fale com Felipe</a>
@@ -74,7 +74,7 @@
         (click)="closeMenu()"
         >Início</a
       >
-      <a href="/#curadoria" (click)="closeMenu()">Curadoria</a>
+      <a routerLink="/" fragment="curadoria" (click)="closeMenu()">Curadoria</a>
       <a
         routerLink="/showroom"
         routerLinkActive
@@ -84,8 +84,8 @@
         (click)="closeMenu()"
         >Showroom</a
       >
-      <a href="/#entregas" (click)="closeMenu()">Entregas</a>
-      <a href="/#sobre" (click)="closeMenu()">Sobre</a>
+      <a routerLink="/" fragment="entregas" (click)="closeMenu()">Entregas</a>
+      <a routerLink="/" fragment="sobre" (click)="closeMenu()">Sobre</a>
     </nav>
 
     <a class="mf-mobile-menu__cta mf-frame" href="https://wa.me/557998709362" (click)="closeMenu()"

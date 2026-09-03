@@ -43,6 +43,7 @@ import { AdminAuthService } from '../../core/auth/admin-auth.service';
       form {
         display: grid;
         inline-size: min(100%, 26rem);
+        box-sizing: border-box;
         gap: var(--space-4);
         padding: var(--space-8);
         border: 1px solid var(--mf-silver);

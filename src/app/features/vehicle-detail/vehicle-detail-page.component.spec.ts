@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { ActivatedRoute, convertToParamMap } from '@angular/router';
+import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 import {
   type VehicleRepository,
   VEHICLE_REPOSITORY,
@@ -48,6 +48,7 @@ describe('VehicleDetailPageComponent', () => {
   it('loads the requested vehicle and provides its gallery', async () => {
     await TestBed.configureTestingModule({
       providers: [
+        provideRouter([]),
         { provide: VEHICLE_REPOSITORY, useValue: repository },
         {
           provide: ActivatedRoute,
