@@ -47,3 +47,13 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+# Private project documentation (kept locally, not published with the source code)
+/00-MASTER-CONTEXT.md
+/01-PRODUCT-DESIGN-UX.md
+/02-ARCHITECTURE-ENGINEERING.md
+/03-IMPLEMENTATION-TASKS.md
+/04-QUALITY-RELEASE.md
+/DESIGN.md
+/DESIGN2.md
+/RELEASE-SCORECARD.md
